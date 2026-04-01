@@ -22,19 +22,33 @@ export default function LoginPage() {
     if (!form.email || !form.password) return setError('Both fields are required.');
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 900));
-    const name = form.email.split('@')[0].replace(/\./g, ' ');
-    login({ name: name.charAt(0).toUpperCase() + name.slice(1), email: form.email }, false);
-    setLoading(false);
-    navigate('/app');
+    
+    try {
+      await login(form.email, form.password);
+      navigate('/app');
+    } catch (err) {
+      setError(err.message || 'Failed to login. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocial = async () => {
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 700));
-    login({ name: 'Google User', email: 'user@gmail.com' }, false);
-    setLoading(false);
-    navigate('/app');
+    try {
+      setLoading(true);
+      setError('');
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/app'
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      setError(err.message || 'Social login failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

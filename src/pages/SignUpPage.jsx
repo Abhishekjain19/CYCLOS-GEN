@@ -9,7 +9,7 @@ import './AuthPage.css';
 
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [agreed, setAgreed] = useState(false);
@@ -25,18 +25,32 @@ export default function SignUpPage() {
     if (!agreed) return setError('Please agree to the Terms of Service and Privacy Policy.');
     setLoading(true);
     setError('');
-    await new Promise(r => setTimeout(r, 1000));
-    login({ name: form.name, email: form.email, avatar: null }, true);
-    setLoading(false);
-    navigate('/onboard/primary');
+    
+    try {
+      await signup(form.email, form.password, form.name);
+      navigate('/onboard/primary');
+    } catch (err) {
+      setError(err.message || 'Failed to create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocial = async () => {
-    setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    login({ name: 'Google User', email: 'user@gmail.com', avatar: null }, true);
-    setLoading(false);
-    navigate('/onboard/primary');
+    try {
+      setLoading(true);
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/app'
+        }
+      });
+      if (error) throw error;
+    } catch (err) {
+      setError(err.message || 'Social login failed.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

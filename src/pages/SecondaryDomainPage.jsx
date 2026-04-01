@@ -69,10 +69,14 @@ export default function SecondaryDomainPage() {
   const handleContinue = async () => {
     if (selected.length === 0) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 600));
-    updateProfile({ secondaryDomain: selected[0] });
-    setLoading(false);
-    navigate('/app');
+    try {
+      await updateProfile({ secondary_domain: selected[0] });
+      navigate('/app');
+    } catch (err) {
+      console.error('Error updating secondary domain:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filtered = SECONDARY_DOMAINS.filter(d =>

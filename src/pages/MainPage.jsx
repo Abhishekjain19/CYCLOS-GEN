@@ -19,7 +19,7 @@ import LocalFactsCarousel from '../components/LocalFactsCarousel';
 import './MainPage.css';
 
 export default function MainPage() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, updateProfile, logout } = useAuth();
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
@@ -66,8 +66,8 @@ export default function MainPage() {
 
   const unreadCount = mockNotifications.filter(n => !n.read).length;
 
-  const firstName = user?.name?.split(' ')[0] || 'Leonard';
-  const fullName = user?.name || 'Leonard N. Olson';
+  const fullName = userProfile?.full_name || 'User';
+  const firstName = fullName.split(' ')[0];
   const locationText = userProfile?.primaryDomain ? 'Malleshwaram, Bengaluru' : 'Local Eco Hub';
 
   return (

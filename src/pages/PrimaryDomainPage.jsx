@@ -37,11 +37,14 @@ export default function PrimaryDomainPage() {
   const handleContinue = async () => {
     if (selectedRoles.length === 0) return;
     setLoading(true);
-    // Simulate API delay
-    await new Promise(r => setTimeout(r, 600));
-    updateProfile({ primaryDomain: selectedRoles });
-    setLoading(false);
-    navigate('/app');
+    try {
+      await updateProfile({ primary_domain: selectedRoles.join(',') });
+      navigate('/onboard/secondary');
+    } catch (err) {
+      console.error('Error updating primary domain:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

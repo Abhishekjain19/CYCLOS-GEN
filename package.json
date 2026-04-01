@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
-    "firebase": "^12.11.0",
+    "@supabase/supabase-js": "^2.101.1",
     "framer-motion": "^12.38.0",
     "gsap": "^3.14.2",
     "leaflet": "^1.9.4",

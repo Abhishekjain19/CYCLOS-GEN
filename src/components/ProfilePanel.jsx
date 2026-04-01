@@ -7,12 +7,12 @@ import { TbX, TbEdit, TbCameraPlus, TbLogout, TbCheck, TbTrendingUp, TbRipple, T
 import './ProfilePanel.css';
 
 export default function ProfilePanel({ isOpen, onClose }) {
-  const { user, logout } = useAuth();
+  const { user, userProfile, updateProfile, logout } = useAuth();
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
   const [isEditingName, setIsEditingName] = useState(false);
-  const [editedName, setEditedName] = useState(user?.name || 'Leonard N. Olson');
+  const [editedName, setEditedName] = useState(userProfile?.full_name || 'User');
   const [profilePic, setProfilePic] = useState(null);
 
   const handleLogout = () => {
@@ -20,8 +20,13 @@ export default function ProfilePanel({ isOpen, onClose }) {
     navigate('/login');
   };
 
-  const handleSaveName = () => {
-    setIsEditingName(false);
+  const handleSaveName = async () => {
+    try {
+      await updateProfile({ full_name: editedName });
+      setIsEditingName(false);
+    } catch (err) {
+      console.error('Error updating name:', err);
+    }
   };
 
   const handleImageUpload = (e) => {

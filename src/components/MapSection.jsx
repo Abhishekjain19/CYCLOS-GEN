@@ -1,7 +1,9 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { TbSparkles, TbLoader2, TbX } from 'react-icons/tb';
+import { getChatResponse } from '../services/nvidiaNim';
 import './MapSection.css';
 
 // 20 fuzzy sample points around Bangalore
@@ -43,6 +45,27 @@ function DarkMap() {
 
 export default function MapSection({ domain }) {
   const points = useMemo(() => POINTS, []);
+  const [insight, setInsight] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const generateInsight = async () => {
+    setLoading(true);
+    try {
+      const summary = points.map(p => `${p.title}: ${p.type} (${p.kg}kg)`).join(', ');
+      const response = await getChatResponse([
+        { 
+          role: 'user', 
+          content: `Here is a summary of waste collection points in this map area: ${summary}. Please provide a 2-sentence expert environmental summary of this region's waste profile.` 
+        }
+      ]);
+      setInsight(response);
+    } catch (err) {
+      console.error(err);
+      setInsight("Unable to generate insight at this time.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -96,6 +119,32 @@ export default function MapSection({ domain }) {
             </CircleMarker>
           ))}
         </MapContainer>
+
+        <button 
+          className={`map-ai-btn ${loading ? 'loading' : ''}`} 
+          onClick={generateInsight}
+          disabled={loading}
+        >
+          {loading ? <TbLoader2 className="spinner" /> : <TbSparkles />}
+          <span>AI Insight</span>
+        </button>
+
+        <AnimatePresence>
+          {insight && (
+            <motion.div 
+              className="map-ai-overlay"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+            >
+              <div className="map-ai-overlay__header">
+                <span><TbSparkles size={14} /> ENVIRONMENTAL INSIGHT</span>
+                <button onClick={() => setInsight(null)}><TbX size={14} /></button>
+              </div>
+              <p>{insight}</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <p className="map-section__note">
