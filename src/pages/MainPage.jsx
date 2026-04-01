@@ -8,10 +8,10 @@ import ProfilePanel from '../components/ProfilePanel';
 
 /* Secondary domain materials — icon + color mapping */
 const SECONDARY_MATERIALS = [
-  { id: 'obp', label: 'OBP', Icon: TbBottle, bg: '#0284c7' }, // Ocean Bound Plastic
-  { id: 'metals', label: 'Metals', Icon: TbRecycle, bg: '#0369a1' },
-  { id: 'shells', label: 'Sea Shells', Icon: TbDroplet, bg: '#0c4a6e' },
-  { id: 'glass', label: 'Glass', Icon: TbLeaf, bg: '#38bdf8' },
+  { id: 'obp', label: 'OBP', Icon: TbBottle, bg: '#0ea5e9' },
+  { id: 'metals', label: 'Metals', Icon: TbRecycle, bg: '#0ea5e9' },
+  { id: 'shells', label: 'Sea Shells', Icon: TbDroplet, bg: '#0ea5e9' },
+  { id: 'glass', label: 'Glass', Icon: TbLeaf, bg: '#0ea5e9' },
   { id: 'nets', label: 'Ghost Nets', Icon: TbAnchor, bg: '#0ea5e9' },
 ];
 import MapSection from '../components/MapSection';
