@@ -99,7 +99,7 @@ export default function MapSection({ domain }) {
       </div>
 
       <p className="map-section__note">
-        📍 Nearest ocean/sea is 42.5 kms far
+        📍 Nearest ocean/sea is 300 kms far
       </p>
     </motion.div>
   );
