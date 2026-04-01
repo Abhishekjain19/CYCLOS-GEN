@@ -338,7 +338,7 @@
 
 .comm-event-desc {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: #ffffff;
   margin: 0;
   line-height: 1.55;
 }
@@ -368,7 +368,7 @@
 
 .comm-event-spots {
   font-size: 0.73rem;
-  color: #475569;
+  color: #ffffff;
   font-weight: 500;
 }
 
@@ -574,7 +574,7 @@
 .comm-label {
   font-size: 0.78rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: #ffffff;
   letter-spacing: 0.04em;
   display: flex;
   align-items: center;
@@ -594,7 +594,7 @@
   width: 100%;
   box-sizing: border-box;
 }
-.comm-input::placeholder { color: #475569; }
+.comm-input::placeholder { color: rgba(255, 255, 255, 0.5); }
 .comm-input:focus {
   border-color: rgba(117, 67, 255, 0.5);
   box-shadow: 0 0 0 3px rgba(117, 67, 255, 0.1);

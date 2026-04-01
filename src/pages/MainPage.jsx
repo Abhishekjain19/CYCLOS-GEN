@@ -105,7 +105,12 @@ export default function MainPage() {
 
           <div className="dash-materials-scroll">
             {SECONDARY_MATERIALS.map(({ id, label, Icon, bg }) => (
-              <div key={id} className="material-card" style={{ background: bg }}>
+              <div
+                key={id}
+                className="material-card"
+                style={{ background: bg, cursor: 'pointer' }}
+                onClick={() => navigate(`/marketplace?category=${id}`)}
+              >
                 <Icon size={32} color="#110e1b" style={{ position: 'absolute', top: 16, opacity: 0.2 }} />
                 <div className="material-card__label">{label}</div>
               </div>

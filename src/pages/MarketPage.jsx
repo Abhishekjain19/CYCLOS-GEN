@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TbChevronLeft, TbShoppingCart, TbSearch,
@@ -65,7 +65,21 @@ const PRODUCTS = [
 
 export default function MarketPage() {
   const navigate = useNavigate();
-  const [activeCategory, setActiveCategory] = useState('all');
+  const location = useLocation();
+
+  // Map dashboard material IDs → marketplace category IDs
+  const MATERIAL_TO_CAT = {
+    obp: 'obp',
+    metals: 'metals',
+    shells: 'all',    // no dedicated tab yet → fall back to all
+    glass: 'glass',
+    nets: 'fishing',
+  };
+
+  const queryCategory = new URLSearchParams(location.search).get('category');
+  const initialCategory = (queryCategory && MATERIAL_TO_CAT[queryCategory]) || queryCategory || 'all';
+
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
   const [qty, setQty] = useState(1);
