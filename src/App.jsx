@@ -1,5 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { supabase } from './supabase/supabaseClient';
+import { Toaster, toast } from 'react-hot-toast';
 import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
@@ -22,9 +25,39 @@ const ProtectedRoute = ({ children }) => {
 const OnboardRoute = ({ children }) => {
   const { user, userProfile } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  if (userProfile?.primaryDomain) return <Navigate to="/app" replace />;
+  if (userProfile?.primary_domain) return <Navigate to="/app" replace />;
   return children;
 };
+
+/* Global Event Listener for Community Helpers */
+function EventNotificationService() {
+  const { userProfile } = useAuth();
+
+  useEffect(() => {
+    if (!userProfile?.roles?.includes('community_helper')) return;
+
+    const channel = supabase
+      .channel('global:events')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, (payload) => {
+        toast.success(`New Event: ${payload.new.title}!`, {
+          duration: 6000,
+          icon: '🌊',
+          style: {
+            background: '#0d1f35',
+            color: '#fff',
+            border: '1px solid rgba(117, 67, 255, 0.4)'
+          }
+        });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userProfile]);
+
+  return null;
+}
 
 function AppRoutes() {
   const location = useLocation();
@@ -33,6 +66,7 @@ function AppRoutes() {
 
   return (
     <>
+      <EventNotificationService />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<SignUpPage />} />
@@ -55,6 +89,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Toaster position="top-center" reverseOrder={false} />
         <AppRoutes />
       </AuthProvider>
     </BrowserRouter>

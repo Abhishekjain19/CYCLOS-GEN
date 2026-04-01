@@ -43,7 +43,7 @@ export default function SignUpPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: window.location.origin + '/app'
+          redirectTo: window.location.origin + '/onboard/primary'
         }
       });
       if (error) throw error;

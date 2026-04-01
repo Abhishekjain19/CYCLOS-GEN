@@ -18,7 +18,7 @@ export default function ScanPage() {
   const [useCamera, setUseCamera] = useState(false);
   const [autoScan, setAutoScan] = useState(true);
   const [inputMode, setInputMode] = useState('choose'); // 'choose', 'camera', 'upload'
-  const [lastScanTime, setLastScanTime] = useState(null);
+  const [scanningProgress, setScanningProgress] = useState(0);
 
   // Helper for actual analysis to avoid redundant logic
   const captureAndProcess = () => {
@@ -26,7 +26,10 @@ export default function ScanPage() {
     
     const canvas = canvasRef.current;
     const video = videoRef.current;
-    if (video.videoWidth === 0) return; // Video not ready
+    
+    // Ensure video is ready
+    if (video.readyState !== 4) return; 
+    if (video.videoWidth === 0) return;
 
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
@@ -36,12 +39,11 @@ export default function ScanPage() {
     const base64withPrefix = canvas.toDataURL('image/jpeg', 0.8);
     const base64 = base64withPrefix.split(',')[1];
     
-    // Do NOT set image state for auto-scan to avoid freezing the preview
+    // For auto-scan, we only set a result image once a match is found
     if (!autoScan) {
       setImage(base64withPrefix);
     }
     
-    setLastScanTime(Date.now());
     processImage(base64);
   };
 
@@ -112,15 +114,30 @@ export default function ScanPage() {
     return () => stopCamera();
   }, [useCamera]);
 
-  // Auto-scan loop
+  // Update Scanning Progress when analyzing
   useEffect(() => {
-    let interval;
-    if (useCamera && autoScan && !scanned && !analyzing) {
-      interval = setInterval(() => {
-        captureAndProcess();
-      }, 4000); // 4 seconds cycle
+    let progressInterval;
+    if (analyzing) {
+      setScanningProgress(0);
+      progressInterval = setInterval(() => {
+        setScanningProgress(prev => (prev < 90 ? prev + 5 : prev));
+      }, 100);
+    } else {
+      setScanningProgress(0);
     }
-    return () => clearInterval(interval);
+    return () => clearInterval(progressInterval);
+  }, [analyzing]);
+
+  // Auto-scan cycle
+  useEffect(() => {
+    let timeout;
+    if (useCamera && autoScan && !scanned && !analyzing) {
+      // Periodic snap and analyze
+      timeout = setTimeout(() => {
+        captureAndProcess();
+      }, 4000); 
+    }
+    return () => clearTimeout(timeout);
   }, [useCamera, autoScan, scanned, analyzing]);
 
 
@@ -155,11 +172,16 @@ export default function ScanPage() {
 
           {/* Targeting HUD Overlay */}
           <div className="scan-hud-overlay">
-            <div className="scan-hud-corner tl" />
-            <div className="scan-hud-corner tr" />
-            <div className="scan-hud-corner bl" />
-            <div className="scan-hud-corner br" />
-            <div className="scan-line" />
+            <div className="scan-hud-corners">
+              <div className="scan-hud-corner tl" />
+              <div className="scan-hud-corner tr" />
+              <div className="scan-hud-corner bl" />
+              <div className="scan-hud-corner br" />
+            </div>
+            
+
+
+
           </div>
           
           <div className="scan-camera-inner">
@@ -190,7 +212,7 @@ export default function ScanPage() {
                 ref={videoRef} 
                 autoPlay 
                 playsInline 
-                className={`scan-live-video ${analyzing ? 'processing' : ''}`}
+                className="scan-live-video"
               />
             ) : image ? (
               <img src={image} alt="Waste to scan" className="scan-preview-img" />
@@ -204,12 +226,7 @@ export default function ScanPage() {
 
           {!scanned && inputMode !== 'choose' && (
             <div className="scan-controls-overlay">
-              {inputMode === 'camera' && !image && (
-                <div className="scan-auto-indicator">
-                  <TbReload className="scan-spin" />
-                  <span>AUTO-SCAN ACTIVE</span>
-                </div>
-              )}
+
             </div>
           )}
         </motion.div>
@@ -224,7 +241,7 @@ export default function ScanPage() {
         {error && <div className="scan-error">{error}</div>}
         
         <div className="scan-result-title">
-          {analyzing ? "AI Analyzing..." : scanned ? result.type : "Scan Result"}
+          {analyzing ? "Analysing..." : scanned ? result.type : "Scan Result"}
         </div>
         
         <div className="scan-result-stats">
@@ -255,7 +272,7 @@ export default function ScanPage() {
            onClick={() => scanned ? navigate('/bins', { state: { materialType: result?.type } }) : null}
            disabled={analyzing || !scanned}
         >
-          {analyzing ? 'Processing...' : scanned ? 'Add to bin station' : 'Capture an image'}
+          {scanned ? 'Add to bin station' : 'Capture an image'}
         </button>
       </motion.div>
     </div>

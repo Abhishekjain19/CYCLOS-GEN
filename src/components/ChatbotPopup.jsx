@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
+import { motion, useDragControls } from 'framer-motion';
 import { TbRobot, TbX, TbSend, TbPhoto } from 'react-icons/tb';
+import ReactMarkdown from 'react-markdown';
 import './ChatbotPopup.css';
 
 /* ── Canned text responses keyed by keywords ── */
@@ -104,6 +106,7 @@ export default function ChatbotPopup({ onClose }) {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const dragControls = useDragControls();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -180,24 +183,28 @@ export default function ChatbotPopup({ onClose }) {
     }
   };
 
-  /* helper: render text with basic **bold** markdown */
-  const renderText = (text) => {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
-    return parts.map((part, i) =>
-      part.startsWith('**') && part.endsWith('**') ? (
-        <strong key={i}>{part.slice(2, -2)}</strong>
-      ) : (
-        <span key={i}>{part}</span>
-      )
-    );
-  };
+
 
   return (
     <div className="chatbot-overlay">
-      <div className={`chatbot-popup${isClosing ? ' closing' : ''}`}>
+      <motion.div 
+        className={`chatbot-popup${isClosing ? ' closing' : ''}`}
+        drag
+        dragControls={dragControls}
+        dragListener={false}
+        dragMomentum={false}
+        dragConstraints={{ left: -1000, right: 1000, top: -1000, bottom: 1000 }}
+        initial={{ opacity: 0, y: 32, scale: 0.92 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 32, scale: 0.92 }}
+      >
 
-        {/* ── Header ── */}
-        <div className="chatbot-header">
+        {/* ── Header (Drag Handle) ── */}
+        <div 
+          className="chatbot-header"
+          onPointerDown={(e) => dragControls.start(e)}
+          style={{ cursor: 'grab' }}
+        >
           <div className="chatbot-header__icon-wrap">
             <TbRobot />
           </div>
@@ -211,6 +218,7 @@ export default function ChatbotPopup({ onClose }) {
             className="chatbot-header__close"
             onClick={handleClose}
             aria-label="Close chatbot"
+            onPointerDown={(e) => e.stopPropagation()}
           >
             <TbX />
           </button>
@@ -240,7 +248,9 @@ export default function ChatbotPopup({ onClose }) {
                 </div>
               ) : (
                 <div className="chatbot-msg__bubble">
-                  {renderText(msg.text)}
+                  <div className="chatbot-markdown">
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  </div>
                 </div>
               )}
             </div>
@@ -317,7 +327,7 @@ export default function ChatbotPopup({ onClose }) {
             <TbSend size={17} />
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

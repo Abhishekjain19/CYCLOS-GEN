@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TbShoppingCart, TbRecycle, TbLeaf, TbX } from 'react-icons/tb';
 import './NotificationsPanel.css';
 
-export default function NotificationsPanel({ isOpen, onClose, notifications }) {
+export default function NotificationsPanel({ isOpen, onClose, notifications, onAction }) {
   if (!isOpen) return null;
 
   const renderIcon = (type) => {
@@ -49,10 +49,11 @@ export default function NotificationsPanel({ isOpen, onClose, notifications }) {
                     {notif.subtext && <p className="notif-subtext">{notif.subtext}</p>}
                   </div>
                   <div className="notif-actions">
-                    {notif.buttons.map((btn, idx) => (
+                    {notif.buttons?.map((btn, idx) => (
                       <button 
                         key={idx} 
                         className={`notif-btn notif-btn--${btn.style || 'secondary'}`}
+                        onClick={() => onAction && onAction(notif, btn)}
                       >
                         {btn.label}
                       </button>

@@ -100,9 +100,24 @@
   display: block;
   font-size: 9px;
   opacity: 0.5;
-  margin-top: 4px;
+  margin-top: 8px;
   text-align: right;
 }
+
+/* Markdown Support */
+.chat-bubble p { margin: 0 0 10px 0; }
+.chat-bubble p:last-child { margin-bottom: 0; }
+.chat-bubble h1, .chat-bubble h2, .chat-bubble h3 { 
+  font-size: 1.1em; 
+  margin: 12px 0 6px 0; 
+  color: inherit;
+  font-weight: 800;
+}
+.chat-bubble ul, .chat-bubble ol { 
+  margin: 8px 0 8px 20px; 
+  padding: 0;
+}
+.chat-bubble li { margin-bottom: 4px; }
 
 .chat-input-area {
   position: fixed;

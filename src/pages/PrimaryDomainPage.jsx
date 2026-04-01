@@ -38,10 +38,14 @@ export default function PrimaryDomainPage() {
     if (selectedRoles.length === 0) return;
     setLoading(true);
     try {
-      await updateProfile({ primary_domain: selectedRoles.join(',') });
+      // Save to both roles (new structural field) and primary_domain (legacy compatibility if needed)
+      await updateProfile({ 
+        roles: selectedRoles,
+        primary_domain: selectedRoles.join(', ')
+      });
       navigate('/onboard/secondary');
     } catch (err) {
-      console.error('Error updating primary domain:', err);
+      console.error('Error updating profile with roles:', err);
     } finally {
       setLoading(false);
     }

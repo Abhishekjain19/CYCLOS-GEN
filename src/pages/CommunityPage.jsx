@@ -1,11 +1,14 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TbArrowLeft, TbPlus, TbCalendarEvent,
   TbMapPin, TbCheck, TbWaveSine, TbClockHour4,
   TbChevronRight, TbTrash, TbAlertTriangle,
 } from 'react-icons/tb';
+import { supabase } from '../supabase/supabaseClient';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
 import './CommunityPage.css';
 
 /* ── Seed events (isOwner: false = not created by this user) ─── */
@@ -125,7 +128,8 @@ function DeleteModal({ eventName, onConfirm, onCancel }) {
 }
 
 /* ── Join Events View ─────────────────────────────────────── */
-function JoinView({ events, onJoin, onDelete, onBack }) {
+function JoinView({ events, onJoin, onDelete, onComplete, onBack }) {
+  const { user } = useAuth();
   const [joinedIds, setJoinedIds] = useState({});
   const [deleteTarget, setDeleteTarget] = useState(null); // event to confirm deletion
 
@@ -149,9 +153,9 @@ function JoinView({ events, onJoin, onDelete, onBack }) {
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="comm-subview__header">
-          <button className="comm-back-btn" onClick={onBack}><TbArrowLeft size={20} /></button>
+          <button className="comm-back-btn" onClick={onBack}><TbArrowLeft size= {20} /></button>
           <h2 className="comm-subview__title">Join an Event</h2>
-          <span className="comm-subview__count">{events.length}</span>
+          <span className="comm-subview__count text-white">{events.length}</span>
         </div>
 
         <div className="comm-events-list">
@@ -159,9 +163,12 @@ function JoinView({ events, onJoin, onDelete, onBack }) {
             {events.map((ev, i) => {
               const col = CATEGORY_COLORS[ev.category] || CATEGORY_COLORS['Awareness'];
               const isJoined = joinedIds[ev.id];
+              const isOwner = user && ev.creator_id === user.id;
+
               return (
                 <motion.div
                   key={ev.id}
+                  id={ev.id}
                   className="comm-event-card"
                   initial={{ opacity: 0, y: 24 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -178,36 +185,44 @@ function JoinView({ events, onJoin, onDelete, onBack }) {
                       {ev.category}
                     </span>
 
-                    {ev.isOwner && (
-                      <button
-                        className="comm-delete-btn"
-                        title="Delete your event"
-                        onClick={() => setDeleteTarget(ev)}
-                      >
-                        <TbTrash size={15} />
-                        Your event
-                      </button>
+                    {isOwner && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          className="comm-complete-btn"
+                          title="Mark as completed"
+                          onClick={() => onComplete(ev.id)}
+                        >
+                          <TbCheck size={15} /> Complete
+                        </button>
+                        <button
+                          className="comm-delete-btn"
+                          title="Delete your event"
+                          onClick={() => setDeleteTarget(ev)}
+                        >
+                          <TbTrash size={15} />
+                        </button>
+                      </div>
                     )}
                   </div>
 
-                  <h3 className="comm-event-name">{ev.name}</h3>
-                  <p className="comm-event-desc">{ev.description}</p>
+                  <h3 className="comm-event-name">{ev.title || ev.name}</h3>
+                  <p className="comm-event-desc text-white">{ev.description}</p>
 
                   <div className="comm-event-meta">
                     <span className="comm-event-meta__item">
                       <TbMapPin size={14} /> {ev.location}
                     </span>
                     <span className="comm-event-meta__item">
-                      <TbCalendarEvent size={14} /> {formatDate(ev.date)}
+                      <TbCalendarEvent size={14} /> {formatDate(ev.date || ev.created_at)}
                     </span>
                     <span className="comm-event-meta__item">
-                      <TbClockHour4 size={14} /> {daysUntil(ev.date)}
+                      <TbClockHour4 size={14} /> {daysUntil(ev.date || ev.created_at)}
                     </span>
                   </div>
 
                   <div className="comm-event-footer">
-                    <span className="comm-event-spots">{ev.spots} spots left</span>
-                    {!ev.isOwner && (
+                    <span className="comm-event-spots text-white">{ev.capacity || ev.spots} spots left</span>
+                    {!isOwner && (
                       <button
                         className={`comm-join-btn ${isJoined ? 'comm-join-btn--joined' : ''}`}
                         onClick={() => !isJoined && handleJoin(ev.id)}
@@ -215,7 +230,7 @@ function JoinView({ events, onJoin, onDelete, onBack }) {
                         {isJoined ? <><TbCheck size={14} /> Joined</> : 'Join Event'}
                       </button>
                     )}
-                    {ev.isOwner && (
+                    {isOwner && (
                       <span className="comm-owner-badge">👤 Organiser</span>
                     )}
                   </div>
@@ -227,7 +242,7 @@ function JoinView({ events, onJoin, onDelete, onBack }) {
           {events.length === 0 && (
             <div className="comm-empty">
               <span>🌊</span>
-              <p>No events yet. Be the first to create one!</p>
+              <p>No active events. Be the first to lead a drive!</p>
             </div>
           )}
         </div>
@@ -250,8 +265,16 @@ function JoinView({ events, onJoin, onDelete, onBack }) {
 
 /* ── Create Event View ────────────────────────────────────── */
 function CreateView({ onBack, onCreated }) {
-  const [form, setForm] = useState({ name: '', description: '', location: '', date: '' });
+  const { user } = useAuth();
+  const [form, setForm] = useState({ 
+    name: '', 
+    description: '', 
+    location: '', 
+    date: '', 
+    category: 'Beach Cleanup' 
+  });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
   const set = (k, v) => {
@@ -268,11 +291,38 @@ function CreateView({ onBack, onCreated }) {
     return e;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
-    setSubmitted(true);
-    onCreated({ ...form, id: Date.now(), category: 'Awareness', spots: 100, isOwner: true });
+    
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .insert([{
+          title: form.name,
+          description: form.description,
+          location: form.location,
+          date: new Date(form.date).toISOString(),
+          category: form.category,
+          creator_id: user.id,
+          status: 'active',
+          capacity: 100
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setSubmitted(true);
+      onCreated(data);
+      toast.success('Event published successfully!');
+    } catch (err) {
+      console.error('Error creating event:', err);
+      toast.error('Failed to publish event.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -287,7 +337,7 @@ function CreateView({ onBack, onCreated }) {
         <h2 className="comm-success__title">Event Created!</h2>
         <p className="comm-success__body">
           <strong>{form.name}</strong> on <strong>{formatDate(form.date)}</strong> at{' '}
-          <strong>{form.location}</strong> is now live. You can delete it anytime from
+          <strong>{form.location}</strong> is now live. You can manage it anytime from
           the event list.
         </p>
         <button className="comm-success__btn" onClick={onBack}>Back to Community</button>
@@ -319,6 +369,25 @@ function CreateView({ onBack, onCreated }) {
             onChange={e => set('name', e.target.value)}
           />
           {errors.name && <span className="comm-error">{errors.name}</span>}
+        </div>
+
+        <div className="comm-field">
+          <label className="comm-label">Category</label>
+          <div className="comm-category-grid">
+            {Object.keys(CATEGORY_COLORS).map(cat => (
+              <button
+                key={cat}
+                className={`comm-cat-chip ${form.category === cat ? 'comm-cat-chip--active' : ''}`}
+                onClick={() => set('category', cat)}
+                style={{
+                  '--cat-color': CATEGORY_COLORS[cat].border,
+                  '--cat-bg': CATEGORY_COLORS[cat].bg
+                }}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className={`comm-field ${errors.description ? 'comm-field--error' : ''}`}>
@@ -360,8 +429,12 @@ function CreateView({ onBack, onCreated }) {
           {errors.date && <span className="comm-error">{errors.date}</span>}
         </div>
 
-        <button className="comm-submit-btn" onClick={handleSubmit}>
-          <TbPlus size={18} /> Publish Event
+        <button 
+          className="comm-submit-btn" 
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? 'Publishing...' : <><TbPlus size={18} /> Publish Event</>}
         </button>
       </div>
     </motion.div>
@@ -370,16 +443,142 @@ function CreateView({ onBack, onCreated }) {
 
 /* ── Main Community Page ──────────────────────────────────── */
 export default function CommunityPage() {
+  const { user, userProfile } = useAuth();
   const navigate = useNavigate();
-  const [view, setView] = useState('home');
-  const [events, setEvents] = useState(SEED_EVENTS);
+  const location = useLocation();
+  const [view, setView] = useState('home'); // home, join, create
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  // Handle focus event from navigation state
+  useEffect(() => {
+    if (location.state?.focusEventId) {
+      setView('join');
+      // Wait for view transition and data fetch
+      setTimeout(() => {
+        const el = document.getElementById(location.state.focusEventId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.style.boxShadow = '0 0 20px rgba(117, 67, 255, 0.6)';
+          setTimeout(() => { el.style.boxShadow = ''; }, 3000);
+        }
+      }, 500);
+    }
+  }, [location.state, events]);
+
+  useEffect(() => {
+    // Subscribe to new events for community helper notifications
+    const channel = supabase
+      .channel('public:events')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, (payload) => {
+        if (userProfile?.roles?.includes('community_helper')) {
+          toast.success(`New Event: ${payload.new.title}!`, {
+            duration: 5000,
+            icon: '🌊',
+          });
+        }
+        fetchEvents();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userProfile]);
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setEvents(data || []);
+    } catch (err) {
+      console.error('Error fetching events:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleJoin = async (eventId) => {
+    if (!user) return navigate('/login');
+    
+    try {
+      // 1. Add to participants
+      const { error: joinError } = await supabase
+        .from('event_participants')
+        .insert([{ event_id: eventId, user_id: user.id }]);
+
+      if (joinError) {
+        if (joinError.code === '23505') toast.error('You have already joined this event.');
+        else throw joinError;
+        return;
+      }
+
+      // 2. Decrement capacity
+      const { error: updateError } = await supabase.rpc('decrement_event_capacity', { x: 1, row_id: eventId });
+      
+      // If RPC doesn't exist, we'll just update locally or do a manual increment
+      if (updateError) {
+        const target = events.find(e => e.id === eventId);
+        await supabase
+          .from('events')
+          .update({ capacity: (target.capacity || 100) - 1 })
+          .eq('id', eventId);
+      }
+
+      toast.success('You joined the event!');
+      fetchEvents();
+    } catch (err) {
+      console.error('Error joining event:', err);
+      toast.error('Failed to join event.');
+    }
+  };
+
+  const handleComplete = async (eventId) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({ status: 'completed' })
+        .eq('id', eventId);
+
+      if (error) throw error;
+      
+      toast.success('Event marked as completed! Impact added to dashboard.');
+      fetchEvents();
+    } catch (err) {
+      console.error('Error completing event:', err);
+      toast.error('Failed to complete event.');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      toast.success('Event deleted.');
+      fetchEvents();
+    } catch (err) {
+      console.error('Error deleting event:', err);
+      toast.error('Failed to delete event.');
+    }
+  };
 
   const handleCreated = (ev) => {
     setEvents(prev => [ev, ...prev]);
-  };
-
-  const handleDelete = (id) => {
-    setEvents(prev => prev.filter(e => e.id !== id));
+    setView('home');
   };
 
   return (
@@ -456,8 +655,9 @@ export default function CommunityPage() {
           <JoinView
             key="join"
             events={events}
-            onJoin={(id) => setEvents(prev => prev.map(e => e.id === id ? { ...e, spots: e.spots - 1 } : e))}
+            onJoin={handleJoin}
             onDelete={handleDelete}
+            onComplete={handleComplete}
             onBack={() => setView('home')}
           />
         )}

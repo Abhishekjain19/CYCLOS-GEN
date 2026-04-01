@@ -1,4 +1,10 @@
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { TbChevronLeft, TbUserCircle, TbSend } from 'react-icons/tb';
+import ReactMarkdown from 'react-markdown';
 import { getChatResponse } from '../services/nvidiaNim';
+import './ChatPage.css';
 
 export default function ChatPage() {
   const navigate = useNavigate();
@@ -84,7 +90,7 @@ export default function ChatPage() {
           >
             {!m.mine && <span className="chat-bubble-user">{m.user}</span>}
             <div className="chat-bubble">
-              {m.message}
+              <ReactMarkdown>{m.message}</ReactMarkdown>
               <span className="chat-bubble-time">{m.time}</span>
             </div>
           </motion.div>

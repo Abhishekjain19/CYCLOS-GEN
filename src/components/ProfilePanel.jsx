@@ -3,7 +3,9 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { TbX, TbEdit, TbCameraPlus, TbLogout, TbCheck, TbTrendingUp, TbRipple, TbLeaf } from 'react-icons/tb';
+import { TbX, TbEdit, TbCameraPlus, TbLogout, TbCheck, TbTrendingUp, TbRipple, TbLeaf, TbCalendarEvent, TbMapPin, TbTrash } from 'react-icons/tb';
+import { supabase } from '../supabase/supabaseClient';
+import { toast } from 'react-hot-toast';
 import './ProfilePanel.css';
 
 export default function ProfilePanel({ isOpen, onClose }) {
@@ -14,6 +16,63 @@ export default function ProfilePanel({ isOpen, onClose }) {
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(userProfile?.full_name || 'User');
   const [profilePic, setProfilePic] = useState(null);
+  
+  const [activeEvents, setActiveEvents] = useState([]);
+  const [conductedCount, setConductedCount] = useState(0);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+
+  React.useEffect(() => {
+    if (isOpen && user) {
+      fetchUserEvents();
+    }
+  }, [isOpen, user]);
+
+  const fetchUserEvents = async () => {
+    setLoadingEvents(true);
+    try {
+      // 1. Fetch active events created by user
+      const { data: active, error: activeErr } = await supabase
+        .from('events')
+        .select('*')
+        .eq('creator_id', user.id)
+        .eq('status', 'active');
+      
+      if (activeErr) throw activeErr;
+      setActiveEvents(active || []);
+
+      // 2. Count "Events Conducted" (completed)
+      const { count, error: countErr } = await supabase
+        .from('events')
+        .select('*', { count: 'exact', head: true })
+        .eq('creator_id', user.id)
+        .eq('status', 'completed');
+
+      if (countErr) throw countErr;
+      setConductedCount(count || 0);
+
+    } catch (err) {
+      console.error('Error fetching user events:', err);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
+
+  const handleDeactivate = async (eventId) => {
+    try {
+      const { error } = await supabase
+        .from('events')
+        .update({ status: 'completed' })
+        .eq('id', eventId);
+
+      if (error) throw error;
+      
+      toast.success('Event deactivated and marked as completed!');
+      fetchUserEvents();
+    } catch (err) {
+      console.error('Error deactivating event:', err);
+      toast.error('Failed to deactivate event.');
+    }
+  };
 
   const handleLogout = () => {
     if (logout) logout();
@@ -149,6 +208,39 @@ export default function ProfilePanel({ isOpen, onClose }) {
                       <span className="stat-value">8,450</span>
                     </div>
                   </div>
+                  <div className="stat-card">
+                    <div className="stat-card__icon bg-blue"><TbCalendarEvent size={20} /></div>
+                    <div className="stat-card__data">
+                      <span className="stat-label">Events Hosted</span>
+                      <span className="stat-value">{conductedCount}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Active Events */}
+              <div className="panel-section">
+                <h4 className="section-title">My Active Events</h4>
+                <div className="active-events-list">
+                  {activeEvents.length === 0 ? (
+                    <p className="empty-text">No active drives organized yet.</p>
+                  ) : (
+                    activeEvents.map(ev => (
+                      <div key={ev.id} className="user-event-card">
+                        <div className="user-event-card__info">
+                          <h5>{ev.title}</h5>
+                          <span><TbMapPin size={12} /> {ev.location}</span>
+                        </div>
+                        <button 
+                          className="btn-deactivate" 
+                          onClick={() => handleDeactivate(ev.id)}
+                          title="Deactivate (Mark as Completed)"
+                        >
+                          Deactivate
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
