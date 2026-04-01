@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TbChevronLeft, TbShoppingCart, TbSearch,
-  TbHeart, TbStarFilled, TbChevronRight, TbUpload, TbPhoto, TbCheck
+  TbHeart, TbStarFilled, TbChevronRight, TbUpload, TbPhoto, TbCheck, TbMapPin
 } from 'react-icons/tb';
 import './MarketPage.css';
 
@@ -87,7 +87,7 @@ export default function MarketPage() {
 
   // Upload modal state
   const [showUpload, setShowUpload] = useState(false);
-  const [uploadData, setUploadData] = useState({ title: '', price: '', desc: '' });
+  const [uploadData, setUploadData] = useState({ title: '', price: '', desc: '', location: '' });
   const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const filtered = PRODUCTS.filter(p => {
@@ -108,7 +108,7 @@ export default function MarketPage() {
     setTimeout(() => {
       setUploadSuccess(false);
       setShowUpload(false);
-      setUploadData({ title: '', price: '', desc: '' });
+      setUploadData({ title: '', price: '', desc: '', location: '' });
     }, 2000);
   };
 
@@ -238,6 +238,19 @@ export default function MarketPage() {
                 <div className="mkt-upload__field">
                   <label>Price (₹)</label>
                   <input required type="text" placeholder="e.g. 500/kg" value={uploadData.price} onChange={e => setUploadData({...uploadData, price: e.target.value})} />
+                </div>
+
+                <div className="mkt-upload__field">
+                  <label className="mkt-upload__label-loc">
+                    <TbMapPin size={14} style={{ marginRight: '5px', verticalAlign: 'middle' }} />
+                    Pickup Location <span className="mkt-upload__loc-note">(private — not shown to buyers)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Marina Beach, Chennai"
+                    value={uploadData.location}
+                    onChange={e => setUploadData({...uploadData, location: e.target.value})}
+                  />
                 </div>
 
                 <div className="mkt-upload__field">
