@@ -1,0 +1,199 @@
+.main-page {
+  min-height: 100vh;
+  background: #01111d; /* Very deep ocean blue/black */
+  padding-bottom: 100px;
+}
+
+/* Deep Ocean Header Background */
+.dash-header__block {
+  background: linear-gradient(135deg, #02223c, #0369a1); /* Deep navy to ocean blue */
+  border-bottom-left-radius: 40px;
+  border-bottom-right-radius: 40px;
+  padding: 60px 20px 48px;
+  box-shadow: 0 10px 30px rgba(3, 105, 161, 0.25);
+}
+
+/* User Profile Pill */
+.dash-profile-pill {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 100px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dash-profile-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #0284c7; /* Brand ocean center */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.dash-profile-info {
+  flex: 1;
+}
+
+.dash-profile-name {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0c4a6e;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.dash-profile-sub {
+  font-size: 12px;
+  color: #0284c7;
+  margin: 2px 0 0 0;
+  font-weight: 600;
+}
+
+.dash-profile-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.dash-profile-edit {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: #e0f2fe;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0369a1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dash-profile-edit:hover {
+  background: #bae6fd;
+  transform: scale(1.05);
+}
+
+/* Stats Row */
+.dash-stats-row {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.dash-stat-minicard {
+  background: rgba(1, 22, 39, 0.6); /* Translucent deep sea */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(2, 132, 199, 0.3);
+  flex: 1;
+  border-radius: 28px;
+  padding: 24px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.dash-stat-icon {
+  margin-bottom: 4px;
+  color: #38bdf8; /* Bright cyan to pop against dark card */
+}
+
+.dash-stat-val {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: var(--font-display);
+}
+
+.dash-stat-label {
+  font-size: 12px;
+  color: #bae6fd;
+  font-weight: 500;
+}
+
+/* Content Sections */
+.dash-content {
+  padding: 24px;
+}
+
+.dash-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dash-section-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #e0f2fe;
+  margin: 0;
+}
+
+.dash-section-viewall {
+  font-size: 12px;
+  color: #38bdf8;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.dash-map-card {
+  background: #021a2f; /* Deep ocean card */
+  border: 1px solid rgba(2, 132, 199, 0.2);
+  border-radius: 20px;
+  padding: 16px;
+  min-height: 180px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dash-materials-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+}
+
+.dash-materials-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.material-card {
+  min-width: 100px;
+  height: 120px;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 16px;
+  position: relative;
+  scroll-snap-align: start;
+  overflow: hidden;
+  /* backgrounds are set inline */
+}
+
+.material-card__label {
+  background: rgba(255, 255, 255, 0.9);
+  color: #0c4a6e;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 50px;
+  text-align: center;
+  width: 100%;
+  backdrop-filter: blur(5px);
+}

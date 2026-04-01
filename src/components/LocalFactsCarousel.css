@@ -1,0 +1,65 @@
+.local-facts {
+  position: relative;
+  width: 100%;
+}
+
+.local-facts__track {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 8px 0 24px 0;
+  scroll-behavior: auto;
+  cursor: grab;
+}
+
+.local-facts__track:active {
+  cursor: grabbing;
+}
+
+/* Hide scrollbar for a cleaner look */
+.local-facts__track::-webkit-scrollbar {
+  display: none;
+}
+.local-facts__track {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.local-fact-card {
+  flex-shrink: 0;
+  width: 260px;
+  background: #1a1625; /* Match dashboard dark theme */
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  user-select: none;
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+
+.local-fact-card:hover {
+  background: #231E30;
+  transform: translateY(-4px);
+  border-color: rgba(117, 67, 255, 0.3);
+}
+
+.local-fact-card__emoji {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.local-fact-card__title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.local-fact-card__body {
+  font-size: 13px;
+  color: #a1a1aa;
+  line-height: 1.5;
+}

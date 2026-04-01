@@ -1,0 +1,53 @@
+.tips-carousel {
+  position: relative;
+  width: 100%;
+}
+
+.tips-carousel__track {
+  overflow: hidden;
+  padding: 8px 0;
+}
+
+.tips-carousel__ticker {
+  display: flex;
+  gap: 16px;
+  will-change: transform;
+}
+
+.tip-card {
+  flex-shrink: 0;
+  width: 280px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(74,222,128,0.1);
+  border-radius: var(--radius-lg);
+  padding: 24px 20px;
+  cursor: default;
+  transition: all 0.25s ease;
+}
+
+.tip-card:hover {
+  background: rgba(74,222,128,0.07);
+  border-color: rgba(74,222,128,0.22);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+}
+
+.tip-card__emoji {
+  font-size: 32px;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.tip-card__title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.tip-card__body {
+  font-size: 13px;
+  color: var(--grey-400);
+  line-height: 1.65;
+}

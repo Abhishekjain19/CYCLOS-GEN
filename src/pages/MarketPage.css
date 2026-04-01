@@ -1,0 +1,614 @@
+/* ══════════════════════════════════════════════════════════
+   MarketPage — Deep Ocean Marine Theme
+   Matches the new Landing Page and overall app aesthetic
+   ══════════════════════════════════════════════════════════ */
+
+.mkt-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, rgba(8, 28, 42, 1) 0%, rgba(14, 36, 37, 1) 100%);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 100px;
+  overflow-x: hidden;
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.mkt-header {
+  background: rgba(8, 28, 42, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 52px 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(83, 174, 165, 0.2);
+}
+
+.mkt-header__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.mkt-header__title {
+  font-size: 18px;
+  font-weight: 800;
+  color: white;
+  font-family: var(--font-display);
+  margin: 0;
+}
+
+.mkt-back-btn,
+.mkt-cart-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(83, 174, 165, 0.3);
+  background: rgba(8, 28, 42, 0.8);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mkt-back-btn:hover,
+.mkt-cart-btn:hover {
+  background: rgba(14, 36, 37, 0.9);
+  border-color: rgba(83, 174, 165, 0.5);
+}
+
+/* ── Search bar ──────────────────────────────────────────── */
+.mkt-search-wrap {
+  background: rgba(14, 36, 37, 0.6);
+  margin: 16px 20px 0;
+  border-radius: 16px;
+  border: 1px solid rgba(83, 174, 165, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 16px;
+  transition: border-color 0.2s;
+}
+
+.mkt-search-wrap:focus-within {
+  border-color: var(--teal-300);
+  box-shadow: 0 0 0 3px rgba(83, 174, 165, 0.1);
+}
+
+.mkt-search-icon {
+  color: rgba(255, 255, 255, 0.4);
+  flex-shrink: 0;
+}
+
+.mkt-search {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: white;
+  font-size: 14px;
+  font-family: var(--font-main);
+  padding: 14px 0;
+}
+
+.mkt-search::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mkt-search-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--teal-400), var(--teal-300));
+  border: none;
+  color: var(--teal-950);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.mkt-search-btn:hover {
+  background: linear-gradient(135deg, var(--teal-300), var(--teal-200));
+}
+
+/* ── Category chips ──────────────────────────────────────── */
+.mkt-cats {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding: 18px 20px 4px;
+  scrollbar-width: none;
+}
+
+.mkt-cats::-webkit-scrollbar {
+  display: none;
+}
+
+.mkt-cat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  background: rgba(14, 36, 37, 0.6);
+  border: 1px solid rgba(83, 174, 165, 0.2);
+  border-radius: 16px;
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 70px;
+}
+
+.mkt-cat:hover {
+  border-color: rgba(83, 174, 165, 0.4);
+  background: rgba(8, 28, 42, 0.8);
+}
+
+.mkt-cat--active {
+  background: linear-gradient(135deg, var(--teal-400), var(--teal-300));
+  border-color: transparent;
+  box-shadow: 0 4px 14px rgba(83, 174, 165, 0.3);
+}
+
+.mkt-cat__icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.mkt-cat__label {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+  font-family: var(--font-main);
+}
+
+.mkt-cat--active .mkt-cat__label {
+  color: var(--teal-950);
+}
+
+/* ── Product list ────────────────────────────────────────── */
+.mkt-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 16px 20px 0;
+}
+
+.mkt-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(14, 36, 37, 0.6);
+  border-radius: 16px;
+  padding: 12px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  border: 1px solid rgba(83, 174, 165, 0.2);
+  transition: all 0.2s;
+  position: relative;
+}
+
+.mkt-item:hover {
+  border-color: rgba(83, 174, 165, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.mkt-item__img-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(8, 28, 42, 0.8);
+  border: 1px solid rgba(83, 174, 165, 0.2);
+}
+
+.mkt-item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mkt-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mkt-item__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+.mkt-item__price {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--teal-300);
+  margin: 0;
+  font-family: var(--font-display);
+}
+
+.mkt-item__wish {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  padding: 6px;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.mkt-item__wish:hover,
+.mkt-item__wish--active {
+  color: #f87171;
+}
+
+.mkt-item__arrow {
+  color: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.mkt-empty {
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 60px 0;
+  font-size: 15px;
+}
+
+/* ── Upload Sheet ────────────────────────────────────────── */
+.mkt-upload {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 28, 42, 1) 0%, rgba(14, 36, 37, 1) 100%);
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+}
+
+.mkt-upload__header {
+  padding: 50px 20px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(83, 174, 165, 0.2);
+}
+
+.mkt-upload__close {
+  background: transparent;
+  color: var(--teal-300);
+  border: none;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mkt-upload__title {
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.mkt-upload__form {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.mkt-upload__photo-btn {
+  width: 100%;
+  aspect-ratio: 2/1;
+  border: 1px dashed rgba(83, 174, 165, 0.4);
+  background: rgba(8, 28, 42, 0.6);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--teal-300);
+  font-weight: 600;
+  gap: 12px;
+  cursor: pointer;
+  margin-bottom: 24px;
+}
+
+.mkt-upload__field {
+  margin-bottom: 20px;
+}
+
+.mkt-upload__field label {
+  display: block;
+  font-size: 12px;
+  color: var(--teal-300);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.mkt-upload__field input,
+.mkt-upload__field textarea {
+  width: 100%;
+  background: rgba(8, 28, 42, 0.6);
+  border: 1px solid rgba(83, 174, 165, 0.3);
+  padding: 16px;
+  border-radius: 12px;
+  color: white;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  resize: vertical;
+}
+
+.mkt-upload__field input:focus,
+.mkt-upload__field textarea:focus {
+  border-color: var(--teal-300);
+  background: rgba(8, 28, 42, 0.9);
+}
+
+.mkt-upload__submit {
+  width: 100%;
+  background: linear-gradient(135deg, var(--teal-400), var(--teal-300));
+  color: var(--teal-950);
+  padding: 18px;
+  border-radius: 50px;
+  font-size: 16px;
+  font-weight: 800;
+  border: none;
+  margin-top: 16px;
+  cursor: pointer;
+}
+
+.mkt-upload__success {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.mkt-upload__success-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(83, 174, 165, 0.15);
+  color: var(--teal-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: 0 0 40px rgba(83, 174, 165, 0.2);
+}
+
+.mkt-upload__success h3 {
+  color: white;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.mkt-upload__success p {
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+/* ── Detail sheet (full-screen slide-up) ─────────────────── */
+.mkt-detail {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(8, 28, 42, 1) 0%, rgba(14, 36, 37, 1) 100%);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.mkt-detail__hero {
+  height: 300px;
+  background: rgba(14, 36, 37, 0.8);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.mkt-detail__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+.mkt-detail__nav {
+  position: absolute;
+  top: 44px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+}
+
+.mkt-detail__nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(8, 28, 42, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(83, 174, 165, 0.3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.mkt-detail__nav-btn:hover {
+  background: rgba(14, 36, 37, 0.9);
+}
+
+.mkt-detail__nav-btn--wish {
+  color: #f87171;
+}
+
+.mkt-detail__info {
+  padding: 24px 20px 140px;
+  flex: 1;
+}
+
+.mkt-detail__title {
+  font-size: 22px;
+  font-weight: 800;
+  color: white;
+  font-family: var(--font-display);
+  margin: 0 0 6px;
+}
+
+.mkt-detail__price {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--teal-300);
+  margin: 0 0 16px;
+  font-family: var(--font-display);
+}
+
+.mkt-detail__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 24px;
+}
+
+.mkt-detail__rating {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #facc15;
+}
+
+.mkt-detail__desc-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.mkt-detail__desc {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.7;
+  margin-bottom: 28px;
+}
+
+/* also-like mini-list */
+.mkt-also-list {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.mkt-also-item {
+  flex: 1;
+  background: rgba(14, 36, 37, 0.6);
+  border-radius: 12px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+  border: 1px solid rgba(83, 174, 165, 0.2);
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  transition: border-color 0.2s;
+}
+
+.mkt-also-item:hover {
+  border-color: rgba(83, 174, 165, 0.4);
+}
+
+.mkt-also-item__img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* ── Detail footer ───────────────────────────────────────── */
+.mkt-detail__footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 24px 34px;
+  background: rgba(8, 28, 42, 0.95);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(83, 174, 165, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 310;
+}
+
+.mkt-detail__qty {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(14, 36, 37, 0.8);
+  border: 1px solid rgba(83, 174, 165, 0.3);
+  padding: 10px 18px;
+  border-radius: 50px;
+  flex-shrink: 0;
+}
+
+.mkt-detail__qty-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: white;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.mkt-detail__qty-val {
+  font-weight: 700;
+  font-size: 15px;
+  color: white;
+  min-width: 24px;
+  text-align: center;
+}
+
+.mkt-detail__add {
+  flex: 1;
+  background: linear-gradient(135deg, var(--teal-400), var(--teal-300));
+  color: var(--teal-950);
+  border: none;
+  padding: 16px;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  transition: all 0.2s;
+  box-shadow: 0 8px 24px rgba(83, 174, 165, 0.3);
+}
+
+.mkt-detail__add:hover {
+  background: linear-gradient(135deg, var(--teal-300), var(--teal-200));
+  transform: translateY(-2px);
+}
