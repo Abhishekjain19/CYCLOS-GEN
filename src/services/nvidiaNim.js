@@ -107,3 +107,40 @@ export const analyzeWasteImage = async (base64Image) => {
     return fallback;
   }
 };
+
+/**
+ * Llama 3.3 Reasoning model for SOS Report Email Generation
+ */
+export const generateSOSEmailBody = async (incidentType, location, userDescription = '') => {
+  const response = await fetch(`${BASE_URL}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${NVIDIA_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'meta/llama-3.3-70b-instruct',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an automated emergency dispatch assistant for Cyclos Ocean Watch. Your job is to draft a highly professional, concise, and official SOS email report addressed to Maritime Rescue and Environmental Authorities. The email must be extremely clear about the coordinates, incident type, and immediate action required.'
+        },
+        {
+          role: 'user',
+          content: `Generate a short official SOS email for the following incident:\nType: ${incidentType}\nLocation/Coordinates: ${location}\nAdditional Details: ${userDescription || 'None provided.'}\n\nDo NOT include subject line in your output, just the body of the email. Keep it urgent, structured with bullet points if necessary, and highly professional.`
+        }
+      ],
+      temperature: 0.2,
+      top_p: 0.7,
+      max_tokens: 512,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'NVIDIA NIM API error');
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+};

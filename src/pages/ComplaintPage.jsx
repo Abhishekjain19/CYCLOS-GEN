@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TbArrowLeft, TbPlus, TbPhoto, TbSend,
-  TbCurrentLocation, TbChevronRight, TbMapPin, TbAlertTriangle, TbCheck, TbMail
+  TbCurrentLocation, TbChevronRight, TbMapPin, TbAlertTriangle, TbCheck, TbMail, TbWand, TbLoader2
 } from 'react-icons/tb';
+import { generateSOSEmailBody } from '../services/nvidiaNim';
 import './ComplaintPage.css';
 
 /* ── MOCK HISTORY ────────────────────────────────────── */
@@ -45,19 +46,49 @@ export default function ComplaintPage() {
   const [view, setView] = useState('list');
   const [selectedComplaint, setSelectedComplaint] = useState(null);
 
-  // New form state
   const [reportType, setReportType] = useState('');
   const [location, setLocation] = useState('');
   const [desc, setDesc] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [history, setHistory] = useState(MOCK_HISTORY);
+  
+  // File upload states
+  const [file, setFile] = useState(null);
+  const [imgPreview, setImgPreview] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
+  // When type changes, we just reset the AI form and let user click 'Generate AI Draft'
   const handleTypeChange = (e) => {
     const type = e.target.value;
     setReportType(type);
-    let template = EMAIL_TEMPLATES[type] || '';
-    if (location) template = template.replace('[Location]', location);
-    setDesc(template);
+  };
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      const reader = new FileReader();
+      reader.onloadend = () => setImgPreview(reader.result);
+      reader.readAsDataURL(selectedFile);
+    }
+  };
+
+  const generateAIDraft = async () => {
+    if (!reportType || !location) {
+      alert("Please select Incident Type and Coordinates first.");
+      return;
+    }
+    setAiLoading(true);
+    try {
+      const typeLabel = reportType.replace('_', ' ').toUpperCase();
+      const generated = await generateSOSEmailBody(typeLabel, location, desc);
+      setDesc(generated);
+    } catch (err) {
+      alert("Failed to generate AI draft: " + err.message);
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   const handleFetchLocation = () => {
@@ -69,29 +100,62 @@ export default function ComplaintPage() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!desc.trim() || !location.trim()) return;
 
-    setSubmitted(true);
-    setTimeout(() => {
-      // Add to history and reset
-      const newEntry = {
-        id: Date.now(),
-        type: reportType ? reportType.replace('_', ' ').toUpperCase() : 'GENERAL',
-        status: 'Triggered',
-        date: new Date().toISOString().split('T')[0],
-        location,
-        desc,
-        img: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80' // generic placeholder
-      };
-      setHistory([newEntry, ...history]);
-      setSubmitted(false);
-      setView('list');
-      setReportType('');
-      setLocation('');
-      setDesc('');
-    }, 1500);
+    setIsSending(true);
+
+    try {
+      // Create FormData to send via FormSubmit.co
+      const formData = new FormData();
+      formData.append('_subject', `SOS Alert: ${reportType.replace('_', ' ').toUpperCase()} at ${location}`);
+      formData.append('Incident Type', reportType.replace('_', ' ').toUpperCase());
+      formData.append('Coordinates', location);
+      formData.append('Official Report', desc);
+      
+      // Stop captcha explicitly for smooth UX
+      formData.append('_captcha', 'false');
+
+      if (file) {
+        formData.append('attachment', file);
+      }
+
+      await fetch("https://formsubmit.co/ajax/varunsugandhi0@gmail.com", {
+          method: "POST",
+          headers: { 
+              'Accept': 'application/json'
+          },
+          body: formData
+      });
+
+      setSubmitted(true);
+      setTimeout(() => {
+        // Add to history and reset
+        const newEntry = {
+          id: Date.now(),
+          type: reportType ? reportType.replace('_', ' ').toUpperCase() : 'GENERAL',
+          status: 'Triggered',
+          date: new Date().toISOString().split('T')[0],
+          location,
+          desc,
+          img: imgPreview || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80'
+        };
+        setHistory([newEntry, ...history]);
+        setSubmitted(false);
+        setView('list');
+        setReportType('');
+        setLocation('');
+        setDesc('');
+        setFile(null);
+        setImgPreview(null);
+      }, 2500);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to transmit SOS. Make sure you are online.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const openDetail = (item) => {
@@ -223,10 +287,17 @@ export default function ComplaintPage() {
                 <form className="cmp-form" onSubmit={handleSubmit}>
                   <p className="cmp-subtitle">Draft an official mid-ocean incident report for authorities.</p>
                   
-                  <div className="cmp-photo-upload">
-                    <TbPhoto size={28} />
-                    <span>Upload Satellite/Drone Evidence</span>
-                  </div>
+                  <label className="cmp-photo-upload" style={{ cursor: 'pointer', overflow: 'hidden', position: 'relative' }}>
+                    <input type="file" accept="image/*" hidden onChange={handleFileChange} />
+                    {imgPreview ? (
+                      <img src={imgPreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+                    ) : (
+                      <>
+                        <TbPhoto size={28} />
+                        <span>Upload Satellite/Drone Evidence</span>
+                      </>
+                    )}
+                  </label>
 
                   <div className="cmp-form-group">
                     <label>Incident Type</label>
@@ -256,19 +327,28 @@ export default function ComplaintPage() {
                   </div>
 
                   <div className="cmp-form-group">
-                    <label>Drafted Mail Body</label>
+                    <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>Drafted Mail Body</span>
+                      <button 
+                        type="button" 
+                        onClick={generateAIDraft}
+                        disabled={aiLoading}
+                        style={{ background: 'var(--teal-300)', color: 'var(--teal-950)', border: 'none', borderRadius: '50px', padding: '4px 10px', fontSize: '11px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                        {aiLoading ? <TbLoader2 className="cmp-loading-spin" size={14} /> : <TbWand size={14} />} Auto-Draft AI
+                      </button>
+                    </label>
                     <textarea 
                       rows={8}
                       className="cmp-mail-area"
-                      placeholder="Select a type to auto-fill authority mail structure..."
+                      placeholder="Click Auto-Draft AI to generate a highly professional structural mail..."
                       value={desc}
                       onChange={e => setDesc(e.target.value)}
                       required
                     />
                   </div>
 
-                  <button type="submit" className="cmp-submit-btn" disabled={!reportType || !location || !desc}>
-                    <TbSend size={18} /> Transmit Report Mail
+                  <button type="submit" className="cmp-submit-btn" disabled={!reportType || !location || !desc || isSending || aiLoading}>
+                    {isSending ? <TbLoader2 className="cmp-loading-spin" size={18} /> : <TbSend size={18} />} Transmit Report Mail
                   </button>
                 </form>
               )}
