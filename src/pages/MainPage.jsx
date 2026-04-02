@@ -64,29 +64,27 @@ export default function MainPage() {
     if (userProfile) {
       fetchDashboardStats();
       
-      // Real-time Event Listener for Community Helpers
-      if (userProfile?.roles?.includes('community_helper')) {
-        const channel = supabase
-          .channel('dashboard:events')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, (payload) => {
-            const newNotif = {
-              id: `event-${payload.new.id}`,
-              type: 'event',
-              message: `New Event: ${payload.new.title}`,
-              subtext: payload.new.description?.substring(0, 60) + '...',
-              timestamp: 'Just now',
-              read: false,
-              eventId: payload.new.id,
-              buttons: [
-                { label: 'View Event', style: 'primary', action: 'view_event' }
-              ]
-            };
-            setNotifications(prev => [newNotif, ...prev]);
-          })
-          .subscribe();
+      // Real-time Event Listener for All Users
+      const channel = supabase
+        .channel('dashboard:events')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'events' }, (payload) => {
+          const newNotif = {
+            id: `event-${payload.new.id}`,
+            type: 'event',
+            message: `New Event: ${payload.new.title}`,
+            subtext: payload.new.description?.substring(0, 60) + '...',
+            timestamp: 'Just now',
+            read: false,
+            eventId: payload.new.id,
+            buttons: [
+              { label: 'View Event', style: 'primary', action: 'view_event' }
+            ]
+          };
+          setNotifications(prev => [newNotif, ...prev]);
+        })
+        .subscribe();
 
-        return () => { supabase.removeChannel(channel); };
-      }
+      return () => { supabase.removeChannel(channel); };
     }
   }, [userProfile]);
 

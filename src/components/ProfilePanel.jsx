@@ -118,12 +118,7 @@ export default function ProfilePanel({ isOpen, onClose }) {
     }
   };
 
-  const marketplaceActivity = [
-    { id: 1, name: 'Ocean Grade Plastic', action: 'Purchase', qty: '50 kg', date: 'Oct 12, 2026', status: 'Completed', color: 'purchased' },
-    { id: 2, name: 'Mixed PET Bottles', action: 'Recycled', qty: '12 kg', date: 'Oct 10, 2026', status: 'Verified', color: 'recycled' },
-    { id: 3, name: 'Glass Shards', action: 'Sold', qty: '8 kg', date: 'Oct 08, 2026', status: 'Pending', color: 'sold' },
-    { id: 4, name: 'Recycled Fiber Bag', action: 'Purchase', qty: '2 items', date: 'Oct 01, 2026', status: 'Completed', color: 'purchased' }
-  ];
+  const marketplaceActivity = [];
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -299,20 +294,24 @@ export default function ProfilePanel({ isOpen, onClose }) {
               <div className="panel-section">
                 <h4 className="section-title">Marketplace Activity</h4>
                 <div className="activity-list">
-                  {marketplaceActivity.map((item) => (
-                    <div key={item.id} className="activity-card">
-                      <div className="activity-card__header">
-                        <span className={`activity-type badge-${item.color}`}>{item.action}</span>
-                        <span className={`activity-status ${getStatusClass(item.status)}`}>{item.status}</span>
+                  {marketplaceActivity.length === 0 ? (
+                    <p className="empty-text">No marketplace activity yet.</p>
+                  ) : (
+                    marketplaceActivity.map((item) => (
+                      <div key={item.id} className="activity-card">
+                        <div className="activity-card__header">
+                          <span className={`activity-type badge-${item.color}`}>{item.action}</span>
+                          <span className={`activity-status ${getStatusClass(item.status)}`}>{item.status}</span>
+                        </div>
+                        <h5 className="activity-name">{item.name}</h5>
+                        <div className="activity-meta">
+                          <span>Qty: {item.qty}</span>
+                          <span className="activity-dot">•</span>
+                          <span>{item.date}</span>
+                        </div>
                       </div>
-                      <h5 className="activity-name">{item.name}</h5>
-                      <div className="activity-meta">
-                        <span>Qty: {item.qty}</span>
-                        <span className="activity-dot">•</span>
-                        <span>{item.date}</span>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
