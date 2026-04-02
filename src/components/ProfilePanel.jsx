@@ -34,6 +34,31 @@ export default function ProfilePanel({ isOpen, onClose }) {
   const [pendingPurchases, setPendingPurchases] = useState([]);
   const [selectedQR, setSelectedQR] = useState(null);
 
+  // Real-time synchronization for order status changes
+  React.useEffect(() => {
+    if (!user || !isOpen) return;
+
+    const ordersChannel = supabase
+      .channel('profile-orders-sync')
+      .on('postgres_changes', {
+        event: '*', 
+        schema: 'public', 
+        table: 'market_orders'
+      }, (payload) => {
+        // Refresh both lists if any order involving the user changes
+        if (payload.new.buyer_id === user.id || payload.new.seller_id === user.id) {
+          fetchAcceptedRequests();
+          fetchPendingPurchases();
+          if (payload.new.status === 'accepted' && payload.new.buyer_id === user.id) {
+            toast.success(`Order for ${payload.new.product_name} accepted! QR code is ready.`);
+          }
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(ordersChannel); };
+  }, [user, isOpen]);
+
   const fetchAcceptedRequests = async () => {
     try {
       const { data, error } = await supabase
