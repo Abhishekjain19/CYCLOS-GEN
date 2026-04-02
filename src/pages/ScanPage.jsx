@@ -35,24 +35,36 @@ export default function ScanPage() {
   }, [location.state]);
 
   const handleQRScan = async (text) => {
+    console.log('QR Scanned:', text);
     if (!text || !text.startsWith('REQ-') || analyzing) return;
     try {
       setAnalyzing(true);
       const reqIdParts = text.split('-');
+      console.log('Parsed Parts:', reqIdParts);
       if (reqIdParts.length < 3) throw new Error("Invalid QR format");
       const realId = reqIdParts[1];
       const buyerId = reqIdParts[2];
       
-      // Verification: The seller (current user) is scanning the buyer's QR
-      // The QR code contains the buyer's ID to ensure they are the correct recipient.
+      console.log('Fetching order with ID:', realId);
+      // Ensure realId is trimmed and check if it resembles a UUID
+      const cleanId = realId.trim();
       
       const { data: request, error: fetchErr } = await supabase
         .from('market_orders')
         .select('*')
-        .eq('id', realId)
+        .eq('id', cleanId)
         .single();
         
-      if (fetchErr || !request) throw new Error("Request not found");
+      if (fetchErr) {
+        console.error('Fetch Error Detail:', fetchErr);
+        throw new Error(`DB Error: ${fetchErr.message}`);
+      }
+      if (!request) {
+        console.error('No record found for ID:', cleanId);
+        throw new Error("Order record not found");
+      }
+      
+      console.log('Request found:', request);
       if (request.status !== 'accepted') throw new Error("Transaction not ready for pickup");
       if (request.seller_id !== user.id) throw new Error("You are not the seller of this item");
 

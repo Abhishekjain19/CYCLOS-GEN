@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { TbX, TbEdit, TbCameraPlus, TbLogout, TbCheck, TbTrendingUp, TbRipple, TbLeaf, TbCalendarEvent, TbMapPin, TbTrash, TbQrcode, TbShoppingCart } from 'react-icons/tb';
 import { supabase } from '../supabase/supabaseClient';
 import { toast } from 'react-hot-toast';
-import QRCode from 'react-qr-code';
+import QRCodePkg from 'react-qr-code';
+const QRCode = QRCodePkg.default || QRCodePkg;
 import './ProfilePanel.css';
 
 export default function ProfilePanel({ isOpen, onClose }) {
