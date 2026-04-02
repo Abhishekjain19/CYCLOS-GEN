@@ -3,7 +3,7 @@ import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { TbX, TbEdit, TbCameraPlus, TbLogout, TbCheck, TbTrendingUp, TbRipple, TbLeaf, TbCalendarEvent, TbMapPin, TbTrash, TbQrcode } from 'react-icons/tb';
+import { TbX, TbEdit, TbCameraPlus, TbLogout, TbCheck, TbTrendingUp, TbRipple, TbLeaf, TbCalendarEvent, TbMapPin, TbTrash, TbQrcode, TbShoppingCart } from 'react-icons/tb';
 import { supabase } from '../supabase/supabaseClient';
 import { toast } from 'react-hot-toast';
 import QRCode from 'react-qr-code';
@@ -383,7 +383,7 @@ export default function ProfilePanel({ isOpen, onClose }) {
                               <span style={{ fontSize: '11px', color: '#64748b' }}>Buyer: {req.buyer_name}</span>
                             </div>
                             <button 
-                              onClick={(e) => { e.stopPropagation(); navigate('/scan'); onClose(); }}
+                              onClick={(e) => { e.stopPropagation(); navigate('/scanner', { state: { autoMode: 'qr' } }); onClose(); }}
                               style={{ marginTop: '10px', width: '100%', padding: '8px', background: 'var(--teal-500)', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}
                             >
                               Open Scanner to Verify

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TbArrowLeft, TbReload, TbCamera, TbPhoto, TbQrcode } from 'react-icons/tb';
 import { analyzeWasteImage } from '../services/nvidiaNim';
@@ -11,6 +11,7 @@ import './ScanPage.css';
 
 export default function ScanPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -25,6 +26,13 @@ export default function ScanPage() {
   const [inputMode, setInputMode] = useState('choose'); // 'choose', 'camera', 'upload', 'qr'
   const [scanningProgress, setScanningProgress] = useState(0);
   const [qrMessage, setQrMessage] = useState('');
+
+  // Auto-set mode if passed from navigation (e.g., from ProfilePanel)
+  useEffect(() => {
+    if (location.state?.autoMode === 'qr') {
+      setInputMode('qr');
+    }
+  }, [location.state]);
 
   const handleQRScan = async (text) => {
     if (!text || !text.startsWith('REQ-') || analyzing) return;
