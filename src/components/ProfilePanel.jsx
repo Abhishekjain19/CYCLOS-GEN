@@ -46,10 +46,13 @@ export default function ProfilePanel({ isOpen, onClose }) {
         table: 'market_orders'
       }, (payload) => {
         // Refresh both lists if any order involving the user changes
-        if (payload.new.buyer_id === user.id || payload.new.seller_id === user.id) {
+        const isParticipant = payload.new?.buyer_id === user.id || payload.new?.seller_id === user.id || 
+                             payload.old?.buyer_id === user.id || payload.old?.seller_id === user.id;
+        
+        if (isParticipant) {
           fetchAcceptedRequests();
           fetchPendingPurchases();
-          if (payload.new.status === 'accepted' && payload.new.buyer_id === user.id) {
+          if (payload.new?.status === 'accepted' && payload.new?.buyer_id === user.id) {
             toast.success(`Order for ${payload.new.product_name} accepted! QR code is ready.`);
           }
         }
@@ -308,26 +311,45 @@ export default function ProfilePanel({ isOpen, onClose }) {
                 <h4 className="section-title">Transactions & Orders</h4>
                 
                 <div className="orders-container">
-                  {/* Buyer View: Show QR Codes for Accepted Items */}
+                  {/* Buyer View: Show QR Codes for Accepted Items and Pending status */}
                   {pendingPurchases.length > 0 ? (
                     <div style={{ marginBottom: '24px' }}>
                       <h5 style={{ fontSize: '12px', color: 'var(--teal-300)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <TbQrcode /> My Purchases (Accepted)
+                        <TbShoppingCart /> My Orders
                       </h5>
                       <div className="active-events-list">
                         {pendingPurchases.map(req => (
                           <div 
                             key={req.id} 
                             className="user-event-card" 
-                            style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', cursor: 'pointer', border: selectedQR === req.id ? '1px solid var(--teal-300)' : '1px solid #e2e8f0' }}
+                            style={{ 
+                              display: 'flex', 
+                              flexDirection: 'column', 
+                              alignItems: 'flex-start', 
+                              cursor: 'pointer', 
+                              border: selectedQR === req.id ? '1px solid var(--teal-300)' : '1px solid #e2e8f0',
+                            }}
                             onClick={() => setSelectedQR(selectedQR === req.id ? null : req.id)}
                           >
                             <div className="user-event-card__info" style={{ width: '100%' }}>
-                              <h5 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 4px 0' }}>
-                                {req.product_name}
-                                <TbQrcode size={18} style={{ color: selectedQR === req.id ? 'var(--teal-500)' : 'var(--teal-300)' }} />
-                              </h5>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <h5 style={{ margin: 0 }}>{req.product_name}</h5>
+                                <span style={{ 
+                                  fontSize: '9px', 
+                                  padding: '2px 6px', 
+                                  borderRadius: '10px', 
+                                  background: '#dcfce7',
+                                  color: '#166534',
+                                  fontWeight: '700',
+                                  textTransform: 'uppercase'
+                                }}>
+                                  LOCKED
+                                </span>
+                              </div>
                               <span style={{ fontSize: '11px', color: '#64748b', display: 'block' }}>Seller: {req.seller_name}</span>
+                              <p style={{ fontSize: '10px', color: 'var(--teal-500)', marginTop: '4px', fontWeight: 'bold' }}>
+                                {selectedQR === req.id ? 'Click to Hide QR' : 'Click to View QR Code'}
+                              </p>
                             </div>
                             {selectedQR === req.id && (
                               <motion.div 

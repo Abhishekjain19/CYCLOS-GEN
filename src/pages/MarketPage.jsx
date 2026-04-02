@@ -276,7 +276,7 @@ export default function MarketPage() {
             seller_id: selected.seller_id,
             buyer_name: userProfile?.full_name || user.email,
             product_name: getDisplayName(selected),
-            status: 'pending',
+            status: 'accepted',
             pickup_date: pickupDate || 'Not specified',
           });
           if (error) throw error;
