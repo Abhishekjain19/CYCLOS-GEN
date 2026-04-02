@@ -7,27 +7,27 @@ import './ChatbotPopup.css';
 /* ── Canned text responses keyed by keywords ── */
 const AI_RESPONSES = {
   plastic:
-    '♻️ Plastic bottles (PET #1 & HDPE #2) can be recycled at most curbside programmes. Rinse them, remove caps, and flatten to save space. Avoid putting plastic bags in the bin — take them to grocery-store drop-off points instead.',
+    '### Plastic Recycling ♻️\n\nPlastic bottles (PET #1 & HDPE #2) can be recycled at most curbside programmes. \n\n*   **Rinse** them clean\n*   **Remove** caps\n*   **Flatten** to save space\n\nAvoid putting plastic bags in the bin — take them to grocery-store drop-off points instead.',
   'e-waste':
-    '🔌 E-waste (phones, chargers, batteries) should NEVER go to landfill. Drop them off at a registered e-waste facility or any Cyclos partner recycler near you. Tap the map icon in the dock to find the closest one!',
+    '### E-Waste Handling 🔌\n\nE-waste (phones, chargers, batteries) should **NEVER** go to landfill. \n\nDrop them off at a registered e-waste facility or any Cyclos partner recycler near you. Tap the map icon in the dock to find the closest one!',
   household:
-    "🏠 Great question! Start with the 3 R's — Reduce, Reuse, Recycle. Composting food scraps, buying in bulk, and choosing products with less packaging are the biggest wins. Every small swap adds up.",
+    "### Sustainable Living 🏠\n\nGreat question! Start with the 3 R's:\n\n1.  **Reduce** waste at the source\n2.  **Reuse** items when possible\n3.  **Recycle** correctly\n\nComposting food scraps and choosing products with less packaging are the biggest wins.",
   recycling:
-    '📍 Open the Cyclos map (dock → home icon) to discover verified recycling centres, drop-off bins, and community collection drives within 5 km of you.',
+    '### Find Facilities 📍\n\nOpen the Cyclos map (dock → home icon) to discover verified recycling centres, drop-off bins, and community collection drives within 5 km of you.',
   center:
-    '📍 Open the Cyclos map (dock → home icon) to discover verified recycling centres, drop-off bins, and community collection drives within 5 km of you.',
+    '### Recycling Centers 📍\n\nOpen the Cyclos map (dock → home icon) to discover verified recycling centres, drop-off bins, and community collection drives within 5 km of you.',
   reduce:
-    '🌿 Simple swaps: carry a reusable bag, use a refillable water bottle, buy second-hand when possible, and choose products with minimal packaging. Every action counts for the planet!',
+    '### Waste Reduction 🌿\n\nSimple swaps make a huge difference:\n\n*   Carry a reusable bag\n*   Use a refillable water bottle\n*   Buy second-hand when possible\n*   Choose minimal packaging',
   paper:
-    '📄 Paper and cardboard are highly recyclable. Flatten boxes, remove any plastic wrapping, and keep them dry. Soiled paper (greasy pizza boxes) should go to compost, not recycling.',
+    '### Paper & Cardboard 📄\n\nPaper and cardboard are highly recyclable. \n\n*   **Flatten** boxes\n*   **Remove** plastic tape\n*   **Keep dry** for better processing\n\n*Note: Soiled paper (greasy pizza boxes) should go to compost.*',
   glass:
-    '🫙 Glass bottles and jars are 100 % recyclable. Rinse them clean and separate by colour (clear, green, brown) if your local centre requires it. Broken glass should be wrapped safely before disposal.',
+    '### Glass Jars & Bottles 🫙\n\nGlass is 100% recyclable. \n\n*   **Rinse** clean\n*   **Separate by colour** if required\n*   **Wrap broken glass** safely before disposal',
   metal:
-    '🥫 Aluminium cans and steel tins are infinitely recyclable. Rinse them out before placing in the recycling bin. Aluminium foil can also be recycled — scrunch several pieces together into a ball first.',
+    '### Metal & Aluminium 🥫\n\nAluminium cans and steel tins are infinitely recyclable. \n\n*   **Rinse** out before recycling\n*   **Scrunch** aluminium foil into a ball\n*   **Metal is high-value** for local recyclers!',
   organic:
-    '🌱 Organic waste like food scraps and garden trimmings is perfect for composting. Keep a small kitchen compost bin and empty it regularly into an outdoor pile or a community compost station.',
+    '### Organic Waste 🌱\n\nFood scraps and garden trimmings are perfect for composting. \n\n*   Start a kitchen **compost bin**\n*   Use community **compost stations**\n*   Turn waste into soil!',
   default:
-    "🤔 Great question! I'm still expanding my knowledge base. Try asking me about plastic, e-waste, paper, glass, metal, or organic waste — or snap a photo of your waste and I'll classify it for you!",
+    "### I'm Learning! 🤔\n\nI'm still expanding my knowledge base. Try asking me about:\n\n*   **Plastic**\n*   **E-waste**\n*   **Paper**\n*   **Glass**\n*   **Metal**\n*   **Organic**\n\n*Tip: You can also upload a photo!*",
 };
 
 /* ── Simulated image-analysis responses ── */

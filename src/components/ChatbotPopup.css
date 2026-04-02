@@ -205,16 +205,23 @@
 .chatbot-markdown p { margin: 0 0 10px 0; }
 .chatbot-markdown p:last-child { margin-bottom: 0; }
 .chatbot-markdown h1, .chatbot-markdown h2, .chatbot-markdown h3 { 
-  font-size: 1.1em; 
-  margin: 12px 0 6px 0; 
+  font-size: 1.15em; 
+  margin: 12px 0 8px 0; 
   color: #0f172a;
   font-weight: 800;
+  line-height: 1.3;
 }
 .chatbot-markdown ul, .chatbot-markdown ol { 
-  margin: 8px 0 8px 20px; 
+  margin: 10px 0 10px 20px; 
   padding: 0;
 }
-.chatbot-markdown li { margin-bottom: 4px; }
+.chatbot-markdown li { 
+  margin-bottom: 6px; 
+  list-style: disc;
+}
+.chatbot-markdown li::marker {
+  color: #38bdf8;
+}
 
 /* ── Quick suggestions ── */
 .chatbot-suggestions {
