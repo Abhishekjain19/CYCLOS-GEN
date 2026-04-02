@@ -79,10 +79,12 @@ export default function ScanPage() {
         
       if (updateErr) throw updateErr;
       
-      // Update Profiles: Buyer gets points and weight, Seller gets points
+      // 2. Update Profiles: Buyer gets points and weight, Seller gets points
+      
       // 1. Update Buyer
-      const { data: buyerProfile } = await supabase.from('profiles').select('points, total_recycled_weight').eq('id', buyerId).single();
-      if (buyerProfile) {
+      const { data: buyerData, error: bFetchErr } = await supabase.from('profiles').select('points, total_recycled_weight').eq('id', buyerId);
+      const buyerProfile = buyerData?.[0]; // Get first match
+      if (buyerProfile && !bFetchErr) {
         await supabase.from('profiles').update({ 
           points: (buyerProfile.points || 0) + pointsToAward,
           total_recycled_weight: (buyerProfile.total_recycled_weight || 0) + numericWeight
@@ -90,8 +92,9 @@ export default function ScanPage() {
       }
 
       // 2. Update Seller (Current User)
-      const { data: sellerProfile } = await supabase.from('profiles').select('points').eq('id', user.id).single();
-      if (sellerProfile) {
+      const { data: sellerData, error: sFetchErr } = await supabase.from('profiles').select('points').eq('id', user.id);
+      const sellerProfile = sellerData?.[0]; // Get first match
+      if (sellerProfile && !sFetchErr) {
         await supabase.from('profiles').update({ 
           points: (sellerProfile.points || 0) + pointsToAward 
         }).eq('id', user.id);
