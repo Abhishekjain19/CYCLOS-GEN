@@ -358,7 +358,7 @@ export default function ProfilePanel({ isOpen, onClose }) {
                                 animate={{ opacity: 1, height: 'auto' }}
                                 style={{ marginTop: 16, padding: 16, background: 'white', borderRadius: 12, alignSelf: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
                               >
-                                <QRCode value={`REQ-${req.id}-${req.buyer_id}`} size={140} />
+                                <QRCode value={`REQ::::${req.id}::::${req.buyer_id}`} size={140} />
                                 <p style={{ textAlign: 'center', color: '#1e293b', fontSize: 10, marginTop: 8, fontWeight: 700 }}>
                                   SCAN TO COMPLETE PICKUP
                                 </p>

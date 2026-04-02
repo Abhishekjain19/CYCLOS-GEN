@@ -36,17 +36,16 @@ export default function ScanPage() {
 
   const handleQRScan = async (text) => {
     console.log('QR Scanned:', text);
-    if (!text || !text.startsWith('REQ-') || analyzing) return;
+    if (!text || !text.startsWith('REQ::::') || analyzing) return;
     try {
       setAnalyzing(true);
-      const reqIdParts = text.split('-');
+      const reqIdParts = text.split('::::');
       console.log('Parsed Parts:', reqIdParts);
       if (reqIdParts.length < 3) throw new Error("Invalid QR format");
       const realId = reqIdParts[1];
       const buyerId = reqIdParts[2];
       
       console.log('Fetching order with ID:', realId);
-      // Ensure realId is trimmed and check if it resembles a UUID
       const cleanId = realId.trim();
       
       const { data: request, error: fetchErr } = await supabase
