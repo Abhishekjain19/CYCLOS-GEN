@@ -1,0 +1,255 @@
+/* ════════════════════════════════════════════════════════
+   ECO-VOYAGE  ·  GLOBAL DESIGN SYSTEM
+   ════════════════════════════════════════════════════════ */
+
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,600,700&display=swap');
+
+:root {
+  /* ── Colour Tokens ───────────────────────────────── */
+  --bg-base:      #040D18;
+  --bg-surface:   #0A1628;
+  --bg-elevated:  #0F1F38;
+  --bg-highlight: #162B4A;
+
+  --accent-cyan:  #00E5FF;
+  --accent-teal:  #00B894;
+  --accent-coral: #FF4D6D;
+  --accent-amber: #FFB347;
+  --accent-purple:#A78BFA;
+
+  --text-primary:   #EDF2F7;
+  --text-secondary: #7A9AB5;
+  --text-muted:     #3D5674;
+
+  --border-subtle:  rgba(0,229,255,0.08);
+  --border-active:  rgba(0,229,255,0.4);
+  --border-teal:    rgba(0,184,148,0.25);
+
+  --glow-cyan:    0 0 20px rgba(0,229,255,0.25), 0 0 40px rgba(0,229,255,0.10);
+  --glow-teal:    0 0 20px rgba(0,184,148,0.25), 0 0 40px rgba(0,184,148,0.10);
+  --glow-coral:   0 0 20px rgba(255,77,109,0.30);
+
+  /* ── Typography ─────────────────────────────────── */
+  --font-display: 'Clash Display', sans-serif;
+  --font-body:    'Satoshi', sans-serif;
+
+  /* ── Spacing & Radius ───────────────────────────── */
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+  --radius-pill:999px;
+
+  /* ── Motion ─────────────────────────────────────── */
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+  --ease-spring: cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* ── Reset & Base ──────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  min-height: 100dvh;
+}
+
+/* ── Grain Texture Overlay ──────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ── Deep-Ocean Radial BG ─────────────────────────── */
+.ev-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 80% 60% at -10% -5%, rgba(0,90,180,0.18) 0%, transparent 60%),
+    var(--bg-base);
+  position: relative;
+}
+
+/* ── Card ────────────────────────────────────────── */
+.ev-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(12px);
+}
+.ev-card--elevated {
+  background: var(--bg-elevated);
+}
+.ev-card--active {
+  border-color: var(--border-active);
+  box-shadow: var(--glow-cyan);
+}
+
+/* ── Typography Classes ──────────────────────────── */
+.t-display { font-family: var(--font-display); }
+.t-xl   { font-size: clamp(28px, 8vw, 36px); font-weight:700; line-height:1.1; }
+.t-lg   { font-size: 22px; font-weight:600; line-height:1.2; }
+.t-md   { font-size: 17px; font-weight:600; }
+.t-sm   { font-size: 14px; font-weight:500; }
+.t-xs   { font-size: 11px; font-weight:500; letter-spacing:.5px; }
+.t-mono { font-family: 'Space Mono', monospace; }
+
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-cyan      { color: var(--accent-cyan); }
+.text-teal      { color: var(--accent-teal); }
+.text-coral     { color: var(--accent-coral); }
+.text-amber     { color: var(--accent-amber); }
+
+/* ── Gradient Text ───────────────────────────────── */
+.gradient-text-cyan {
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent-teal));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Pill / Badge ────────────────────────────────── */
+.ev-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+}
+.ev-pill--cyan   { background: rgba(0,229,255,0.15); color: var(--accent-cyan); border: 1px solid rgba(0,229,255,0.25); }
+.ev-pill--teal   { background: rgba(0,184,148,0.15); color: var(--accent-teal); border: 1px solid rgba(0,184,148,0.25); }
+.ev-pill--coral  { background: rgba(255,77,109,0.15); color: var(--accent-coral); border: 1px solid rgba(255,77,109,0.25); }
+.ev-pill--amber  { background: rgba(255,179,71,0.15); color: var(--accent-amber); border: 1px solid rgba(255,179,71,0.25); }
+.ev-pill--purple { background: rgba(167,139,250,0.15); color: var(--accent-purple); border: 1px solid rgba(167,139,250,0.25); }
+
+/* ── Primary Button ─────────────────────────────── */
+.ev-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 52px;
+  border-radius: var(--radius-md);
+  border: none;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 80ms, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.ev-btn:active { transform: scale(0.97); }
+.ev-btn--primary {
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-cyan));
+  color: #040D18;
+}
+.ev-btn--primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.5s;
+}
+.ev-btn--primary:hover::after { transform: translateX(100%); }
+.ev-btn--outline {
+  background: transparent;
+  border: 1px solid var(--border-active);
+  color: var(--accent-cyan);
+}
+.ev-btn--danger {
+  background: linear-gradient(135deg, #c0392b, var(--accent-coral));
+  color: #fff;
+}
+
+/* ── Input ──────────────────────────────────────── */
+.ev-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ev-input:focus {
+  border-color: var(--border-active);
+  border-left-color: var(--accent-cyan);
+  box-shadow: 0 0 0 2px rgba(0,229,255,0.08);
+}
+.ev-input::placeholder { color: var(--text-muted); }
+
+/* ── Skeleton ───────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.ev-skeleton {
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: var(--radius-md);
+}
+
+/* ── Live Pulse Dot ─────────────────────────────── */
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.7); }
+}
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  animation: pulse-live 1.8s ease-in-out infinite;
+}
+.live-dot--red { background: var(--accent-coral); }
+
+/* ── Count Up ───────────────────────────────────── */
+.count-up-number {
+  font-family: var(--font-display);
+  font-weight: 700;
+  transition: opacity 0.1s;
+}
+
+/* ── Tappable Scale ─────────────────────────────── */
+.tappable {
+  transition: transform 80ms;
+  cursor: pointer;
+}
+.tappable:active { transform: scale(0.97); }
+
+/* ── Page Fade-Rise ─────────────────────────────── */
+@keyframes fadeRise {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.page-enter {
+  animation: fadeRise 0.22s var(--ease-out) forwards;
+}
+
+/* ── Scrollbar ──────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius:99px; }

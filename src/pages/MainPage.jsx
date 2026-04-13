@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -18,6 +18,23 @@ const SECONDARY_MATERIALS = [
 import MapSection from '../components/MapSection';
 import LocalFactsCarousel from '../components/LocalFactsCarousel';
 import './MainPage.css';
+
+/* ── Count-Up Hook ─────────────────── */
+function useCountUp(target, duration = 1200) {
+  const [value, setValue] = useState(0);
+  const raf = useRef(null);
+  useEffect(() => {
+    const start = performance.now();
+    const run = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      setValue(parseFloat((progress * target).toFixed(1)));
+      if (progress < 1) raf.current = requestAnimationFrame(run);
+    };
+    raf.current = requestAnimationFrame(run);
+    return () => cancelAnimationFrame(raf.current);
+  }, [target, duration]);
+  return value;
+}
 
 export default function MainPage() {
   const { user, userProfile, updateProfile, logout } = useAuth();
@@ -224,16 +241,19 @@ export default function MainPage() {
   const firstName = fullName.split(' ')[0];
   const locationText = userProfile?.primaryDomain ? 'Malleshwaram, Bengaluru' : 'Local Eco Hub';
 
+  const obpCount    = useCountUp(stats.obp, 1400);
+  const recycleCount = useCountUp(stats.recycle, 1400);
+  const pointsCount  = useCountUp(stats.points, 1000);
+
   return (
     <div className="main-page">
-      {/* Top Purple Block */}
+      {/* Identity Card */}
       <motion.div
         className="dash-header__block"
-        initial={{ y: -40, opacity: 0 }}
+        initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.45 }}
       >
-        {/* Profile Pill */}
         <div className="dash-profile-pill">
           <div className="dash-profile-avatar">
             {firstName.charAt(0).toUpperCase()}
@@ -242,23 +262,23 @@ export default function MainPage() {
             <h2 className="dash-profile-name">{fullName}</h2>
             <p className="dash-profile-sub">{locationText}</p>
           </div>
-          <div className="dash-profile-actions" style={{ display: 'flex', gap: '8px' }}>
+          <div className="dash-profile-actions">
             <button className="dash-profile-edit" aria-label="Complaints" onClick={() => navigate('/complaint')}>
               <TbMessageReport size={16} />
             </button>
             <div className="notification-wrapper">
-              <button 
-                className="dash-profile-edit" 
-                aria-label="Notifications" 
+              <button
+                className="dash-profile-edit"
+                aria-label="Notifications"
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 <TbBell size={16} />
                 {unreadCount > 0 && <span className="notification-badge">{unreadCount}</span>}
               </button>
-              <NotificationsPanel 
-                isOpen={showNotifications} 
-                onClose={() => setShowNotifications(false)} 
-                notifications={notifications} 
+              <NotificationsPanel
+                isOpen={showNotifications}
+                onClose={() => setShowNotifications(false)}
+                notifications={notifications}
                 onAction={handleNotificationAction}
               />
             </div>
@@ -271,31 +291,31 @@ export default function MainPage() {
         {/* Stats Row */}
         <div className="dash-stats-row">
           <div className="dash-stat-card">
-            <div className="dash-stat-card__icon bg-cyan"><TbRipple size={20} /></div>
+            <div className="dash-stat-card__icon bg-cyan"><TbRipple size={18} /></div>
             <div className="dash-stat-card__content">
               <span className="dash-stat-label">OBP Collected</span>
               <div className="dash-stat-value-group">
-                <span className="dash-stat-value">{stats.obp.toFixed(1)}</span>
+                <span className="dash-stat-value">{obpCount.toFixed(1)}</span>
                 <span className="dash-stat-unit">kg</span>
               </div>
             </div>
           </div>
           <div className="dash-stat-card">
-            <div className="dash-stat-card__icon bg-purple"><TbTrendingUp size={20} /></div>
+            <div className="dash-stat-card__icon bg-purple"><TbTrendingUp size={18} /></div>
             <div className="dash-stat-card__content">
               <span className="dash-stat-label">Total Recycled</span>
               <div className="dash-stat-value-group">
-                <span className="dash-stat-value">{stats.recycle.toFixed(1)}</span>
+                <span className="dash-stat-value">{recycleCount.toFixed(1)}</span>
                 <span className="dash-stat-unit">kg</span>
               </div>
             </div>
           </div>
           <div className="dash-stat-card">
-            <div className="dash-stat-card__icon bg-teal"><TbLeaf size={20} /></div>
+            <div className="dash-stat-card__icon bg-teal"><TbLeaf size={18} /></div>
             <div className="dash-stat-card__content">
               <span className="dash-stat-label">Eco Points</span>
               <div className="dash-stat-value-group">
-                <span className="dash-stat-value">{stats.points.toLocaleString()}</span>
+                <span className="dash-stat-value">{Math.round(pointsCount).toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -315,7 +335,7 @@ export default function MainPage() {
           transition={{ delay: 0.2 }}
         >
           <div className="dash-section-header">
-            <h3 className="dash-section-title">Nearby Ocean's</h3>
+            <h3 className="dash-section-title">Global Ocean Intelligence</h3>
             {/* <a href="#" className="dash-section-viewall">View all</a>` */}
           </div>
           <div className="dash-map-card">
@@ -330,7 +350,7 @@ export default function MainPage() {
           transition={{ delay: 0.3 }}
           style={{ marginBottom: '32px' }}
         >
-          <div className="dash-section-header" style={{ marginTop: '32px' }}>
+          <div className="dash-section-header" style={{ marginTop: '28px' }}>
             <h3 className="dash-section-title">Materials</h3>
             <a href="/marketplace" className="dash-section-viewall">View all</a>
           </div>
@@ -339,11 +359,10 @@ export default function MainPage() {
             {SECONDARY_MATERIALS.map(({ id, label, Icon, bg }) => (
               <div
                 key={id}
-                className="material-card"
-                style={{ background: bg, cursor: 'pointer' }}
+                className="material-card tappable"
                 onClick={() => navigate(`/marketplace?category=${id}`)}
               >
-                <Icon size={32} color="#110e1b" style={{ position: 'absolute', top: 16, opacity: 0.2 }} />
+                <Icon size={28} className="material-card__icon" />
                 <div className="material-card__label">{label}</div>
               </div>
             ))}
@@ -357,9 +376,9 @@ export default function MainPage() {
           transition={{ delay: 0.4 }}
           style={{ marginBottom: '120px' }}
         >
-          <hr style={{ height: "2px", borderWidth: 0, backgroundColor: "white" }} />
+          <hr style={{ height: "1px", borderWidth: 0, backgroundColor: "rgba(0,229,255,0.08)", margin: '0 0 8px' }} />
           <LocalFactsCarousel location={locationText} />
-          <hr style={{ height: "2px", borderWidth: 0, backgroundColor: "white" }} />
+          <hr style={{ height: "1px", borderWidth: 0, backgroundColor: "rgba(0,229,255,0.08)", margin: '8px 0 0' }} />
         </motion.div>
       </div>
     </div>

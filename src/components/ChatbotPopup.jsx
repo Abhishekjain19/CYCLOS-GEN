@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { motion, useDragControls } from 'framer-motion';
-import { TbRobot, TbX, TbSend, TbPhoto } from 'react-icons/tb';
+import { TbSend, TbPhoto, TbRobot } from 'react-icons/tb';
 import ReactMarkdown from 'react-markdown';
+import { motion } from 'framer-motion';
 import './ChatbotPopup.css';
 
 /* ── Canned text responses keyed by keywords ── */
@@ -73,8 +73,10 @@ const IMAGE_CLASSIFICATIONS = [
 const QUICK_SUGGESTIONS = [
   'How do I recycle plastic bottles?',
   'Where can I dispose e-waste?',
-  'Tips to reduce household waste',
-  'Find nearby recycling centers',
+  'Nearest recycling hub',
+  'What is OBP?',
+  'How to earn Eco Points?',
+  'Ocean plastic impact',
 ];
 
 const WELCOME_MESSAGE = {
@@ -106,7 +108,6 @@ export default function ChatbotPopup({ onClose }) {
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
-  const dragControls = useDragControls();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -190,38 +191,39 @@ export default function ChatbotPopup({ onClose }) {
       <motion.div 
         className={`chatbot-popup${isClosing ? ' closing' : ''}`}
         drag
-        dragControls={dragControls}
-        dragListener={false}
         dragMomentum={false}
-        dragConstraints={{ left: -1000, right: 1000, top: -1000, bottom: 1000 }}
-        initial={{ opacity: 0, y: 32, scale: 0.92 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 32, scale: 0.92 }}
+        dragConstraints={{ top: -500, bottom: 50, left: -400, right: 400 }}
       >
 
-        {/* ── Header (Drag Handle) ── */}
-        <div 
-          className="chatbot-header"
-          onPointerDown={(e) => dragControls.start(e)}
-          style={{ cursor: 'grab' }}
-        >
+        {/* ── Drag Handle ── */}
+        <div className="chatbot-drag-handle" />
+
+        {/* ── Header ── */}
+        <div className="chatbot-header">
           <div className="chatbot-header__icon-wrap">
-            <TbRobot />
+            🌊
           </div>
           <div className="chatbot-header__text">
-            <p className="chatbot-header__title">Cyclos AI Assistant</p>
-            <p className="chatbot-header__subtitle">
-              Your guide for recycling and sustainable waste management.
-            </p>
+            <p className="chatbot-header__title">Cyclos</p>
+            <p className="chatbot-header__subtitle">AI Assistant</p>
           </div>
           <button
             className="chatbot-header__close"
             onClick={handleClose}
             aria-label="Close chatbot"
-            onPointerDown={(e) => e.stopPropagation()}
           >
-            <TbX />
+            ✕
           </button>
+        </div>
+
+        {/* ── Identity Strip ── */}
+        <div className="chatbot-identity">
+          <div className="chatbot-identity__pulse">
+            <span />
+          </div>
+          <p className="chatbot-identity__text">
+            Your guide for recycling and sustainable waste management
+          </p>
         </div>
 
         {/* ── Messages ── */}
@@ -311,7 +313,7 @@ export default function ChatbotPopup({ onClose }) {
           <input
             ref={inputRef}
             className="chatbot-input"
-            placeholder="Ask about recycling, sustainability, or waste disposal..."
+            placeholder="Ask about recycling, sustainability, or waste..."
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}

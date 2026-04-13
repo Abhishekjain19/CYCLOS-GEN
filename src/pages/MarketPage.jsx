@@ -5,8 +5,9 @@ import {
   TbChevronLeft, TbShoppingCart, TbSearch, TbHeart, TbStarFilled,
   TbChevronRight, TbUpload, TbPhoto, TbCheck, TbMapPin, TbX,
   TbSortAscending, TbFilter, TbUser, TbPackage, TbSend, TbBell,
-  TbAlertCircle, TbLoader2, TbEye, TbRefresh
+  TbAlertCircle, TbLoader2, TbEye, TbRefresh, TbCurrentLocation
 } from 'react-icons/tb';
+import { toast } from 'react-hot-toast';
 import { supabase } from '../supabase/supabaseClient';
 import { useAuth } from '../context/AuthContext';
 import './MarketPage.css';
@@ -453,6 +454,7 @@ export default function MarketPage() {
                 <motion.div
                   key={prod.id}
                   className="mkt-item"
+                  data-cat={prod.category}
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -8 }}
@@ -626,7 +628,40 @@ export default function MarketPage() {
 
                 {/* Location */}
                 <div className="mkt-upload__field">
-                  <label><TbMapPin size={12} style={{ marginRight: 4 }} />Pickup Location *</label>
+                  <div className="mkt-upload__label-row">
+                    <label className="mkt-upload__field-label"><TbMapPin size={12} style={{ marginRight: 4 }} />Pickup Location *</label>
+                    <button 
+                      type="button"
+                      className="mkt-upload__loc-btn"
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          toast.error("Geolocation not supported");
+                          return;
+                        }
+                        setUploadData(d => ({ ...d, location: 'Fetching...' }));
+                        navigator.geolocation.getCurrentPosition(
+                          async (pos) => {
+                            const { latitude, longitude } = pos.coords;
+                            try {
+                              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+                              const data = await res.json();
+                              const city = data.address.city || data.address.town || data.address.village || data.address.suburb || "Current Location";
+                              setUploadData(d => ({ ...d, location: `${city} (${latitude.toFixed(2)}, ${longitude.toFixed(2)})` }));
+                              toast.success("Location detected!");
+                            } catch (e) {
+                              setUploadData(d => ({ ...d, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
+                            }
+                          },
+                          () => {
+                            toast.error("Location access denied");
+                            setUploadData(d => ({ ...d, location: '' }));
+                          }
+                        );
+                      }}
+                    >
+                      <TbCurrentLocation size={13} /> <span>Auto-Detect</span>
+                    </button>
+                  </div>
                   <input
                     id="mkt-upload-location"
                     required

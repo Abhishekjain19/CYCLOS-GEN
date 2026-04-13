@@ -1,70 +1,136 @@
+/* ══════════════════════════════════
+   BOTTOM NAV  ·  Frosted Glass Pill
+   ══════════════════════════════════ */
+
+/* ── Floating AI FAB Button ────────────────────────────── */
+.chatbot-fab {
+  position: fixed;
+  bottom: 90px;
+  right: 16px;
+  z-index: 9997;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #00B894, #006E5A);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 0 4px rgba(0,229,255,0.15),
+    0 0 20px rgba(0,229,255,0.25),
+    0 0 40px rgba(0,229,255,0.10),
+    0 6px 20px rgba(0,0,0,0.4);
+  transition: transform 150ms var(--ease-spring, cubic-bezier(0.34,1.56,0.64,1)),
+              box-shadow 0.25s ease;
+  color: rgba(255,255,255,0.9);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chatbot-fab:hover {
+  transform: scale(1.05);
+  box-shadow:
+    0 0 0 4px rgba(0,229,255,0.25),
+    0 0 28px rgba(0,229,255,0.45),
+    0 0 50px rgba(0,229,255,0.15),
+    0 6px 24px rgba(0,0,0,0.5);
+}
+
+.chatbot-fab:active {
+  transform: scale(0.96);
+}
+
+.chatbot-fab--active {
+  background: radial-gradient(circle at 35% 35%, #00E5FF, #00B894);
+  box-shadow:
+    0 0 0 5px rgba(0,229,255,0.3),
+    0 0 30px rgba(0,229,255,0.5),
+    0 0 60px rgba(0,229,255,0.2),
+    0 6px 20px rgba(0,0,0,0.4);
+}
+
+/* Wave icon oscillation animation */
+.chatbot-fab__wave {
+  width: 28px;
+  height: 16px;
+  animation: waveOscillate 2.2s ease-in-out infinite;
+}
+
+@keyframes waveOscillate {
+  0%,100% { transform: scaleY(1); }
+  50%      { transform: scaleY(0.7); }
+}
+
 .bottom-nav-app {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: white;
+  z-index: 1000;
+
   display: flex;
   align-items: center;
-  padding: 8px 20px;
-  border-radius: 50px;
-  gap: 10px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  z-index: 9999;
-  /* keep dock inside safe area on iPhone notch / home-bar devices */
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
-}
+  gap: 4px;
 
-/* ── Clamp width so it never overflows narrow screens ── */
-@media (max-width: 480px) {
-  .bottom-nav-app {
-    /* cap to viewport minus 24px per side */
-    max-width: calc(100vw - 32px);
-    gap: 6px;
-    padding: 6px 14px;
-    padding-bottom: max(6px, env(safe-area-inset-bottom));
-    bottom: 14px;
-  }
+  background: rgba(10, 22, 40, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 229, 255, 0.12);
+  border-radius: 999px;
+  padding: 10px 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,229,255,0.05);
 }
 
 .bottom-nav-app__item {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
-  color: #110e1b;
-  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  gap: 0;
+  width: 52px;
+  height: 44px;
+  border-radius: 999px;
   cursor: pointer;
-  background: transparent;
-  flex-shrink: 0;
+  color: #3D5674;
+  font-size: 22px;
+  position: relative;
+  transition: color 150ms ease, background 150ms ease, transform 150ms var(--ease-spring, cubic-bezier(0.34,1.56,0.64,1));
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* shrink icon circles on very small screens */
-@media (max-width: 380px) {
-  .bottom-nav-app__item {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-  }
+.bottom-nav-app__item:active {
+  transform: scale(0.93);
 }
 
-.bottom-nav-app__item svg {
-  stroke-width: 2px;
-}
-
-.bottom-nav-app__item:hover {
-  background: #7543ff;
-  color: white;
-  transform: translateY(-12px);
-  box-shadow: 0 8px 20px rgba(117, 67, 255, 0.4);
+/* Active dot indicator */
+.bottom-nav-app__item::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #00E5FF;
+  transition: transform 150ms var(--ease-spring, cubic-bezier(0.34,1.56,0.64,1));
 }
 
 .bottom-nav-app__item.scan-active {
-  background: #7543ff;
-  color: white;
-  transform: translateY(-12px);
-  box-shadow: 0 8px 20px rgba(117, 67, 255, 0.4);
+  color: #00E5FF;
+  background: rgba(0, 229, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.bottom-nav-app__item.scan-active::after {
+  transform: translateX(-50%) scale(1);
+}
+
+/* Hover */
+@media (hover: hover) {
+  .bottom-nav-app__item:hover:not(.scan-active) {
+    color: #7A9AB5;
+    background: rgba(255,255,255,0.04);
+  }
 }
