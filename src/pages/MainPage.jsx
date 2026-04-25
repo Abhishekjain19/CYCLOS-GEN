@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -41,6 +41,23 @@ export default function MainPage() {
   const navigate = useNavigate();
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfilePanel, setShowProfilePanel] = useState(false);
+  const notifWrapperRef = useRef(null);
+
+  // Close notification panel when clicking outside
+  useEffect(() => {
+    if (!showNotifications) return;
+    const handleClickOutside = (e) => {
+      if (notifWrapperRef.current && !notifWrapperRef.current.contains(e.target)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showNotifications]);
 
   const [notifications, setNotifications] = useState([
     {
@@ -266,7 +283,7 @@ export default function MainPage() {
             <button className="dash-profile-edit" aria-label="Complaints" onClick={() => navigate('/complaint')}>
               <TbMessageReport size={16} />
             </button>
-            <div className="notification-wrapper">
+            <div className="notification-wrapper" ref={notifWrapperRef}>
               <button
                 className="dash-profile-edit"
                 aria-label="Notifications"

@@ -1,25 +1,20 @@
 /* src/components/NotificationsPanel.css */
 .notifications-dropdown {
   position: absolute;
-  top: calc(100% + 12px);
-  right: -50px; /* Offset to center relative to icon somewhat, but right aligned better */
+  top: calc(100% + 10px);
+  right: -8px;
   width: 320px;
+  max-width: calc(100vw - 32px);
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(16px);
   border-radius: 20px;
-  border: 1px solid rgba(16, 185, 129, 0.4); /* thin green border */
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  z-index: 9999;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transform-origin: top center;
-}
-
-@media (min-width: 768px) {
-  .notifications-dropdown {
-    right: 0;
-  }
+  transform-origin: top right;
 }
 
 .notifications-header {

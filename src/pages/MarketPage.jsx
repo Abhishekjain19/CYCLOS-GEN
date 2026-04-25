@@ -49,6 +49,7 @@ export default function MarketPage() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [selected, setSelected] = useState(null);
   const [wishlist, setWishlist] = useState([]);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   // Upload form
   const [showUpload, setShowUpload] = useState(false);
@@ -110,6 +111,41 @@ export default function MarketPage() {
     return () => supabase.removeChannel(channel);
   }, [fetchProducts]);
 
+  // Fetch user's wishlist from DB
+  useEffect(() => {
+    if (!user) {
+      setWishlist([]);
+      return;
+    }
+
+    const fetchWishlist = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('wishlists')
+          .select('product_id')
+          .eq('user_id', user.id);
+        if (error) throw error;
+        setWishlist(data.map(item => item.product_id));
+      } catch (err) {
+        console.error('Error fetching wishlist:', err);
+      }
+    };
+
+    fetchWishlist();
+
+    const channel = supabase
+      .channel('user-wishlist')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'wishlists',
+        filter: `user_id=eq.${user.id}`,
+      }, () => fetchWishlist())
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [user]);
+
   // ── Filtering & Sorting ──────────────────────────────────
   const filtered = products
     .filter(p => {
@@ -135,8 +171,39 @@ export default function MarketPage() {
 
   // ── Helpers ──────────────────────────────────────────────
   const getCat = (id) => CATEGORIES.find(c => c.id === id) || { emoji: '📦', label: id };
-  const toggleWish = (id) =>
-    setWishlist(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const toggleWish = async (productId) => {
+    if (!user) {
+      toast.error('Please login to add to wishlist');
+      return;
+    }
+    setWishlistLoading(true);
+    try {
+      const isInWishlist = wishlist.includes(productId);
+      if (isInWishlist) {
+        const { error } = await supabase
+          .from('wishlists')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('product_id', productId);
+        if (error) throw error;
+        setWishlist(prev => prev.filter(id => id !== productId));
+        toast.success('Removed from wishlist');
+      } else {
+        const { error } = await supabase
+          .from('wishlists')
+          .insert({ user_id: user.id, product_id: productId });
+        if (error) throw error;
+        setWishlist(prev => [...prev, productId]);
+        toast.success('Added to wishlist ❤️');
+      }
+    } catch (err) {
+      console.error('Wishlist error:', err);
+      toast.error('Failed to update wishlist');
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   const getDisplayName = (prod) => prod.name || prod.item_name || 'Unnamed Item';
 

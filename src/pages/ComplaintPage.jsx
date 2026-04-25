@@ -13,6 +13,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import emailjs from 'emailjs-com';
 import { getChatResponse } from '../services/nvidiaNim';
+import { supabase } from '../supabase/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 import './ComplaintPage.css';
 
 // Fix for Leaflet default icon issues in React
@@ -117,6 +119,7 @@ const LocationPicker = ({ onLocationSelect }) => {
 
 export default function ComplaintPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [view, setView] = useState('history'); // 'history', 'create', 'detail'
   const [selectedReport, setSelectedReport] = useState(null);
   const [step, setStep] = useState(1);
@@ -125,34 +128,8 @@ export default function ComplaintPage() {
   const [isSuccess, setIsSuccess] = useState(false);
 
   // History State
-  const [reportHistory, setReportHistory] = useState([
-    {
-      id: 'A1B2C3',
-      type: 'Oil Spill / Slick',
-      severity: 'high',
-      status: 'DISPATCHED',
-      date: '2026-03-30',
-      coordinates: '12.5830°N 77.3512°E',
-      desc: 'Large liquid hydrocarbon slick spotted moving East. Estimated radius: 2km. Plume is visually dark and rainbow sheen is visible along the containment perimeter.',
-      media: [{ preview: 'https://images.unsplash.com/photo-1616782559714-fae3ca6b1585?w=600' }],
-      actions: ["Deploy containment booms and absorbent pads.", "Notify regional Coast Guard Pollution Response sector."],
-      timestamp: '2026-03-30 08:45:12 UTC',
-      authority: 'Indian Coast Guard - MRCC Mumbai'
-    },
-    {
-      id: 'D4E5F6',
-      type: 'Plastic Mass',
-      severity: 'moderate',
-      status: 'RESOLVED',
-      date: '2026-03-25',
-      coordinates: '35.4210°N 142.1120°W',
-      desc: 'Dense patch of microplastics and discarded nets. Spread over 500 sq meters. Heavy accumulation of ghost gear identified.',
-      media: [{ preview: 'https://images.unsplash.com/photo-1621451537084-482c73073a0f?w=600' }],
-      actions: ["Monitor drift trajectory using satellite telemetry.", "Alert regional waste collection vessels for interception."],
-      timestamp: '2026-03-25 14:22:05 UTC',
-      authority: 'US Coast Guard - District 11'
-    }
-  ]);
+  const [reportHistory, setReportHistory] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
 
   // Form Data
   const [files, setFiles] = useState([]);
@@ -165,6 +142,58 @@ export default function ComplaintPage() {
   const [reporterName, setReporterName] = useState('Anonymous Scientist');
   const [aiDrafting, setAiDrafting] = useState(false);
   const [aiDraftedText, setAiDraftedText] = useState('');
+
+  // Fetch user's incident reports from DB
+  useEffect(() => {
+    if (!user) {
+      setReportHistory([]);
+      setHistoryLoading(false);
+      return;
+    }
+
+    const fetchReports = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('incident_reports')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        const transformed = data.map(report => ({
+          id: report.case_id,
+          type: report.incident_type,
+          severity: report.severity,
+          status: report.status,
+          date: new Date(report.created_at).toISOString().split('T')[0],
+          coordinates: report.coordinates,
+          desc: report.description || '',
+          media: report.media_urls?.map(url => ({ preview: url })) || [],
+          actions: report.actions_recommended || [],
+          timestamp: new Date(report.created_at).toISOString().replace('T', ' ').split('.')[0] + ' UTC',
+          authority: report.authority_name
+        }));
+        setReportHistory(transformed);
+      } catch (err) {
+        console.error('Error fetching reports:', err);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    fetchReports();
+
+    const channel = supabase
+      .channel('user-incident-reports')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'incident_reports',
+        filter: `user_id=eq.${user.id}`,
+      }, () => fetchReports())
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
+  }, [user]);
 
   // ── Step 1: Upload ──────
   const handleFileUpload = (e) => {
@@ -281,6 +310,31 @@ export default function ComplaintPage() {
         authority: nearestAuthority.name
       };
       setReportHistory(prev => [newEntry, ...prev]);
+
+      // Save to Supabase DB
+      try {
+        const { error: dbError } = await supabase
+          .from('incident_reports')
+          .insert({
+            user_id: user?.id,
+            case_id: caseId,
+            incident_type: incidentType?.label,
+            severity,
+            status: 'SUBMITTED',
+            coordinates,
+            latitude: mapCoords?.[0] || null,
+            longitude: mapCoords?.[1] || null,
+            description: aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc,
+            media_urls: files.map(f => f.preview),
+            actions_recommended: emailData.actions,
+            authority_name: nearestAuthority.name,
+            authority_email: nearestAuthority.email,
+            email_sent: true
+          });
+        if (dbError) console.error('DB save error:', dbError);
+      } catch (err) {
+        console.error('Failed to save report to database:', err);
+      }
 
       setIsSubmitting(false);
       setIsSuccess(true);

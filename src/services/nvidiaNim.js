@@ -1,4 +1,4 @@
-const NVIDIA_API_KEY = 'ENTER_API-KEY_HERE';
+const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY || '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';
 const BASE_URL = '/api/nvidia';
 
 /**
