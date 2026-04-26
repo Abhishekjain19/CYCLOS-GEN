@@ -389,7 +389,27 @@ export default function ComplaintPage() {
     setIsSubmitting(true);
     
     try {
-      // Use FormSubmit for actual mail delivery in this demo, pointing to user's requested email
+      // 1. Upload images to Supabase to get public URLs
+      const uploadedUrls = [];
+      for (const [index, f] of files.entries()) {
+        const fileObj = f.file || f.blob;
+        if (fileObj) {
+          const ext = f.name.split('.').pop() || 'jpg';
+          const fileName = `case_${caseId}_ev_${index+1}_${Date.now()}.${ext}`;
+          const { data, error } = await supabase.storage
+            .from('incident_media')
+            .upload(fileName, fileObj);
+          
+          if (!error && data) {
+            const { data: { publicUrl } } = supabase.storage
+              .from('incident_media')
+              .getPublicUrl(data.path);
+            uploadedUrls.push(publicUrl);
+          }
+        }
+      }
+
+      // 2. Prepare FormSubmit Payload
       const formData = new FormData();
       formData.append('_subject', `[URGENT] SOS Report: ${incidentType?.label} - CASE #${caseId}`);
       formData.append('Case ID', caseId);
@@ -397,8 +417,25 @@ export default function ComplaintPage() {
       formData.append('Coordinates', coordinates);
       formData.append('Severity', severity.toUpperCase());
       formData.append('Reporter', reporterName);
-      formData.append('Summary', aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc);
+      
+      // Inject the image URLs directly into the email contents
+      let enhancedSummary = aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc;
+      if (uploadedUrls.length > 0) {
+        enhancedSummary += '\n\n--- EVIDENCE MEDIA ---\n';
+        uploadedUrls.forEach((url, i) => {
+          enhancedSummary += `Image ${i+1}: ${url}\n`;
+        });
+      }
+      formData.append('Summary', enhancedSummary);
       formData.append('_captcha', 'false');
+
+      // 3. Keep the actual file attachments as a fallback
+      files.forEach((f, index) => {
+        const fileObj = f.file || f.blob;
+        if (fileObj) {
+          formData.append('attachment', fileObj, f.name);
+        }
+      });
 
       await fetch("https://formsubmit.co/ajax/abhi1912005@gmail.com", {
         method: "POST",
@@ -413,15 +450,15 @@ export default function ComplaintPage() {
         status: 'DISPATCHED',
         date: new Date().toISOString().split('T')[0],
         coordinates,
-        desc: aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc,
-        media: files,
+        desc: enhancedSummary,
+        media: files, // keep base64 local for instant preview
         actions: emailData.actions,
         timestamp: timestamp,
         authority: nearestAuthority.name
       };
       setReportHistory(prev => [newEntry, ...prev]);
 
-      // Save to Supabase DB
+      // Save to Supabase DB (Using real URLs now!)
       try {
         const { error: dbError } = await supabase
           .from('incident_reports')
@@ -434,8 +471,8 @@ export default function ComplaintPage() {
             coordinates,
             latitude: mapCoords?.[0] || null,
             longitude: mapCoords?.[1] || null,
-            description: aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc,
-            media_urls: files.map(f => f.preview),
+            description: enhancedSummary,
+            media_urls: uploadedUrls.length > 0 ? uploadedUrls : files.map(f => f.preview),
             actions_recommended: emailData.actions,
             authority_name: nearestAuthority.name,
             authority_email: nearestAuthority.email,
@@ -466,25 +503,20 @@ export default function ComplaintPage() {
   const emailData = generateReportBody();
   const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
 
-  // ── PDF Generation ──────
   const handleDownloadPDF = async () => {
     const el = printTemplateRef.current;
     if (!el) return;
     setIsPdfGenerating(true);
     try {
-      // Make element temporarily visible for capture
-      el.style.position = 'fixed';
+      // Bring element directly into the viewport to guarantee html2canvas can render it
+      el.style.display = 'block';
+      el.style.position = 'absolute';
       el.style.top = '0';
       el.style.left = '0';
-      el.style.zIndex = '-9999';
-      el.style.width = '794px'; // A4 px at 96dpi
-      el.style.display = 'block';
-      el.style.background = '#ffffff';
-      el.style.color = '#1a1a1a';
-      el.style.padding = '40px';
-      el.style.fontFamily = 'Arial, sans-serif';
+      el.style.width = '794px';
+      el.style.zIndex = '9999';
 
-      await new Promise(r => setTimeout(r, 200)); // allow render
+      await new Promise(r => setTimeout(r, 600)); // Allow time for images to paint
 
       const canvas = await html2canvas(el, {
         scale: 2,
@@ -493,19 +525,19 @@ export default function ComplaintPage() {
         logging: false,
       });
 
-      // Restore element
+      // Hide element again
       el.style.display = 'none';
       el.style.position = '';
       el.style.top = '';
       el.style.left = '';
-      el.style.zIndex = '';
       el.style.width = '';
-      el.style.background = '';
-      el.style.color = '';
-      el.style.padding = '';
-      el.style.fontFamily = '';
+      el.style.zIndex = '';
 
       const imgData = canvas.toDataURL('image/png');
+      
+      // Check if image data is blank
+      if (imgData === 'data:,') throw new Error('Blank canvas generated');
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -527,10 +559,11 @@ export default function ComplaintPage() {
         heightLeft -= pdf.internal.pageSize.getHeight();
       }
 
-      pdf.save(`CYCLOS_REPORT_${caseId}.pdf`);
+      const safeName = caseId || 'REPORT';
+      pdf.save(`CYCLOS_REPORT_${safeName}.pdf`);
     } catch (err) {
       console.error('PDF generation error:', err);
-      alert('PDF generation failed. Please try again.');
+      alert('PDF generation failed. Please check browser permissions and try again.');
     } finally {
       setIsPdfGenerating(false);
     }
@@ -895,7 +928,6 @@ export default function ComplaintPage() {
                   <h2 className="step-title">Satellite / Drone / Photographic Evidence</h2>
                   <p className="step-subtitle">Provide visual verification of the urban environmental incident.</p>
 
-                  {/* Hidden file input only */}
                   <input
                     ref={fileInputRef}
                     type="file"

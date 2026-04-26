@@ -8,6 +8,7 @@ import LandingPage from './pages/LandingPage';
 import SignUpPage from './pages/SignUpPage';
 import LoginPage from './pages/LoginPage';
 import PrimaryDomainPage from './pages/PrimaryDomainPage';
+import SecondaryDomainPage from './pages/SecondaryDomainPage';
 import MainPage from './pages/MainPage';
 import ScanPage from './pages/ScanPage';
 import MarketPage from './pages/MarketPage';
@@ -26,7 +27,7 @@ const ProtectedRoute = ({ children }) => {
 const OnboardRoute = ({ children }) => {
   const { user, userProfile } = useAuth();
   if (!user) return <Navigate to="/login" replace />;
-  if (userProfile?.primary_domain) return <Navigate to="/app" replace />;
+  if (userProfile?.primary_domain && userProfile?.secondary_domain) return <Navigate to="/app" replace />;
   return children;
 };
 
@@ -62,7 +63,7 @@ function EventNotificationService() {
 
 function AppRoutes() {
   const location = useLocation();
-  const hideNavPaths = ['/', '/signup', '/login', '/onboard/primary'];
+  const hideNavPaths = ['/', '/signup', '/login', '/onboard/primary', '/onboard/secondary'];
   const showNav = !hideNavPaths.includes(location.pathname);
 
   return (
@@ -73,6 +74,7 @@ function AppRoutes() {
         <Route path="/signup" element={<SignUpPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/onboard/primary" element={<OnboardRoute><PrimaryDomainPage /></OnboardRoute>} />
+        <Route path="/onboard/secondary" element={<OnboardRoute><SecondaryDomainPage /></OnboardRoute>} />
         <Route path="/app" element={<ProtectedRoute><MainPage /></ProtectedRoute>} />
         <Route path="/scanner" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
         <Route path="/bins" element={<ProtectedRoute><BinLocationPage /></ProtectedRoute>} />

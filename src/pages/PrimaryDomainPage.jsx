@@ -106,7 +106,7 @@ export default function PrimaryDomainPage() {
                  whileHover={{ scale: 1.02 }}
                  whileTap={{ scale: 0.98 }}
               >
-                <div className="domain-role-card__content" style={{ padding: '20px' }}>
+                <div className="domain-role-card__content">
                   <div className="domain-role-card__icon-wrap">
                     <Icon size={24} />
                   </div>
