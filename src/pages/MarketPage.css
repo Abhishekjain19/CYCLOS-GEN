@@ -262,11 +262,18 @@
 }
 
 /* ── Product List ────────────────────────────────────── */
+/* ── Product List ────────────────────────────────────── */
 .mkt-list {
-  padding: 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (min-width: 768px) {
+  .mkt-list { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 1024px) {
+  .mkt-list { grid-template-columns: repeat(5, 1fr); }
 }
 
 /* ── Category accent colors ──── */
@@ -280,38 +287,38 @@
 
 .mkt-item {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 0;
-  border-bottom: 1px solid rgba(45,106,79,0.06);
+  flex-direction: column;
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid rgba(45,106,79,0.08);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
   cursor: pointer;
-  transition: background 0.15s, transform 80ms;
-  border-radius: 0;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
   position: relative;
-  /* left accent */
-  padding-left: 10px;
+  overflow: hidden;
 }
 .mkt-item::before {
   content: '';
   position: absolute;
-  left: 0;
-  top: 18px;
-  bottom: 18px;
-  width: 3px;
-  border-radius: 2px;
+  top: 0; left: 0; right: 0;
+  height: 4px;
   background: var(--cat-color, var(--eco-500));
-  opacity: 0.6;
+  opacity: 0.8;
+  z-index: 3;
 }
-.mkt-item:active { transform: scale(0.99); }
-.mkt-item:last-child { border-bottom: none; }
+.mkt-item:active { transform: scale(0.97); }
+.mkt-item:hover {
+  box-shadow: 0 8px 24px rgba(45,106,79,0.1);
+  border-color: rgba(45,106,79,0.2);
+  transform: translateY(-2px);
+}
 
 .mkt-item__img-wrap {
-  width: 72px;
-  height: 72px;
-  border-radius: 12px;
+  width: 100%;
+  aspect-ratio: 1;
+  background: #f8faf9;
+  position: relative;
   overflow: hidden;
-  flex-shrink: 0;
-  background: #FFFFFF;
 }
 
 .mkt-item__img {
@@ -319,14 +326,18 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform 0.3s;
+}
+.mkt-item:hover .mkt-item__img {
+  transform: scale(1.05);
 }
 
 .mkt-item__body {
-  flex: 1;
-  min-width: 0;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
 }
 
 .mkt-item__meta-row {
@@ -426,19 +437,22 @@
 }
 
 .mkt-item__actions {
+  position: absolute;
+  top: 12px;
+  right: 8px;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  align-items: center;
-  padding-left: 4px;
+  z-index: 5;
 }
 
 .mkt-item__wish, .mkt-item__view-btn {
-  width: 34px; height: 34px;
+  width: 32px; height: 32px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: var(--grey-500);
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(0,0,0,0.05);
+  color: var(--grey-600);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   transition: color 0.2s, background 0.2s, transform 80ms;
