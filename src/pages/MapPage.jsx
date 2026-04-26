@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+﻿import React, { useState, useEffect, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -18,166 +18,27 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const OCEAN_DATA = [
-  {
-    id: 1,
-    name: "Great Pacific Garbage Patch",
-    coords: [35, -145],
-    status: "polluted",
-    metrics: {
-      obp: "80,000",
-      biodiversity: 24,
-      threatened_species: 1420,
-      temp: 22.4,
-      wind: 12,
-      o2: 82,
-      plastic_density: 45000,
-      coral_health: "Poor",
-      top_pollutant: "Microplastics & Nets",
-      shipping_density: "Moderate",
-      dead_zones: 12,
-      carbon_absorption: 2.1,
-      microplastic_index: 9.8,
-      initiatives: 4,
-      ph_level: { current: 8.01, baseline: 8.12 },
-      ai_insight: "The concentration of plastic in this region has reached a critical threshold, disrupting microbial ecosystems and carbon sequestration rates."
-    }
-  },
-  {
-    id: 2,
-    name: "North Atlantic Gyre",
-    coords: [30, -40],
-    status: "moderate",
-    metrics: {
-      obp: "45,000",
-      biodiversity: 48,
-      threatened_species: 890,
-      temp: 18.2,
-      wind: 18,
-      o2: 91,
-      plastic_density: 12000,
-      coral_health: "Fair",
-      top_pollutant: "Shipping Waste",
-      shipping_density: "Heavy",
-      dead_zones: 5,
-      carbon_absorption: 3.4,
-      microplastic_index: 6.4,
-      initiatives: 8,
-      ph_level: { current: 8.06, baseline: 8.11 },
-      ai_insight: "Heavy shipping traffic in this sector is the primary contributor to acoustic pollution and waste discharge."
-    }
-  },
-  {
-    id: 3,
-    name: "Challenger Deep Region",
-    coords: [11.3, 142.2],
-    status: "biodiverse",
-    metrics: {
-      obp: "1,200",
-      biodiversity: 92,
-      threatened_species: 45,
-      temp: 4.1,
-      wind: 8,
-      o2: 98,
-      plastic_density: 150,
-      coral_health: "Excellent",
-      top_pollutant: "Deep-sea debris",
-      shipping_density: "Sparse",
-      dead_zones: 0,
-      carbon_absorption: 1.2,
-      microplastic_index: 1.2,
-      initiatives: 12,
-      ph_level: { current: 8.12, baseline: 8.14 },
-      ai_insight: "One of the last pristine deep-sea habitats. Low bacterial activity means any pollutants introduced here persist for centuries."
-    }
-  },
-  {
-    id: 4,
-    name: "Coral Triangle",
-    coords: [-2, 125],
-    status: "biodiverse",
-    metrics: {
-      obp: "12,000",
-      biodiversity: 98,
-      threatened_species: 2100,
-      temp: 29.5,
-      wind: 5,
-      o2: 94,
-      plastic_density: 3200,
-      coral_health: "Excellent",
-      top_pollutant: "Single-use plastic",
-      shipping_density: "Moderate",
-      dead_zones: 2,
-      carbon_absorption: 4.2,
-      microplastic_index: 3.1,
-      initiatives: 25,
-      ph_level: { current: 8.04, baseline: 8.13 },
-      ai_insight: "The world's epicenter of marine biodiversity. Rising temperatures pose a 90% risk of bleaching if current trends continue through 2030."
-    }
-  },
-  {
-    id: 5,
-    name: "Southern Ocean (Antarctic)",
-    coords: [-65, 90],
-    status: "clean",
-    metrics: {
-      obp: "400",
-      biodiversity: 65,
-      threatened_species: 120,
-      temp: -1.2,
-      wind: 35,
-      o2: 99,
-      plastic_density: 45,
-      coral_health: "N/A",
-      top_pollutant: "Atmospheric fallout",
-      shipping_density: "Very Sparse",
-      dead_zones: 0,
-      carbon_absorption: 8.5,
-      microplastic_index: 0.8,
-      initiatives: 15,
-      ph_level: { current: 8.09, baseline: 8.12 },
-      ai_insight: "Crucial carbon sink. Cold waters absorb more CO2, but are also Acidifying faster than tropical regions."
-    }
-  },
-  {
-    id: 6,
-    name: "Mediterranean Sea",
-    coords: [35, 18],
-    status: "polluted",
-    metrics: {
-      obp: "62,000",
-      biodiversity: 55,
-      threatened_species: 1100,
-      temp: 21.8,
-      wind: 10,
-      o2: 85,
-      plastic_density: 38000,
-      coral_health: "Poor",
-      top_pollutant: "Land-based runoff",
-      shipping_density: "Heavy",
-      dead_zones: 8,
-      carbon_absorption: 1.5,
-      microplastic_index: 8.9,
-      initiatives: 18,
-      ph_level: { current: 8.02, baseline: 8.10 },
-      ai_insight: "Closed system with slow water exchange. Pollutants accumulate 5x faster than in open ocean basins."
-    }
-  }
+const URBAN_ECO_ZONES = [
+  { id: 'ward_76', name: 'Malleswaram Ward 76', coords: [13.0031, 77.5643], status: 'eco_hub', metrics: { swm: '1,200', biodiversity: 85, threatened_species: 2, temp: 28.5, wind: 5, o2: 90, plastic_density: 150, coral_health: 'Good', top_pollutant: 'Mixed Dry Waste', shipping_density: 'High', dead_zones: 0, carbon_absorption: 1.2, microplastic_index: 2.1, initiatives: 12, ph_level: { current: 7.2, baseline: 7.0 }, ai_insight: 'High citizen participation and active dry waste collection centers.' } },
+  { id: 'ward_150', name: 'Bellandur Ward 150', coords: [12.9304, 77.6784], status: 'critical_waste', metrics: { swm: '8,500', biodiversity: 30, threatened_species: 15, temp: 29.1, wind: 8, o2: 60, plastic_density: 4500, coral_health: 'Poor', top_pollutant: 'E-Waste & Plastics', shipping_density: 'High', dead_zones: 3, carbon_absorption: 0.5, microplastic_index: 8.5, initiatives: 4, ph_level: { current: 6.5, baseline: 7.0 }, ai_insight: 'Frequent illegal dumping and low collection efficiency in commercial sectors.' } },
+  { id: 'ward_174', name: 'HSR Layout Ward 174', coords: [12.9121, 77.6446], status: 'moderate', metrics: { swm: '4,200', biodiversity: 65, threatened_species: 5, temp: 28.8, wind: 6, o2: 75, plastic_density: 1200, coral_health: 'Fair', top_pollutant: 'Organic Waste', shipping_density: 'Medium', dead_zones: 1, carbon_absorption: 2.1, microplastic_index: 4.5, initiatives: 8, ph_level: { current: 6.8, baseline: 7.0 }, ai_insight: 'Improving segregation but high commercial waste volume remains a challenge.' } },
+  { id: 'ward_111', name: 'Shantala Nagar Ward 111', coords: [12.9716, 77.5946], status: 'moderate', metrics: { swm: '5,100', biodiversity: 50, threatened_species: 8, temp: 29.5, wind: 4, o2: 70, plastic_density: 2100, coral_health: 'Fair', top_pollutant: 'Commercial Packaging', shipping_density: 'Very High', dead_zones: 0, carbon_absorption: 0.8, microplastic_index: 6.2, initiatives: 6, ph_level: { current: 6.9, baseline: 7.0 }, ai_insight: 'Central business district with heavy mixed waste generation.' } },
+  { id: 'ward_168', name: 'Jayanagar Ward 168', coords: [12.9250, 77.5938], status: 'eco_hub', metrics: { swm: '900', biodiversity: 92, threatened_species: 1, temp: 28.2, wind: 5, o2: 95, plastic_density: 80, coral_health: 'Excellent', top_pollutant: 'Leaf Litter', shipping_density: 'Low', dead_zones: 0, carbon_absorption: 3.5, microplastic_index: 1.5, initiatives: 25, ph_level: { current: 7.1, baseline: 7.0 }, ai_insight: 'Model ward with extensive composting initiatives and high compliance.' } }
 ];
 
 const getMarkerIcon = (status, index) => {
   let color = "#00E5FF";
   let className = "pulse-marker-clean";
   
-  if (status === "polluted") {
+  if (status === "critical_waste") {
     color = "#FF4757";
-    className = "pulse-marker-polluted";
+    className = "pulse-marker-critical_waste";
   } else if (status === "moderate") {
     color = "#FFB347";
     className = "pulse-marker-moderate";
-  } else if (status === "biodiverse") {
+  } else if (status === "eco_hub") {
     color = "#2EE5B0";
-    className = "pulse-marker-biodiverse";
+    className = "pulse-marker-eco_hub";
   }
 
   return L.divIcon({
@@ -205,26 +66,26 @@ const MapController = ({ selectedCoords }) => {
 };
 
 export default function MapPage() {
-  const [selectedOcean, setSelectedOcean] = useState(null);
+  const [selectedZone, setSelectedZone] = useState(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [aiInsight, setAiInsight] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
 
-  const filteredOceans = useMemo(() => {
-    return OCEAN_DATA.filter(o => {
+  const filteredZones = useMemo(() => {
+    return URBAN_ECO_ZONES.filter(o => {
       const matchesSearch = o.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFilter = filter === "all" || 
-                            (filter === "polluted" && o.status === "polluted") ||
+                            (filter === "critical_waste" && o.status === "critical_waste") ||
                             (filter === "moderate" && o.status === "moderate") ||
-                            (filter === "biodiverse" && (o.status === "biodiverse" || o.status === "clean"));
+                            (filter === "eco_hub" && (o.status === "eco_hub" || o.status === "clean"));
       return matchesSearch && matchesFilter;
     });
   }, [searchQuery, filter]);
 
-  const handleOceanClick = (ocean) => {
-    setSelectedOcean(ocean);
+  const handleZoneClick = (ocean) => {
+    setSelectedZone(ocean);
     setIsSidebarOpen(true);
     setAiInsight("");
     setIsStreaming(false);
@@ -232,9 +93,9 @@ export default function MapPage() {
 
   useEffect(() => {
     let interval;
-    if (isStreaming && selectedOcean) {
+    if (isStreaming && selectedZone) {
       setAiInsight("");
-      const text = selectedOcean.metrics.ai_insight;
+      const text = selectedZone.metrics.ai_insight;
       let i = 0;
       interval = setInterval(() => {
         setAiInsight(prev => prev + text.charAt(i));
@@ -246,14 +107,14 @@ export default function MapPage() {
       }, 30);
     }
     return () => clearInterval(interval);
-  }, [isStreaming, selectedOcean]);
+  }, [isStreaming, selectedZone]);
 
   const triggerAIInsight = () => {
     setIsStreaming(true);
   };
 
   return (
-    <div className="ocean-map-page">
+    <div className="zone-map-page">
       {/* Background Noise & Waves */}
       <div className="map-overlay-noise"></div>
       <div className="map-overlay-waves">
@@ -270,7 +131,7 @@ export default function MapPage() {
           <TbSearch className="search-icon" />
           <input 
             type="text" 
-            placeholder="Search oceans, gyres, reefs..." 
+            placeholder="Search wards, districts, zones..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -285,10 +146,10 @@ export default function MapPage() {
             All Zones
           </button>
           <button 
-            className={`legend-pill polluted ${filter === 'polluted' ? 'active' : ''}`}
-            onClick={() => setFilter('polluted')}
+            className={`legend-pill critical_waste ${filter === 'critical_waste' ? 'active' : ''}`}
+            onClick={() => setFilter('critical_waste')}
           >
-            <span className="dot"></span> Most Polluted
+            <span className="dot"></span> Critical Waste
           </button>
           <button 
             className={`legend-pill moderate ${filter === 'moderate' ? 'active' : ''}`}
@@ -297,10 +158,10 @@ export default function MapPage() {
             <span className="dot"></span> High Traffic
           </button>
           <button 
-            className={`legend-pill biodiverse ${filter === 'biodiverse' ? 'active' : ''}`}
-            onClick={() => setFilter('biodiverse')}
+            className={`legend-pill eco_hub ${filter === 'eco_hub' ? 'active' : ''}`}
+            onClick={() => setFilter('eco_hub')}
           >
-            <span className="dot"></span> Clean / Biodiverse
+            <span className="dot"></span> Eco Hubs
           </button>
         </div>
       </div>
@@ -316,21 +177,21 @@ export default function MapPage() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
-        <MapController selectedCoords={selectedOcean?.coords} />
+        <MapController selectedCoords={selectedZone?.coords} />
         
-        {filteredOceans.map((ocean, idx) => (
+        {filteredZones.map((ocean, idx) => (
           <Marker 
-            key={ocean.id} 
-            position={ocean.coords} 
-            icon={getMarkerIcon(ocean.status, idx)}
+            key={zone.id} 
+            position={zone.coords} 
+            icon={getMarkerIcon(zone.status, idx)}
             eventHandlers={{
-              click: () => handleOceanClick(ocean)
+              click: () => handleZoneClick(ocean)
             }}
           >
-            <Tooltip direction="top" offset={[0, -10]} opacity={1} className="ocean-tooltip">
+            <Tooltip direction="top" offset={[0, -10]} opacity={1} className="zone-tooltip">
               <div className="tooltip-content">
-                <strong>{ocean.name}</strong>
-                <span>Biodiversity: {ocean.metrics.biodiversity}/100</span>
+                <strong>{zone.name}</strong>
+                <span>Biodiversity: {zone.metrics.biodiversity}/100</span>
               </div>
             </Tooltip>
           </Marker>
@@ -339,17 +200,17 @@ export default function MapPage() {
 
       {/* Sidebar Panel */}
       <div className={`sidebar-panel ${isSidebarOpen ? 'open' : ''}`}>
-        {selectedOcean && (
+        {selectedZone && (
           <>
             <div className="sidebar-header sticky">
               <div className="header-top">
-                <h2>{selectedOcean.name}</h2>
+                <h2>{selectedZone.name}</h2>
                 <button className="close-sidebar" onClick={() => setIsSidebarOpen(false)}>
                   <TbX />
                 </button>
               </div>
-              <div className={`status-badge ${selectedOcean.status}`}>
-                {selectedOcean.status.charAt(0).toUpperCase() + selectedOcean.status.slice(1)} Zone
+              <div className={`status-badge ${selectedZone.status}`}>
+                {selectedZone.status.charAt(0).toUpperCase() + selectedZone.status.slice(1)} Zone
               </div>
             </div>
 
@@ -358,8 +219,8 @@ export default function MapPage() {
                 <div className="metric-card">
                   <div className="metric-icon"><TbRecycle /></div>
                   <div className="metric-info">
-                    <span className="label">OBP (tonnes/yr)</span>
-                    <span className="value">{selectedOcean.metrics.obp}</span>
+                    <span className="label">Waste (tonnes/yr)</span>
+                    <span className="value">{selectedZone.metrics.swm}</span>
                   </div>
                 </div>
 
@@ -368,9 +229,9 @@ export default function MapPage() {
                   <div className="metric-info">
                     <span className="label">Biodiversity</span>
                     <div className="gauge-container">
-                      <div className="gauge-fill" style={{ width: `${selectedOcean.metrics.biodiversity}%` }}></div>
+                      <div className="gauge-fill" style={{ width: `${selectedZone.metrics.biodiversity}%` }}></div>
                     </div>
-                    <span className="value">{selectedOcean.metrics.biodiversity}/100</span>
+                    <span className="value">{selectedZone.metrics.biodiversity}/100</span>
                   </div>
                 </div>
 
@@ -378,7 +239,7 @@ export default function MapPage() {
                   <div className="metric-icon"><TbAlertTriangle /></div>
                   <div className="metric-info">
                     <span className="label">Threatened Species</span>
-                    <span className="value">{selectedOcean.metrics.threatened_species}</span>
+                    <span className="value">{selectedZone.metrics.threatened_species}</span>
                   </div>
                 </div>
 
@@ -386,8 +247,8 @@ export default function MapPage() {
                   <div className="metric-icon"><TbThermometer /></div>
                   <div className="metric-info">
                     <span className="label">Surface Temp</span>
-                    <span className={`value temp-${selectedOcean.metrics.temp > 20 ? 'warm' : 'cool'}`}>
-                      {selectedOcean.metrics.temp}°C
+                    <span className={`value temp-${selectedZone.metrics.temp > 20 ? 'warm' : 'cool'}`}>
+                      {selectedZone.metrics.temp}°C
                     </span>
                   </div>
                 </div>
@@ -396,7 +257,7 @@ export default function MapPage() {
                   <div className="metric-icon"><TbWind /></div>
                   <div className="metric-info">
                     <span className="label">Avg Wind Speed</span>
-                    <span className="value">{selectedOcean.metrics.wind} knots</span>
+                    <span className="value">{selectedZone.metrics.wind} knots</span>
                   </div>
                 </div>
 
@@ -404,22 +265,22 @@ export default function MapPage() {
                   <div className="metric-icon"><TbDroplet /></div>
                   <div className="metric-info">
                     <span className="label">Dissolved O2</span>
-                    <span className="value">{selectedOcean.metrics.o2}%</span>
+                    <span className="value">{selectedZone.metrics.o2}%</span>
                   </div>
                 </div>
 
                 <div className="metric-card">
                   <div className="metric-info">
                     <span className="label">Plastic Density (pcs/km²)</span>
-                    <span className="value">{selectedOcean.metrics.plastic_density}</span>
+                    <span className="value">{selectedZone.metrics.plastic_density}</span>
                   </div>
                 </div>
 
                 <div className="metric-card">
                   <div className="metric-info">
-                    <span className="label">Coral Reef Health</span>
-                    <span className={`badge health-${selectedOcean.metrics.coral_health.toLowerCase()}`}>
-                      {selectedOcean.metrics.coral_health}
+                    <span className="label">Ward Cleanliness</span>
+                    <span className={`badge health-${selectedZone.metrics.coral_health.toLowerCase()}`}>
+                      {selectedZone.metrics.coral_health}
                     </span>
                   </div>
                 </div>
@@ -427,7 +288,7 @@ export default function MapPage() {
                 <div className="metric-card full">
                   <div className="metric-info">
                     <span className="label">Top Pollutant</span>
-                    <span className="value highlight">{selectedOcean.metrics.top_pollutant}</span>
+                    <span className="value highlight">{selectedZone.metrics.top_pollutant}</span>
                   </div>
                 </div>
 
@@ -435,7 +296,7 @@ export default function MapPage() {
                   <div className="metric-icon"><TbBuildingSkyscraper /></div>
                   <div className="metric-info">
                     <span className="label">Shipping Lanes</span>
-                    <span className="value">{selectedOcean.metrics.shipping_density}</span>
+                    <span className="value">{selectedZone.metrics.shipping_density}</span>
                   </div>
                 </div>
 
@@ -443,7 +304,7 @@ export default function MapPage() {
                   <div className="metric-icon"><TbActivity /></div>
                   <div className="metric-info">
                     <span className="label">Dead Zones</span>
-                    <span className="value">{selectedOcean.metrics.dead_zones}</span>
+                    <span className="value">{selectedZone.metrics.dead_zones}</span>
                   </div>
                 </div>
 
@@ -451,7 +312,7 @@ export default function MapPage() {
                   <div className="metric-icon"><TbLeaf /></div>
                   <div className="metric-info">
                     <span className="label">Carbon Absorption</span>
-                    <span className="value">{selectedOcean.metrics.carbon_absorption} Gt</span>
+                    <span className="value">{selectedZone.metrics.carbon_absorption} Gt</span>
                   </div>
                 </div>
 
@@ -459,7 +320,7 @@ export default function MapPage() {
                   <div className="metric-icon"><TbMicroscope /></div>
                   <div className="metric-info">
                     <span className="label">Microplastic Index</span>
-                    <span className="value">{selectedOcean.metrics.microplastic_index}/10</span>
+                    <span className="value">{selectedZone.metrics.microplastic_index}/10</span>
                   </div>
                 </div>
 
@@ -467,7 +328,7 @@ export default function MapPage() {
                   <div className="metric-info">
                     <span className="label">Conservation Initiatives</span>
                     <div className="flex-row">
-                      <span className="value">{selectedOcean.metrics.initiatives} Active</span>
+                      <span className="value">{selectedZone.metrics.initiatives} Active</span>
                       <button className="ghost-btn">Learn More <TbChevronRight /></button>
                     </div>
                   </div>
@@ -479,14 +340,14 @@ export default function MapPage() {
                     <div className="ph-strip">
                       <div className="ph-item">
                         <span className="ph-label">1980</span>
-                        <span className="ph-val">{selectedOcean.metrics.ph_level.baseline}</span>
+                        <span className="ph-val">{selectedZone.metrics.ph_level.baseline}</span>
                       </div>
                       <div className="ph-progress-container">
                         <div className="ph-progress" style={{ width: '60%' }}></div>
                       </div>
                       <div className="ph-item active">
                         <span className="ph-label">NOW</span>
-                        <span className="ph-val">{selectedOcean.metrics.ph_level.current}</span>
+                        <span className="ph-val">{selectedZone.metrics.ph_level.current}</span>
                       </div>
                     </div>
                   </div>

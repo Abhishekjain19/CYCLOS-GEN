@@ -92,14 +92,7 @@
   color: white;
 }
 
-/* Teal filled sign-up button */
-.navbar__links .btn-primary {
-  background: linear-gradient(135deg, var(--teal-400), var(--teal-300));
-  color: var(--teal-950);
-}
-.navbar__links .btn-primary::before {
-  background: linear-gradient(135deg, var(--teal-300), #AEE1D8);
-}
+/* Filled sign-up button defaults to global */
 
 .navbar__burger {
   display: none;

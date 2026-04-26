@@ -1,4 +1,4 @@
-// src/components/ProfilePanel.jsx
+﻿// src/components/ProfilePanel.jsx
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
@@ -255,7 +255,7 @@ export default function ProfilePanel({ isOpen, onClose }) {
                   <div className="stat-card">
                     <div className="stat-card__icon bg-blue"><TbRipple size={20} /></div>
                     <div className="stat-card__data">
-                      <span className="stat-label">OBP Left</span>
+                      <span className="stat-label">Waste Left</span>
                       <span className="stat-value">25.4 kg</span>
                     </div>
                   </div>

@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'react';
-import { TbSend, TbPhoto, TbRobot } from 'react-icons/tb';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { TbSend, TbPhoto, TbRobot, TbMicrophone, TbMicrophoneOff } from 'react-icons/tb';
 import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
 import './ChatbotPopup.css';
@@ -25,7 +25,7 @@ const AI_RESPONSES = {
   metal:
     '### Metal & Aluminium 🥫\n\nAluminium cans and steel tins are infinitely recyclable. \n\n*   **Rinse** out before recycling\n*   **Scrunch** aluminium foil into a ball\n*   **Metal is high-value** for local recyclers!',
   organic:
-    '### Organic Waste 🌱\n\nFood scraps and garden trimmings are perfect for composting. \n\n*   Start a kitchen **compost bin**\n*   Use community **compost stations**\n*   Turn waste into soil!',
+    '### Organic Waste Protocols 🌱\n\nFor wet waste < 2kg:\n\n*   **Garbage Enzyme**: Mix 3 parts fruit peels, 1 part jaggery, 10 parts water. Ferment for 3 months.\n*   **Vermicompost**: Use a small bin with red wiggler worms.\n\nFor larger quantities, we will route a BBMP Auto-Tipper to your location.',
   default:
     "### I'm Learning! 🤔\n\nI'm still expanding my knowledge base. Try asking me about:\n\n*   **Plastic**\n*   **E-waste**\n*   **Paper**\n*   **Glass**\n*   **Metal**\n*   **Organic**\n\n*Tip: You can also upload a photo!*",
 };
@@ -74,9 +74,9 @@ const QUICK_SUGGESTIONS = [
   'How do I recycle plastic bottles?',
   'Where can I dispose e-waste?',
   'Nearest recycling hub',
-  'What is OBP?',
+  'What is Circular Economy?',
   'How to earn Eco Points?',
-  'Ocean plastic impact',
+  'Urban waste impact',
 ];
 
 const WELCOME_MESSAGE = {
@@ -86,8 +86,20 @@ const WELCOME_MESSAGE = {
   ts: Date.now(),
 };
 
-function getAIReply(userText) {
+function getAIReply(userText, history = []) {
   const lower = userText.toLowerCase();
+
+  // Contextual memory check for recently uploaded images
+  if (lower.includes('image') || lower.includes('photo') || lower.includes('picture') || lower.includes('this') || lower.includes('what is that') || lower.includes('it')) {
+    const lastImageReply = [...history].reverse().find(m => m.isImageReply);
+    if (lastImageReply) {
+      const match = lastImageReply.text.match(/Detected:\s*([^*]+)/);
+      if (match) {
+        return `You're asking about the image you uploaded! As I analyzed earlier, it is **${match[1].trim()}**. Do you need specific recycling instructions for it?`;
+      }
+    }
+  }
+
   for (const [key, reply] of Object.entries(AI_RESPONSES)) {
     if (lower.includes(key.toLowerCase())) return reply;
   }
@@ -105,9 +117,105 @@ export default function ChatbotPopup({ onClose }) {
   const [inputVal, setInputVal] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [voiceMode, setVoiceMode] = useState('English');
+  const [isVoiceMode, setIsVoiceMode] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
+  const recognitionRef = useRef(null);
+  const synthRef = useRef(window.speechSynthesis);
+  const typingTimeoutRef = useRef(null);
+
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = false;
+      
+      // Update recognition language when dropdown changes
+      if (voiceMode === 'Kannada') recognitionRef.current.lang = 'kn-IN';
+      else if (voiceMode === 'Hindi') recognitionRef.current.lang = 'hi-IN';
+      else recognitionRef.current.lang = 'en-IN';
+
+      recognitionRef.current.onspeechstart = () => {
+        // If user starts speaking while AI is talking, stop the AI immediately
+        if (synthRef.current?.speaking) {
+          synthRef.current.cancel();
+        }
+        // If AI was about to answer, pause and listen instead
+        if (typingTimeoutRef.current) {
+          clearTimeout(typingTimeoutRef.current);
+          setIsTyping(false);
+        }
+      };
+
+      recognitionRef.current.onresult = (event) => {
+        if (synthRef.current?.speaking) {
+          synthRef.current.cancel();
+        }
+        const transcript = event.results[event.results.length - 1][0].transcript;
+        if (transcript.trim()) {
+          sendMessage(transcript);
+        }
+      };
+
+      recognitionRef.current.onend = () => {
+        // Auto-restart if in voice mode
+        if (isVoiceMode) {
+          try {
+            recognitionRef.current.start();
+          } catch(e) {}
+        }
+      };
+    }
+    
+    return () => {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      if (synthRef.current) synthRef.current.cancel();
+    };
+  }, [voiceMode, isVoiceMode]); // re-bind when language or mode changes
+
+  useEffect(() => {
+    if (isVoiceMode && recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+      } catch (e) {}
+    } else if (!isVoiceMode && recognitionRef.current) {
+      recognitionRef.current.stop();
+      synthRef.current?.cancel();
+    }
+  }, [isVoiceMode]);
+
+  const speakText = useCallback((text) => {
+    if (!synthRef.current) return;
+    synthRef.current.cancel();
+    
+    // Strip markdown formatting for speech
+    const cleanText = text.replace(/[#*`_]/g, '').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const voices = synthRef.current.getVoices();
+    let selectedVoice = null;
+    
+    if (voiceMode === 'Kannada') {
+      utterance.lang = 'kn-IN';
+      selectedVoice = voices.find(v => v.lang === 'kn-IN' && v.name.includes('Google')) || voices.find(v => v.lang === 'kn-IN');
+    } else if (voiceMode === 'Hindi') {
+      utterance.lang = 'hi-IN';
+      selectedVoice = voices.find(v => v.lang === 'hi-IN' && v.name.includes('Google')) || voices.find(v => v.lang === 'hi-IN');
+    } else {
+      utterance.lang = 'en-IN';
+      selectedVoice = voices.find(v => (v.lang === 'en-IN' || v.lang === 'en-US') && (v.name.includes('Female') || v.name.includes('Google'))) 
+        || voices.find(v => v.lang.startsWith('en'));
+    }
+    
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    
+    synthRef.current.speak(utterance);
+  }, [voiceMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -128,16 +236,23 @@ export default function ChatbotPopup({ onClose }) {
     if (!clean) return;
 
     const userMsg = { id: Date.now(), role: 'user', text: clean };
+    const currentHistory = messages;
     setMessages((prev) => [...prev, userMsg]);
     setInputVal('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+    typingTimeoutRef.current = setTimeout(() => {
+      const replyText = getAIReply(clean, currentHistory);
       setIsTyping(false);
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, role: 'ai', text: getAIReply(clean) },
+        { id: Date.now() + 1, role: 'ai', text: replyText },
       ]);
+      if (isVoiceMode) {
+        speakText(replyText);
+      }
     }, 900 + Math.random() * 600);
   };
 
@@ -161,16 +276,20 @@ export default function ChatbotPopup({ onClose }) {
     /* simulate AI analysing image */
     setTimeout(() => {
       const cls = getRandomClassification();
+      const replyText = `${cls.emoji} **Detected: ${cls.category}**\n\n${cls.advice}`;
       setIsTyping(false);
       setMessages((prev) => [
         ...prev,
         {
           id: Date.now() + 1,
           role: 'ai',
-          text: `${cls.emoji} **Detected: ${cls.category}**\n\n${cls.advice}`,
+          text: replyText,
           isImageReply: true,
         },
       ]);
+      if (isVoiceMode) {
+        speakText(`Detected ${cls.category}. ${cls.advice}`);
+      }
     }, 1400 + Math.random() * 800);
 
     /* reset file input so the same file can be re-uploaded */
@@ -201,19 +320,30 @@ export default function ChatbotPopup({ onClose }) {
         {/* ── Header ── */}
         <div className="chatbot-header">
           <div className="chatbot-header__icon-wrap">
-            🌊
+            ♻️
           </div>
           <div className="chatbot-header__text">
-            <p className="chatbot-header__title">Cyclos</p>
-            <p className="chatbot-header__subtitle">AI Assistant</p>
+            <p className="chatbot-header__title">Cyclos AI</p>
+            <p className="chatbot-header__subtitle">Eco-Intelligence Assistant</p>
           </div>
-          <button
-            className="chatbot-header__close"
-            onClick={handleClose}
-            aria-label="Close chatbot"
-          >
-            ✕
-          </button>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <select 
+              value={voiceMode} 
+              onChange={(e) => setVoiceMode(e.target.value)}
+              style={{ padding: '4px', borderRadius: '4px', background: 'var(--eco-100)', color: 'var(--eco-900)', border: 'none', fontSize: '12px', fontWeight: 'bold' }}
+            >
+              <option value="English">EN Voice</option>
+              <option value="Kannada">ಕನ್ನಡ Voice</option>
+              <option value="Hindi">हिंदी Voice</option>
+            </select>
+            <button
+              className="chatbot-header__close"
+              onClick={handleClose}
+              aria-label="Close chatbot"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* ── Identity Strip ── */}
@@ -310,13 +440,25 @@ export default function ChatbotPopup({ onClose }) {
             <TbPhoto size={19} />
           </button>
 
+          {/* voice mode toggle */}
+          <button
+            className={`chatbot-upload-btn ${isVoiceMode ? 'active-voice' : ''}`}
+            onClick={() => setIsVoiceMode(!isVoiceMode)}
+            aria-label="Toggle voice mode"
+            title="Toggle Voice Mode"
+            style={{ color: isVoiceMode ? '#EF4444' : 'inherit' }}
+          >
+            {isVoiceMode ? <TbMicrophone size={19} /> : <TbMicrophoneOff size={19} />}
+          </button>
+
           <input
             ref={inputRef}
             className="chatbot-input"
-            placeholder="Ask about recycling, sustainability, or waste..."
+            placeholder={isVoiceMode ? "Listening..." : "Ask about recycling, sustainability, or waste..."}
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={isVoiceMode}
             id="chatbot-input-field"
           />
 

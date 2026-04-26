@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+﻿import { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -9,11 +9,11 @@ import ProfilePanel from '../components/ProfilePanel';
 
 /* Secondary domain materials — icon + color mapping */
 const SECONDARY_MATERIALS = [
-  { id: 'obp', label: 'OBP', Icon: TbBottle, bg: '#0ea5e9' },
-  { id: 'metals', label: 'Metals', Icon: TbRecycle, bg: '#0ea5e9' },
-  { id: 'shells', label: 'Sea Shells', Icon: TbDroplet, bg: '#0ea5e9' },
-  { id: 'glass', label: 'Glass', Icon: TbLeaf, bg: '#0ea5e9' },
-  { id: 'nets', label: 'Ghost Nets', Icon: TbAnchor, bg: '#0ea5e9' },
+  { id: 'compost', label: 'Compost', Icon: TbLeaf, bg: '#4ADE80' },
+  { id: 'metals', label: 'Metals', Icon: TbRecycle, bg: '#4ADE80' },
+  { id: 'plastic_res', label: 'Plastics', Icon: TbBottle, bg: '#4ADE80' },
+  { id: 'glass', label: 'Glass', Icon: TbDroplet, bg: '#4ADE80' },
+  { id: 'paper_pulp', label: 'Paper Pulp', Icon: TbRipple, bg: '#4ADE80' },
 ];
 import MapSection from '../components/MapSection';
 import LocalFactsCarousel from '../components/LocalFactsCarousel';
@@ -88,7 +88,7 @@ export default function MainPage() {
 
   const [stats, setStats] = useState({
     recycle: 0,
-    obp: 0,
+    swm: 0,
     points: userProfile?.points || 0,
     eventsConducted: 0,
     activeEvents: 0
@@ -238,11 +238,11 @@ export default function MainPage() {
         .eq('user_id', user.id);
       
       const recycleWeight = activities?.filter(a => a.action === 'Recycled').reduce((acc, curr) => acc + parseFloat(curr.qty || 0), 0) || 0;
-      const obpWeight = activities?.filter(a => a.action === 'OBP Collected').reduce((acc, curr) => acc + parseFloat(curr.qty || 0), 0) || 0;
+      const swmWeight = activities?.filter(a => a.action === 'Waste Diverted').reduce((acc, curr) => acc + parseFloat(curr.qty || 0), 0) || 0;
 
       setStats({
         recycle: recycleWeight,
-        obp: obpWeight,
+        swm: swmWeight,
         points: userProfile?.points || 0,
         eventsConducted: conductedCount || 0,
         activeEvents: activeCount || 0
@@ -258,7 +258,7 @@ export default function MainPage() {
   const firstName = fullName.split(' ')[0];
   const locationText = userProfile?.primaryDomain ? 'Malleshwaram, Bengaluru' : 'Local Eco Hub';
 
-  const obpCount    = useCountUp(stats.obp, 1400);
+  const swmCount    = useCountUp(stats.swm, 1400);
   const recycleCount = useCountUp(stats.recycle, 1400);
   const pointsCount  = useCountUp(stats.points, 1000);
 
@@ -310,9 +310,9 @@ export default function MainPage() {
           <div className="dash-stat-card">
             <div className="dash-stat-card__icon bg-cyan"><TbRipple size={18} /></div>
             <div className="dash-stat-card__content">
-              <span className="dash-stat-label">OBP Collected</span>
+              <span className="dash-stat-label">Waste Diverted</span>
               <div className="dash-stat-value-group">
-                <span className="dash-stat-value">{obpCount.toFixed(1)}</span>
+                <span className="dash-stat-value">{swmCount.toFixed(1)}</span>
                 <span className="dash-stat-unit">kg</span>
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function MainPage() {
           transition={{ delay: 0.2 }}
         >
           <div className="dash-section-header">
-            <h3 className="dash-section-title">Global Ocean Intelligence</h3>
+            <h3 className="dash-section-title">Eco-Intelligence Map</h3>
             {/* <a href="#" className="dash-section-viewall">View all</a>` */}
           </div>
           <div className="dash-map-card">

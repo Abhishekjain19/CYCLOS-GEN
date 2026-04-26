@@ -1,14 +1,14 @@
 .integrated-map-section {
   width: 100%;
-  background: #07111D;
+  background: #FFFFFF;
   border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(0, 229, 255, 0.2);
+  border: 1px solid rgba(82, 183, 136, 0.2);
   display: flex;
   flex-direction: column;
   position: relative;
   font-family: 'DM Mono', monospace;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
 }
 
 /* Controls */
@@ -18,27 +18,27 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  background: rgba(255, 255, 255, 0.02);
-  border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid rgba(82, 183, 136, 0.1);
   z-index: 1001;
 }
 
 .map-search {
   flex: 1;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(0, 229, 255, 0.2);
+  background: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(82, 183, 136, 0.2);
   border-radius: 50px;
   padding: 8px 16px;
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #00E5FF;
+  color: var(--eco-600);
 }
 
 .map-search input {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--grey-900);
   font-family: inherit;
   font-size: 13px;
   width: 100%;
@@ -51,9 +51,9 @@
 }
 
 .map-filters button {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--grey-600);
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 11px;
@@ -63,14 +63,14 @@
 }
 
 .map-filters button.active {
-  background: rgba(0, 229, 255, 0.2);
-  border-color: #00E5FF;
-  color: #fff;
+  background: rgba(82, 183, 136, 0.1);
+  border-color: var(--eco-600);
+  color: var(--eco-700);
 }
 
-.map-filters button.polluted.active { background: rgba(255, 71, 87, 0.2); border-color: #FF4757; }
-.map-filters button.moderate.active { background: rgba(255, 179, 71, 0.2); border-color: #FFB347; }
-.map-filters button.biodiverse.active { background: rgba(46, 229, 176, 0.2); border-color: #2EE5B0; }
+.map-filters button.polluted.active { background: rgba(255, 71, 87, 0.1); border-color: #FF4757; color: #FF4757; }
+.map-filters button.moderate.active { background: rgba(255, 179, 71, 0.1); border-color: #FFB347; color: #E69500; }
+.map-filters button.biodiverse.active { background: rgba(46, 229, 176, 0.1); border-color: var(--eco-500); color: var(--eco-600); }
 
 /* Map Frame */
 .map-frame {
@@ -82,7 +82,7 @@
 .leaflet-integrated-container {
   height: 100%;
   width: 100%;
-  background: #07111D !important;
+  background: #f0f4f8 !important;
 }
 
 /* Custom Marker Styling */
@@ -139,16 +139,16 @@
 }
 
 @keyframes m-shimmer {
-  0% { border-color: #2EE5B0; border-width: 1px; }
-  50% { border-color: #00E5FF; border-width: 3px; transform: scale(1.2); }
-  100% { border-color: #2EE5B0; border-width: 1px; }
+  0% { border-color: var(--eco-500); border-width: 1px; }
+  50% { border-color: var(--eco-400); border-width: 3px; transform: scale(1.2); }
+  100% { border-color: var(--eco-500); border-width: 1px; }
 }
 
 /* Tooltip */
 .map-integrated-tooltip {
-  background: #07111D !important;
-  border: 1px solid #00E5FF !important;
-  color: #fff !important;
+  background: #FFFFFF !important;
+  border: 1px solid var(--eco-400) !important;
+  color: var(--grey-900) !important;
   font-family: inherit !important;
   border-radius: 4px !important;
   font-size: 11px !important;
@@ -162,9 +162,9 @@
   right: 0;
   width: 380px;
   height: 100%;
-  background: rgba(7, 17, 29, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-left: 1px solid rgba(0, 229, 255, 0.2);
+  border-left: 1px solid rgba(82, 183, 136, 0.2);
   z-index: 1002;
   display: flex;
   flex-direction: column;
@@ -175,21 +175,21 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: linear-gradient(to bottom, rgba(7, 17, 29, 1), transparent);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
 }
 
 .header-text h2 {
   font-family: 'Syne', sans-serif;
   font-size: 20px;
-  color: #fff;
+  color: var(--grey-900);
   text-transform: uppercase;
   margin-bottom: 4px;
 }
 
 .sidebar-close {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border: none;
-  color: #fff;
+  color: var(--grey-600);
   width: 30px;
   height: 30px;
   border-radius: 50%;
@@ -207,10 +207,10 @@
   border: 1px solid;
 }
 
-.status-badge.polluted { color: #FF4757; border-color: #FF4757; background: #FF475722; }
-.status-badge.moderate { color: #FFB347; border-color: #FFB347; background: #FFB34722; }
-.status-badge.biodiverse { color: #2EE5B0; border-color: #2EE5B0; background: #2EE5B022; }
-.status-badge.clean { color: #00E5FF; border-color: #00E5FF; background: #00E5FF22; }
+.status-badge.polluted { color: #FF4757; border-color: #FF4757; background: rgba(255, 71, 87, 0.1); }
+.status-badge.moderate { color: #E69500; border-color: #FFB347; background: rgba(255, 179, 71, 0.1); }
+.status-badge.biodiverse { color: var(--eco-600); border-color: var(--eco-500); background: rgba(46, 229, 176, 0.1); }
+.status-badge.clean { color: var(--eco-600); border-color: var(--eco-400); background: rgba(82, 183, 136, 0.1); }
 
 .sidebar-scrollable {
   flex: 1;
@@ -224,7 +224,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 60px;
-  color: #00E5FF;
+  color: var(--eco-600);
 }
 
 .spinner { animation: spin 1s linear infinite; font-size: 24px; }
@@ -237,8 +237,8 @@
 }
 
 .metric-card {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(0, 229, 255, 0.1);
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(82, 183, 136, 0.1);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -247,11 +247,11 @@
 
 .metric-card.full { grid-column: span 2; }
 
-.m-icon { color: #00E5FF; font-size: 18px; flex-shrink: 0; }
+.m-icon { color: var(--eco-600); font-size: 18px; flex-shrink: 0; }
 .m-info { display: flex; flex-direction: column; width: 100%; }
-.m-label { font-size: 9px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; }
-.m-value { font-size: 15px; color: #fff; font-weight: 600; }
-.m-value.highlight { color: #00E5FF; font-family: 'Syne', sans-serif; font-size: 18px; }
+.m-label { font-size: 9px; color: var(--grey-600); text-transform: uppercase; }
+.m-value { font-size: 15px; color: var(--grey-900); font-weight: 600; }
+.m-value.highlight { color: var(--eco-600); font-family: 'Syne', sans-serif; font-size: 18px; }
 
 .metric-card.threatened {
   position: relative;
@@ -309,22 +309,26 @@
 
 .m-badge {
   font-size: 10px;
-  background: rgba(0, 229, 255, 0.1);
+  background: rgba(82, 183, 136, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
   width: fit-content;
-  color: #00E5FF;
+  color: var(--eco-600);
 }
+
+.m-badge.success { background: rgba(46, 229, 176, 0.15); color: var(--eco-600); }
+.m-badge.warning { background: rgba(255, 179, 71, 0.15); color: #E69500; }
+.m-badge.danger { background: rgba(255, 71, 87, 0.1); color: #FF4757; }
 
 /* AI Sector */
 .metric-card.primary {
-  background: linear-gradient(135deg, rgba(0, 229, 255, 0.08), transparent);
-  border-color: rgba(0, 229, 255, 0.2);
+  background: linear-gradient(135deg, rgba(82, 183, 136, 0.05), transparent);
+  border-color: rgba(82, 183, 136, 0.2);
 }
 
 .ai-gen-btn {
-  background: #00E5FF;
-  color: #07111D;
+  background: var(--eco-500);
+  color: #FFFFFF;
   border: none;
   padding: 8px;
   border-radius: 8px;
@@ -343,8 +347,8 @@
   margin-top: 12px;
   font-size: 12px;
   line-height: 1.5;
-  color: #e0f2fe;
-  border-top: 1px dashed rgba(0, 229, 255, 0.3);
+  color: var(--grey-800);
+  border-top: 1px dashed rgba(82, 183, 136, 0.3);
   padding-top: 10px;
 }
 
@@ -359,14 +363,14 @@
 .ph-dot span { display: block; font-size: 8px; }
 .ph-dot.active { color: #FF4757; font-weight: 700; }
 
-.ph-line { flex: 1; height: 1px; background: linear-gradient(to right, #00E5FF, #FF4757); }
+.ph-line { flex: 1; height: 1px; background: linear-gradient(to right, var(--eco-400), #FF4757); }
 
 .map-footer-note {
   padding: 12px;
   text-align: center;
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.4);
-  background: rgba(0, 0, 0, 0.2);
+  color: var(--grey-600);
+  background: rgba(0, 0, 0, 0.02);
   display: flex;
   align-items: center;
   justify-content: center;

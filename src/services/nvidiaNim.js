@@ -16,7 +16,7 @@ export const getChatResponse = async (messages) => {
       messages: [
         {
           role: 'system',
-          content: 'You are EcoCaptain, an expert AI assistant for Cyclos, a marine waste management platform. You are an expert in Sustainablity and Waste Management 2026 rules, ocean pollution, and circular economy. Provide concise, expert-level reasoning. Use marine-themed terminology where appropriate.'
+          content: 'You are EcoGuide, an expert AI assistant for Cyclos, a civic solid waste management platform. You are an expert in Sustainablity and Waste Management 2026 rules, urban waste pollution, and circular economy. Provide concise, expert-level reasoning. Use civic SWM terminology where appropriate.'
         },
         ...messages
       ],
@@ -53,7 +53,7 @@ export const analyzeWasteImage = async (base64Image) => {
           content: [
             {
               type: 'text',
-              text: 'STRICT INSTRUCTION: Analyze this waste item and RETURN ONLY A VALID JSON OBJECT. DO NOT include any conversational text, explanations, or labels like "Based on the image".\n\nREQUIRED FIELDS:\n- type: (string, e.g., "Plastic Water Bottle")\n- weight_estimation: (string, e.g., "0.5 kg")\n- recycling_cost: (string, e.g., "₹14.00")\n- recycled_product_suggestion: (string, e.g., "Polyester fabric")\n- co2_impact: (string, e.g., "1.5 kg")'
+              text: 'STRICT INSTRUCTION: Analyze this waste item and RETURN ONLY A VALID JSON OBJECT. DO NOT include any conversational text, explanations, or labels like "Based on the image".\n\nREQUIRED FIELDS:\n- type: (string, e.g., "Copper Wire", "Mixed Organic")\n- stream: (string, "Dry Waste", "Wet Waste", "E-Waste", "Hazardous")\n- grade: (string, "A", "B", "C")\n- recyclability_score: (string, e.g., "94%")\n- weight_estimation: (string, just the number, e.g., "8")\n- price_per_kg: (string, just the number, e.g., "800")\n- co2_per_kg: (string, just the number, e.g., "13.5")\n- selling_potential: (string, "YES", "NO", "Only if bulk")\n- confidence: (string, just the number e.g., "91")'
             },
             {
               type: 'image_url',
@@ -93,10 +93,14 @@ export const analyzeWasteImage = async (base64Image) => {
     // Fallback: Manually extract fields if the AI returned markdown
     const fallback = {
       type: content.match(/Type:\s*(.*)/i)?.[1] || "Unidentified Item",
-      weight_estimation: content.match(/Weight Estimation:\s*(.*)/i)?.[1] || "Unknown",
-      recycling_cost: content.match(/Recycling Cost:\s*(.*)/i)?.[1] || "₹0.00",
-      recycled_product_suggestion: content.match(/Recycled Product Suggestion:\s*(.*)/i)?.[1] || "General Disposal",
-      co2_impact: content.match(/CO2 Impact:\s*(.*)/i)?.[1] || "Negligible"
+      stream: content.match(/Stream:\s*(.*)/i)?.[1] || "Dry Waste",
+      grade: content.match(/Grade:\s*(.*)/i)?.[1] || "B",
+      recyclability_score: content.match(/Recyclability:\s*(.*)/i)?.[1] || "50%",
+      weight_estimation: content.match(/Weight:\s*(.*)/i)?.[1]?.replace(/[^0-9.]/g, '') || "1",
+      price_per_kg: content.match(/Price:\s*(.*)/i)?.[1]?.replace(/[^0-9.]/g, '') || "10",
+      co2_per_kg: content.match(/CO2:\s*(.*)/i)?.[1]?.replace(/[^0-9.]/g, '') || "5",
+      selling_potential: content.match(/Selling:\s*(.*)/i)?.[1] || "YES",
+      confidence: content.match(/Confidence:\s*(.*)/i)?.[1]?.replace(/[^0-9.]/g, '') || "85"
     };
 
     // If we couldn't even extract via regex, throw the error
@@ -123,7 +127,7 @@ export const generateSOSEmailBody = async (incidentType, location, userDescripti
       messages: [
         {
           role: 'system',
-          content: 'You are an automated emergency dispatch assistant for Cyclos Ocean Watch. Your job is to draft a highly professional, concise, and official SOS email report addressed to Maritime Rescue and Environmental Authorities. The email must be extremely clear about the coordinates, incident type, and immediate action required.'
+          content: 'You are an automated emergency dispatch assistant for Cyclos SWM Platform. Your job is to draft a highly professional, concise, and official SOS email report addressed to BBMP and KSPCB Authorities. The email must be extremely clear about the coordinates, incident type, and immediate action required.'
         },
         {
           role: 'user',

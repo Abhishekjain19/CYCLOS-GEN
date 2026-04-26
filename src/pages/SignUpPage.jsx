@@ -74,8 +74,8 @@ export default function SignUpPage() {
           <span>Cyclos</span>
         </div>
 
-        <h1 className="auth-card__title">Create your new<br />account</h1>
-        <p className="auth-card__sub">Create an account to start your eco journey</p>
+        <h1 className="auth-card__title">Join the Circular<br />Economy.</h1>
+        <p className="auth-card__sub">Create an account to track and trade resources</p>
 
         {error && (
           <motion.div className="auth-error" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>

@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+﻿import { useRef, useEffect } from 'react';
 import './TipsCarousel.css';
 
 const TIPS = [
@@ -9,7 +9,7 @@ const TIPS = [
   { emoji: '💡', title: 'E-Waste Awareness', body: 'Never throw electronics in regular trash. E-waste contains toxic metals. Use certified collection centers.' },
   { emoji: '🔥', title: 'Say No to Burning', body: 'Open burning of waste releases toxic gases and PM2.5 particles. Use authorized waste collection services instead.' },
   { emoji: '💧', title: 'Liquid Waste First', body: 'Drain all liquids before disposing containers. Liquid contamination ruins entire batches of recyclables.' },
-  { emoji: '🌊', title: 'Microplastics Crisis', body: 'Over 8 million tonnes of plastic enter oceans yearly. Choose biodegradable alternatives wherever possible.' },
+  { emoji: '♻️', title: 'Microplastics Crisis', body: 'Over 8 million tonnes of plastic enter landfills yearly. Choose biodegradable alternatives wherever possible.' },
   { emoji: '📊', title: 'Track Your Impact', body: 'Use Cyclos dashboard to monitor your carbon footprint, recycling score, and eco points earned over time.' },
   { emoji: '🤝', title: 'Build Circular Chains', body: 'Connect with local businesses to form closed-loop systems where one\'s waste is another\'s raw material.' },
 ];

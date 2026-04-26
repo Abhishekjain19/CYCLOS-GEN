@@ -26,6 +26,12 @@ export default function ScanPage() {
   const [inputMode, setInputMode] = useState('choose'); // 'choose', 'camera', 'upload', 'qr'
   const [scanningProgress, setScanningProgress] = useState(0);
   const [qrMessage, setQrMessage] = useState('');
+  
+  // SWM 2026 Specific State
+  const [editedWeight, setEditedWeight] = useState('');
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const [timerRef, setTimerRef] = useState(null);
 
   // Auto-set mode if passed from navigation (e.g., from ProfilePanel)
   useEffect(() => {
@@ -191,11 +197,31 @@ export default function ScanPage() {
     setAnalyzing(true);
     setError(null);
     setScanned(false);
+    setShowConfirm(false);
+    setEditedWeight('');
 
     try {
       const data = await analyzeWasteImage(base64);
       setResult(data);
       setScanned(true);
+      setEditedWeight(data.weight_estimation);
+      
+      const conf = parseInt(data.confidence || '0', 10);
+      if (conf < 80) {
+        setShowConfirm(true);
+        setCountdown(10);
+        const timer = setInterval(() => {
+          setCountdown((prev) => {
+            if (prev <= 1) {
+              clearInterval(timer);
+              setShowConfirm(false);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+        setTimerRef(timer);
+      }
     } catch (err) {
       console.error(err);
       setError('AI Analysis failed. Please try a clearer photo.');
@@ -203,6 +229,12 @@ export default function ScanPage() {
       setAnalyzing(false);
     }
   };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef) clearInterval(timerRef);
+    };
+  }, [timerRef]);
 
   useEffect(() => {
     if (useCamera) {
@@ -317,7 +349,7 @@ export default function ScanPage() {
             <div className="scan-camera-inner" style={{ minHeight: 320, background: '#000' }}>
               <Scanner onScan={(res) => handleQRScan(res?.[0]?.rawValue)} />
               {qrMessage && (
-                <div style={{ position:'absolute', bottom:16, left:12, right:12, background:'#00B894', color:'#040D18', padding:'10px 14px', borderRadius:10, textAlign:'center', fontWeight:700 }}>
+                <div style={{ position:'absolute', bottom:16, left:12, right:12, background:'var(--eco-500)', color:'#FFF', padding:'10px 14px', borderRadius:10, textAlign:'center', fontWeight:700 }}>
                   {qrMessage}
                 </div>
               )}
@@ -336,7 +368,7 @@ export default function ScanPage() {
               {inputMode === 'camera' && !scanned && (
                 <div className="scan-controls-overlay">
                   <button
-                    style={{ width:64, height:64, borderRadius:'50%', background:'#00E5FF', border:'none', color:'#040D18', fontSize:26, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', boxShadow:'0 0 24px rgba(0,229,255,0.5)' }}
+                    style={{ width:64, height:64, borderRadius:'50%', background:'var(--eco-500)', border:'none', color:'#FFF', fontSize:26, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', boxShadow:'0 0 24px rgba(45,106,79,0.5)' }}
                     onClick={handleCameraCapture}
                     disabled={analyzing}
                   >
@@ -351,8 +383,8 @@ export default function ScanPage() {
             </div>
           ) : (
             <div className="scan-placeholder">
-              <TbReload size={48} style={{ color:'#3D5674' }} />
-              <p style={{ color:'#7A9AB5', fontSize:14 }}>Initializing scanner...</p>
+              <TbReload size={48} style={{ color:'var(--grey-500)' }} />
+              <p style={{ color:'var(--grey-600)', fontSize:14 }}>Initializing scanner...</p>
             </div>
           )}
         </motion.div>
@@ -376,40 +408,91 @@ export default function ScanPage() {
           {analyzing ? 'Analysing...' : scanned ? result.type : 'Capture an image'}
         </div>
 
-        <div className="scan-result-stats">
-          <div className="scan-result-stat">
-            <span className="scan-result-stat__lbl">Waste Type</span>
-            <span className="scan-result-stat__val">{scanned ? result.type : '—'}</span>
-          </div>
-          <div className="scan-result-stat">
-            <span className="scan-result-stat__lbl">Weight Est.</span>
-            <span className="scan-result-stat__val">{scanned ? result.weight_estimation : '—'}</span>
-          </div>
-          <div className="scan-result-stat scan-result-stat--value">
-            <span className="scan-result-stat__lbl">♻ Recycling Value</span>
-            <span className="scan-result-stat__val">{scanned ? result.recycling_cost : '—'}</span>
-          </div>
-          <div className="scan-result-stat scan-result-stat--co2">
-            <span className="scan-result-stat__lbl">⚠ CO₂ Impact</span>
-            <span className="scan-result-stat__val">{scanned ? result.co2_impact : '—'}</span>
-          </div>
-        </div>
-
-        {scanned && result.recycled_product_suggestion && (
-          <div className="scan-ai-suggestion">
-            <span className="scan-ai-icon">✦</span>
-            <p className="scan-ai-text"><strong>AI:</strong> {result.recycled_product_suggestion}</p>
+        {/* LLaMA Pro Escalation Confirm Bar */}
+        {showConfirm && (
+          <div style={{ background: '#FF475722', border: '1px solid #FF4757', borderRadius: '8px', padding: '12px', marginBottom: '16px' }}>
+            <p style={{ color: '#FF4757', fontSize: '13px', margin: '0 0 8px 0', fontWeight: 'bold' }}>
+              ⚠ LLaMA Pro: Low confidence. Is this classification correct?
+            </p>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button onClick={() => { setShowConfirm(false); clearInterval(timerRef); }} style={{ flex: 1, padding: '8px', background: '#FF4757', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Yes</button>
+              <button onClick={() => { setShowConfirm(false); clearInterval(timerRef); setResult(null); setScanned(false); setInputMode('camera'); }} style={{ flex: 1, padding: '8px', background: 'transparent', border: '1px solid #FF4757', color: '#FF4757', borderRadius: '4px', cursor: 'pointer' }}>No, Rescan</button>
+            </div>
+            <div style={{ fontSize: '10px', color: '#FF4757', marginTop: '8px', textAlign: 'right' }}>Auto-confirm in {countdown}s</div>
           </div>
         )}
 
-        <button
-          className="scan-result-btn"
-          onClick={() => scanned ? navigate('/bins', { state: { materialType: result?.type } }) : null}
-          disabled={analyzing || !scanned}
-        >
-          <TbCamera size={18} />
-          {scanned ? 'Add to Bin Station' : 'Capture an Image'}
-        </button>
+        <div className="scan-result-stats">
+          <div className="scan-result-stat">
+            <span className="scan-result-stat__lbl">Material Type</span>
+            <span className="scan-result-stat__val">{scanned ? result.type : '—'}</span>
+          </div>
+          <div className="scan-result-stat">
+            <span className="scan-result-stat__lbl">Stream & Grade</span>
+            <span className="scan-result-stat__val">{scanned ? `${result.stream} · Grade ${result.grade}` : '—'}</span>
+          </div>
+          
+          <div className="scan-result-stat" style={{ gridColumn: 'span 2' }}>
+            <span className="scan-result-stat__lbl">Actual Weight (kg)</span>
+            <input 
+              type="number" 
+              value={editedWeight} 
+              onChange={(e) => setEditedWeight(e.target.value)}
+              disabled={!scanned}
+              style={{ width: '100%', padding: '8px', background: 'var(--grey-100)', border: '1px solid var(--grey-300)', borderRadius: '6px', color: 'var(--grey-900)', fontFamily: 'inherit', marginTop: '4px' }}
+            />
+          </div>
+
+          <div className="scan-result-stat scan-result-stat--value">
+            <span className="scan-result-stat__lbl">♻ Estimated Price</span>
+            <span className="scan-result-stat__val">
+              {scanned ? `₹${(parseFloat(editedWeight || 0) * parseFloat(result.price_per_kg || 0)).toFixed(2)}` : '—'}
+            </span>
+          </div>
+          <div className="scan-result-stat scan-result-stat--co2">
+            <span className="scan-result-stat__lbl">⚠ CO₂ Impact</span>
+            <span className="scan-result-stat__val">
+              {scanned ? `${(parseFloat(editedWeight || 0) * parseFloat(result.co2_per_kg || 0)).toFixed(1)} kg saved` : '—'}
+            </span>
+          </div>
+        </div>
+
+        {scanned && result.selling_potential && (
+          <div className="scan-ai-suggestion" style={{ marginTop: '12px' }}>
+            <span className="scan-ai-icon">✦</span>
+            <p className="scan-ai-text"><strong>AI Analysis:</strong> Recyclability Score {result.recyclability_score}. Selling Potential: {result.selling_potential}.</p>
+          </div>
+        )}
+
+        {scanned && (
+          <div style={{ marginTop: '16px', display: 'flex', gap: '8px', flexDirection: 'column' }}>
+            {(result.stream?.toLowerCase().includes('organic') || result.stream?.toLowerCase().includes('wet')) && parseFloat(editedWeight || 0) < 2 ? (
+              <button
+                className="scan-result-btn"
+                onClick={() => navigate('/bins', { state: { materialType: result?.type } })}
+                style={{ background: 'var(--eco-500)', color: '#fff', border: 'none' }}
+              >
+                <TbMapPin size={18} /> Move to BBMP Green Bin
+              </button>
+            ) : (
+              <button
+                className="scan-result-btn"
+                onClick={() => navigate('/market/sell', { state: { result, weight: editedWeight } })}
+                style={{ background: 'var(--grey-900)', color: '#fff', border: 'none' }}
+                disabled={showConfirm}
+              >
+                List on Market
+              </button>
+            )}
+            
+            <button
+              onClick={() => { setScanned(false); setResult(null); setInputMode('camera'); }}
+              style={{ padding: '12px', background: 'transparent', color: 'var(--grey-600)', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </motion.div>
     </div>
   );

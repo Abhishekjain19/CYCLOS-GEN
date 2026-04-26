@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { TbHome, TbScan, TbBuildingStore, TbUsers } from 'react-icons/tb';
+import { TbHome, TbScan, TbBuildingStore, TbUsers, TbLeaf } from 'react-icons/tb';
 import { AnimatePresence, motion } from 'framer-motion';
 import ChatbotPopup from './ChatbotPopup';
 import './BottomNav.css';
@@ -41,29 +41,10 @@ export default function BottomNav() {
         id="chatbot-dock-icon"
         aria-label="Open Cyclos AI Assistant"
       >
-        {/* Wave SVG Icon */}
-        <svg
-          className="chatbot-fab__wave"
-          viewBox="0 0 28 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M1 8 Q4 1 7 8 T13 8 T19 8 T25 8 T27 8"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            fill="none"
-          />
-          <path
-            d="M1 12 Q4 5 7 12 T13 12 T19 12 T25 12 T27 12"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            fill="none"
-            opacity="0.55"
-          />
-        </svg>
+        <div className="chatbot-fab__content" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
+          <TbLeaf size={22} />
+          <span style={{ fontSize: '9px', fontWeight: '700', letterSpacing: '0.5px' }}>Cyclos AI</span>
+        </div>
       </button>
 
       {/* ── Navigation Pill ── */}

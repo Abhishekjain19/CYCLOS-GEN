@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+﻿import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { TbChevronLeft, TbUserCircle, TbSend } from 'react-icons/tb';
@@ -11,8 +11,8 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([
     { 
       id: 'welcome', 
-      user: 'EcoCaptain', 
-      message: 'Hello! I am EcoCaptain, your marine waste management expert. How can I help you protect our oceans today?', 
+      user: 'EcoGuide', 
+      message: 'Hello! I am EcoGuide, your civic solid waste management expert. How can I help you manage urban waste today?', 
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), 
       mine: false 
     }
@@ -46,7 +46,7 @@ export default function ChatPage() {
       
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        user: 'EcoCaptain',
+        user: 'EcoGuide',
         message: response,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         mine: false
@@ -55,7 +55,7 @@ export default function ChatPage() {
       console.error(err);
       setMessages(prev => [...prev, {
         id: Date.now() + 1,
-        user: 'EcoCaptain',
+        user: 'EcoGuide',
         message: 'Sorry, I encountered an error. Please try again later.',
         time: 'Error',
         mine: false
@@ -101,7 +101,7 @@ export default function ChatPage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
           >
-            <span className="chat-bubble-user">EcoCaptain</span>
+            <span className="chat-bubble-user">EcoGuide</span>
             <div className="chat-bubble typing">
               <span className="dot"></span>
               <span className="dot"></span>

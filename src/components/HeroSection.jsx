@@ -7,43 +7,35 @@ import './HeroSection.css';
 const NEWS_CARDS = [
   {
     id: 0,
-    tag: 'MARINE CRISIS',
-    title: "8 million tonnes of plastic enter oceans every year — India's coastline at breaking point.",
-    excerpt: "A new UNEP report reveals that India's 7,500 km coastline is among the worst affected by marine plastic pollution, with Mumbai, Chennai, and Kochi identified as critical hotspots. MORE",
-    img: '/marine_news1.png',
-    date: 'Mar 28, 2026',
+    tag: 'BBMP INITIATIVE',
+    title: "BBMP mandates 100% source segregation for Bengaluru's bulk generators.",
+    excerpt: "New municipal guidelines enforce strict fines on apartments and tech parks failing to separate dry, wet, and sanitary waste.",
+    img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=500&q=80',
+    date: 'Apr 24, 2026',
   },
   {
     id: 1,
-    tag: 'OCEAN ALERT',
-    title: "Sea turtles found with plastic in 100% of sampled populations off Indian coast.",
-    excerpt: "Marine biologists from NIO Goa confirm that every sea turtle sampled in a 2026 study had ingested microplastics, threatening the survival of critically endangered species. MORE",
-    img: '/marine_news2.png',
-    date: 'Mar 25, 2026',
+    tag: 'E-WASTE HUB',
+    title: "Karnataka launches e-waste tracking dashboard for Peenya Industrial Area.",
+    excerpt: "The state pollution control board aims to curb informal sector processing by digitizing the lifecycle of toxic electronic materials.",
+    img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80',
+    date: 'Apr 20, 2026',
   },
   {
     id: 2,
-    tag: 'COASTAL CRISIS',
-    title: "Ghost fishing nets blanket 40 km of Kerala shoreline — marine life suffocating.",
-    excerpt: "Abandoned fishing gear, or 'ghost nets,' now cover vast stretches of Kerala's coast, trapping dolphins, turtles, and fish in lethal underwater tangles. MORE",
-    img: '/marine_news3.png',
-    date: 'Mar 20, 2026',
+    tag: 'CIRCULAR ECONOMY',
+    title: "Malleswaram residents successfully divert 50 tonnes of organic waste.",
+    excerpt: "A coordinated community composting drive has converted wet waste into high-yield fertilizer for local parks and gardens.",
+    img: 'https://images.unsplash.com/photo-1611284446314-60a58a7dd514?w=500&q=80',
+    date: 'Apr 18, 2026',
   },
   {
     id: 3,
-    tag: 'ACTION',
-    title: "India's largest coastal cleanup drive removes 12,000 tonnes of marine debris.",
-    excerpt: "Over 50,000 volunteers across 13 coastal states participated in the 2026 Ocean Swachh Abhiyan, recovering tonnes of plastic, rubber, and industrial waste from beaches. MORE",
-    img: '/marine_news4.png',
-    date: 'Mar 15, 2026',
-  },
-  {
-    id: 4,
-    tag: 'DEEP SEA',
-    title: "Microplastics detected at 7,000 m depth in the Bay of Bengal — deepest ever in Indian waters.",
-    excerpt: "Scientists from INCOIS Hyderabad discover microplastic contamination in deep-sea sediments, raising alarms about the full extent of ocean pollution beyond surface-level waste. MORE",
-    img: '/marine_news1.png',
-    date: 'Mar 10, 2026',
+    tag: 'KSPCB REPORT',
+    title: "Bengaluru sees 15% reduction in landfill dumping through dry waste centers.",
+    excerpt: "Dry Waste Collection Centres (DWCCs) across 198 wards are driving unprecedented plastic and paper recovery rates.",
+    img: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80',
+    date: 'Apr 15, 2026',
   },
 ];
 
@@ -180,9 +172,9 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
-            Turn Waste Into
+            Digitizing the
             <br />
-            <span className="hero__title-accent">Circular Value</span>
+            <span className="hero__title-accent">Circular Economy</span>
           </motion.h1>
 
           <motion.p
@@ -218,7 +210,7 @@ export default function HeroSection() {
         >
           <div className="hero__carousel-label">
             <span className="hero__carousel-dot" />
-            Marine Waste Events
+            SWM Updates 2026
           </div>
           <NewsCarousel />
         </motion.div>
@@ -227,7 +219,7 @@ export default function HeroSection() {
       {/* Bottom wave separator */}
       <div className="hero__wave">
         <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#0E2425" />
+          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--bg-light)" />
         </svg>
       </div>
     </section>

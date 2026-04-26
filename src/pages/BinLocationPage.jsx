@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+﻿import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -49,7 +49,7 @@ const SITE_TYPES = [
     typeBadge: 'RECYCLING HUB',
     icon: <TbRecycle size={22} />,
     status: 'Open 8am–8pm',
-    accepts: ['Plastic', 'OBP', 'E-Waste', 'Metal', 'Glass'],
+    accepts: ['Plastic', 'Dry Waste', 'E-Waste', 'Metal', 'Glass'],
   },
 ];
 
@@ -57,7 +57,7 @@ const generateNearbyBins = (lat, lng) => [
   { id: 1, lat: lat + 0.0051, lng: lng - 0.0042, name: "BBMP Primary Collection Point", distance: "0.6 km", type: "Dry Waste", ...SITE_TYPES[0] },
   { id: 2, lat: lat - 0.0034, lng: lng + 0.0082, name: "Garbage Transfer Station", distance: "1.2 km", type: "Mixed Waste", ...SITE_TYPES[1] },
   { id: 3, lat: lat + 0.0120, lng: lng + 0.0010, name: "Public Smart Dustbin", distance: "2.1 km", type: "Recyclables", ...SITE_TYPES[2] },
-  { id: 4, lat: lat - 0.0080, lng: lng - 0.0090, name: "Community Recycling Hub", distance: "2.8 km", type: "Plastics/OBP", ...SITE_TYPES[3] },
+  { id: 4, lat: lat - 0.0080, lng: lng - 0.0090, name: "Community Recycling Hub", distance: "2.8 km", type: "Plastics/Dry Waste", ...SITE_TYPES[3] },
 ];
 
 const getHaversineKm = (lat1, lon1, lat2, lon2) => {

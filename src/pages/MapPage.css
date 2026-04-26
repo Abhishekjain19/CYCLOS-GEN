@@ -1,4 +1,4 @@
-.ocean-map-page {
+﻿.urban-map-page {
   position: relative;
   width: 100%;
   height: 100vh;
@@ -36,7 +36,7 @@
 /* Removes leaflet attribution blur and colors it to match theme */
 .leaflet-container .leaflet-control-attribution {
   background: rgba(7, 17, 29, 0.8) !important;
-  color: #00E5FF !important;
+  color: var(--eco-400) !important;
   font-family: 'DM Mono', monospace;
   font-size: 10px;
 }
@@ -71,11 +71,11 @@
 }
 
 .search-pill:focus-within {
-  border-color: #00E5FF;
+  border-color: var(--eco-400);
 }
 
 .search-icon {
-  color: #00E5FF;
+  color: var(--eco-400);
   font-size: 20px;
 }
 
@@ -131,7 +131,7 @@
 
 .legend-pill.active {
   background: rgba(0, 229, 255, 0.2);
-  border-color: #00E5FF;
+  border-color: var(--eco-400);
   color: #fff;
 }
 
@@ -139,12 +139,12 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #00E5FF;
+  background: var(--eco-400);
 }
 
 .legend-pill.polluted .dot { background: #FF4757; }
 .legend-pill.moderate .dot { background: #FFB347; }
-.legend-pill.biodiverse .dot { background: #2EE5B0; }
+.legend-pill.biodiverse .dot { background: var(--eco-500); }
 
 /* Custom Markers */
 .custom-marker {
@@ -231,9 +231,9 @@
 }
 
 /* Tooltip */
-.ocean-tooltip {
+.urban-tooltip {
   background: #07111D !important;
-  border: 1px solid #00E5FF !important;
+  border: 1px solid var(--eco-400) !important;
   color: #fff !important;
   border-radius: 8px !important;
   padding: 8px 12px !important;
@@ -244,7 +244,7 @@
 .tooltip-content strong {
   display: block;
   font-family: 'Syne', sans-serif;
-  color: #00E5FF;
+  color: var(--eco-400);
   font-size: 14px;
 }
 
@@ -334,15 +334,15 @@
 
 .status-badge.polluted { background: rgba(255, 71, 87, 0.2); color: #FF4757; border: 1px solid #FF4757; }
 .status-badge.moderate { background: rgba(255, 179, 71, 0.2); color: #FFB347; border: 1px solid #FFB347; }
-.status-badge.biodiverse { background: rgba(46, 229, 176, 0.2); color: #2EE5B0; border: 1px solid #2EE5B0; }
-.status-badge.clean { background: rgba(0, 229, 255, 0.2); color: #00E5FF; border: 1px solid #00E5FF; }
+.status-badge.biodiverse { background: rgba(46, 229, 176, 0.2); color: var(--eco-500); border: 1px solid var(--eco-500); }
+.status-badge.clean { background: rgba(0, 229, 255, 0.2); color: var(--eco-400); border: 1px solid var(--eco-400); }
 
 .sidebar-content {
   flex: 1;
   overflow-y: auto;
   padding: 0 24px 40px;
   scrollbar-width: thin;
-  scrollbar-color: #00E5FF rgba(255, 255, 255, 0.05);
+  scrollbar-color: var(--eco-400) rgba(255, 255, 255, 0.05);
 }
 
 .metrics-grid {
@@ -378,7 +378,7 @@
 }
 
 .metric-icon {
-  color: #00E5FF;
+  color: var(--eco-400);
   font-size: 20px;
   flex-shrink: 0;
 }
@@ -404,7 +404,7 @@
 }
 
 .metric-info .value.highlight {
-  color: #00E5FF;
+  color: var(--eco-400);
   font-family: 'Syne', sans-serif;
   font-weight: 700;
 }
@@ -420,14 +420,14 @@
 
 .gauge-fill {
   height: 100%;
-  background: #2EE5B0;
+  background: var(--eco-500);
   border-radius: 2px;
-  box-shadow: 0 0 8px #2EE5B0;
+  box-shadow: 0 0 8px var(--eco-500);
 }
 
 /* Temp Badge */
 .temp-warm { color: #FF4757 !important; }
-.temp-cool { color: #00E5FF !important; }
+.temp-cool { color: var(--eco-400) !important; }
 
 /* Health Badge */
 .badge {
@@ -440,8 +440,8 @@
 
 .health-poor { background: #FF475733; color: #FF4757; }
 .health-fair { background: #FFB34733; color: #FFB347; }
-.health-good { background: #2EE5B033; color: #2EE5B0; }
-.health-excellent { background: #00E5FF33; color: #00E5FF; }
+.health-good { background: var(--eco-500)33; color: var(--eco-500); }
+.health-excellent { background: var(--eco-400)33; color: var(--eco-400); }
 
 /* Conservation Row */
 .flex-row {
@@ -454,7 +454,7 @@
 .ghost-btn {
   background: transparent;
   border: 1px solid rgba(0, 229, 255, 0.4);
-  color: #00E5FF;
+  color: var(--eco-400);
   font-size: 11px;
   font-family: 'Syne', sans-serif;
   padding: 4px 10px;
@@ -468,7 +468,7 @@
 
 .ghost-btn:hover {
   background: rgba(0, 229, 255, 0.1);
-  border-color: #00E5FF;
+  border-color: var(--eco-400);
 }
 
 /* pH Strip */
@@ -498,7 +498,7 @@
 
 .ph-progress {
   height: 100%;
-  background: linear-gradient(to right, #00E5FF, #FF4757);
+  background: linear-gradient(to right, var(--eco-400), #FF4757);
 }
 
 /* AI Insight */
@@ -511,7 +511,7 @@
 
 .ai-insight-btn {
   width: 100%;
-  background: #00E5FF;
+  background: var(--eco-400);
   color: #07111D;
   border: none;
   padding: 14px;
@@ -533,7 +533,7 @@
 
 .ai-insight-card {
   background: rgba(0, 229, 255, 0.05);
-  border: 1px dashed #00E5FF;
+  border: 1px dashed var(--eco-400);
   padding: 20px;
   border-radius: 12px;
   font-size: 13px;
@@ -545,7 +545,7 @@
   display: inline-block;
   width: 4px;
   height: 4px;
-  background: #00E5FF;
+  background: var(--eco-400);
   border-radius: 50%;
   margin-left: 4px;
   animation: blink 0.8s infinite;

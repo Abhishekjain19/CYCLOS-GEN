@@ -1,4 +1,4 @@
-.chat-page {
+﻿.chat-page {
   min-height: 100vh;
   background: #110e1b;
   display: flex;
@@ -179,7 +179,7 @@
 .chat-bubble.typing .dot {
   width: 6px;
   height: 6px;
-  background: var(--ocean-400);
+  background: var(--eco-400);
   border-radius: 50%;
   animation: bounce 1.4s infinite ease-in-out;
 }
@@ -190,4 +190,4 @@
 @keyframes bounce {
   0%, 80%, 100% { transform: scale(0); opacity: 0.3; }
   40% { transform: scale(1); opacity: 1; }
-}
+}

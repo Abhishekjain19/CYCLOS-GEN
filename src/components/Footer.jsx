@@ -14,7 +14,7 @@ export default function Footer() {
               <span>Cyclos</span>
             </div>
             <p className="footer__tagline">
-              Building the circular economy, one product at a time. 
+              SWM 2026 · Circular Economy Platform<br/>
               Turn waste into wealth, together.
             </p>
             <div className="footer__social">

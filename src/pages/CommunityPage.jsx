@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,42 +15,42 @@ import './CommunityPage.css';
 const SEED_EVENTS = [
   {
     id: 1,
-    name: 'Marina Beach Plastic Drive',
+    name: 'Lalbagh Cleanup Drive',
     description:
-      'Join us for a large-scale cleanup along Marina Beach. We target single-use plastic, ghost nets, and micro-debris near the waterline.',
-    location: 'Marina Beach, Chennai',
+      'Join us for a large-scale cleanup inside Lalbagh. We target plastic bottles, wrappers, and mixed dry waste.',
+    location: 'Lalbagh, Bengaluru',
     date: '2026-04-12',
-    category: 'Beach Cleanup',
+    category: 'Waste Sorting Drive',
     spots: 48,
     isOwner: false,
   },
   {
     id: 2,
-    name: 'Versova Net Retrieval',
+    name: 'Indiranagar E-Waste Drive',
     description:
-      'Underwater and surface recovery of abandoned fishing nets entangling marine life off Versova coast. Diving gear provided.',
-    location: 'Versova Beach, Mumbai',
+      'Recovery of abandoned electronics and batteries. Safe disposal bins provided by certified recyclers.',
+    location: 'Indiranagar, Bengaluru',
     date: '2026-04-19',
-    category: 'Ghost Net Removal',
+    category: 'E-Waste Collection',
     spots: 20,
     isOwner: false,
   },
   {
     id: 3,
-    name: 'Panjim Mangrove Restoration',
+    name: 'Malleswaram Composting Workshop',
     description:
-      'Plant mangrove saplings along the estuarine buffer zone to restore coastal biodiversity and natural filtration.',
-    location: 'Mandovi Estuary, Goa',
+      'Learn how to compost kitchen waste and manage wet waste efficiently at home to reduce landfill burden.',
+    location: 'Malleswaram, Bengaluru',
     date: '2026-04-26',
-    category: 'Habitat Restoration',
+    category: 'Composting Workshop',
     spots: 35,
     isOwner: false,
   },
   {
     id: 4,
-    name: 'Bengaluru Ocean Awareness Rally',
+    name: 'Bengaluru SWM Awareness Rally',
     description:
-      'A city march and awareness workshop educating inland communities about how land-based pollution reaches the sea.',
+      'A city march and awareness workshop educating communities about the importance of segregation at source.',
     location: 'Cubbon Park, Bengaluru',
     date: '2026-05-03',
     category: 'Awareness',
@@ -59,10 +59,10 @@ const SEED_EVENTS = [
   },
   {
     id: 5,
-    name: 'Kochi Harbour Microplastic Study',
+    name: 'Bellandur Lake Water Quality Study',
     description:
-      "Citizen science data-collection event. Participants sample harbour water and submit data to NIO's national microplastic database.",
-    location: 'Kochi Harbour, Kerala',
+      'Citizen science data-collection event. Participants sample lake water for pollutants and submit data to KSPCB.',
+    location: 'Bellandur, Bengaluru',
     date: '2026-05-10',
     category: 'Citizen Science',
     spots: 15,
@@ -71,9 +71,9 @@ const SEED_EVENTS = [
 ];
 
 const CATEGORY_COLORS = {
-  'Beach Cleanup':       { bg: 'rgba(6,182,212,0.15)',  border: '#06b6d4', text: '#67e8f9' },
-  'Ghost Net Removal':   { bg: 'rgba(99,102,241,0.15)', border: '#6366f1', text: '#a5b4fc' },
-  'Habitat Restoration': { bg: 'rgba(16,185,129,0.15)', border: '#10b981', text: '#6ee7b7' },
+  'Waste Sorting Drive': { bg: 'rgba(6,182,212,0.15)',  border: '#06b6d4', text: '#67e8f9' },
+  'E-Waste Collection':  { bg: 'rgba(99,102,241,0.15)', border: '#6366f1', text: '#a5b4fc' },
+  'Composting Workshop': { bg: 'rgba(16,185,129,0.15)', border: '#10b981', text: '#6ee7b7' },
   'Awareness':           { bg: 'rgba(245,158,11,0.15)', border: '#f59e0b', text: '#fcd34d' },
   'Citizen Science':     { bg: 'rgba(139,92,246,0.15)', border: '#8b5cf6', text: '#c4b5fd' },
 };
@@ -271,7 +271,7 @@ function CreateView({ onBack, onCreated }) {
     description: '', 
     location: '', 
     date: '', 
-    category: 'Beach Cleanup' 
+    category: 'Waste Sorting Drive' 
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -364,7 +364,7 @@ function CreateView({ onBack, onCreated }) {
           <label className="comm-label">Event Name</label>
           <input
             className="comm-input"
-            placeholder="e.g. Juhu Beach Cleanup Drive"
+            placeholder="e.g. Juhu Waste Sorting Drive Drive"
             value={form.name}
             onChange={e => set('name', e.target.value)}
           />
@@ -583,7 +583,7 @@ export default function CommunityPage() {
 
   return (
     <div className="community-page">
-      {/* Animated ocean background blobs */}
+      {/* Animated eco background blobs */}
       <div className="comm-bg">
         <div className="comm-bg__blob comm-bg__blob--1" />
         <div className="comm-bg__blob comm-bg__blob--2" />
@@ -603,15 +603,15 @@ export default function CommunityPage() {
           >
             <div className="comm-home__header">
               <div className="comm-home__badge">
-                <TbWaveSine size={14} /> Ocean Community · 2026
+                <TbWaveSine size={14} /> SWM Community · 2026
               </div>
               <h1 className="comm-home__title">
                 Act Together,<br />
                 <span className="comm-home__accent">Save Together</span>
               </h1>
               <p className="comm-home__subtitle">
-                Organise and join marine cleanup events, habitat restoration drives,
-                and ocean awareness campaigns — right from your community.
+                Organise and join civic waste sorting drives, habitat restoration drives,
+                and sustainability awareness campaigns — right from your community.
               </p>
             </div>
 
@@ -640,7 +640,7 @@ export default function CommunityPage() {
                 <div className="comm-action-card__icon">📋</div>
                 <div className="comm-action-card__body">
                   <h3>Create Event</h3>
-                  <p>Organise a local ocean conservation event and rally volunteers from your community.</p>
+                  <p>Organise a local sustainability event and rally volunteers from your community.</p>
                   <span className="comm-action-card__count">Takes under 2 minutes</span>
                 </div>
                 <TbChevronRight size={22} className="comm-action-card__arrow" />

@@ -7,8 +7,8 @@
 .scan-page {
   min-height: 100dvh;
   background:
-    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,80,145,0.2) 0%, transparent 55%),
-    #040D18;
+    radial-gradient(ellipse 70% 50% at 50% 0%, rgba(45,106,79,0.1) 0%, transparent 55%),
+    var(--bg-light);
   display: flex;
   flex-direction: column;
   padding-bottom: 110px;
@@ -28,9 +28,9 @@
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
-  color: #7A9AB5;
+  background: rgba(45,106,79,0.05);
+  border: 1px solid rgba(45,106,79,0.1);
+  color: var(--grey-600);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -38,13 +38,13 @@
   transition: color 0.2s, background 0.2s, transform 80ms;
 }
 .scan-header__btn:active { transform: scale(0.9); }
-.scan-header__btn:hover { color: #00E5FF; background: rgba(0,229,255,0.1); }
+.scan-header__btn:hover { color: var(--eco-600); background: rgba(45,106,79,0.1); }
 
 .scan-header__title {
   font-family: 'Clash Display', sans-serif;
   font-size: 20px;
   font-weight: 600;
-  color: #EDF2F7;
+  color: var(--grey-800);
   letter-spacing: 1px;
 }
 
@@ -55,8 +55,8 @@
 }
 
 .scan-camera-box {
-  background: #0A1628;
-  border: 1px solid rgba(0,229,255,0.1);
+  background: #FFFFFF;
+  border: 1px solid rgba(45,106,79,0.1);
   border-radius: 20px;
   overflow: hidden;
   position: relative;
@@ -72,7 +72,7 @@
 
 .scan-zone-camera {
   height: 170px;
-  background: #0F1F38;
+  background: var(--surface-light);
   border-radius: 14px;
   display: flex;
   flex-direction: column;
@@ -84,7 +84,7 @@
   overflow: hidden;
   transition: background 0.2s;
 }
-.scan-zone-camera:active { background: #162B4A; }
+.scan-zone-camera:active { background: var(--surface-hover); }
 
 /* Animated corner brackets */
 .scan-hud-overlay {
@@ -100,7 +100,7 @@
   position: absolute;
   width: 20px;
   height: 20px;
-  border-color: #00E5FF;
+  border-color: var(--eco-600);
   border-style: solid;
   border-width: 0;
   transition: opacity 0.3s;
@@ -112,18 +112,18 @@
 .scan-hud-corner.br { bottom:0; right:0; border-bottom-width:2.5px; border-right-width:2.5px; border-radius:0 0 4px 0; }
 
 @keyframes bracket-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(0,229,255,0.3); }
-  50%       { opacity: 0.5; box-shadow: 0 0 2px rgba(0,229,255,0.1); }
+  0%, 100% { opacity: 1; box-shadow: 0 0 8px rgba(45,106,79,0.3); }
+  50%       { opacity: 0.5; box-shadow: 0 0 2px rgba(45,106,79,0.1); }
 }
 
 .scan-zone-camera:hover .scan-hud-corner {
-  box-shadow: 0 0 16px rgba(0,229,255,0.7);
+  box-shadow: 0 0 16px rgba(45,106,79,0.7);
   opacity: 1;
 }
 
 .scan-zone-icon {
   font-size: 32px;
-  color: #00E5FF;
+  color: var(--eco-600);
   position: relative;
   z-index: 1;
 }
@@ -132,14 +132,14 @@
   font-family: 'Clash Display', sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #EDF2F7;
+  color: var(--grey-800);
   position: relative;
   z-index: 1;
 }
 
 .scan-zone-hint {
   font-size: 11px;
-  color: #7A9AB5;
+  color: var(--grey-600);
   position: relative;
   z-index: 1;
 }
@@ -150,7 +150,7 @@
   align-items: center;
   gap: 10px;
   padding: 0 8px;
-  color: #3D5674;
+  color: var(--grey-500);
   font-size: 11px;
   font-weight: 600;
 }
@@ -159,12 +159,12 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: rgba(0,229,255,0.08);
+  background: rgba(45,106,79,0.08);
 }
 
 /* ── Zone 2: QR ──────────────────────────────── */
 .scan-zone-qr {
-  background: linear-gradient(135deg, #004D40, #003330);
+  background: linear-gradient(135deg, var(--eco-700), var(--eco-900));
   border-radius: 14px;
   padding: 16px 20px;
   display: flex;
@@ -178,13 +178,13 @@
 .scan-zone-qr-icon {
   width: 44px;
   height: 44px;
-  background: rgba(0,184,148,0.2);
+  background: rgba(82,183,136,0.2);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  color: #00B894;
+  color: var(--eco-500);
 }
 
 .scan-zone-qr-text {}
@@ -192,22 +192,22 @@
   font-family: 'Clash Display', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #EDF2F7;
+  color: var(--grey-800);
 }
 .scan-zone-qr-sub {
   display: inline-flex;
   margin-top: 4px;
   padding: 2px 8px;
-  background: rgba(0,184,148,0.15);
+  background: rgba(82,183,136,0.15);
   border-radius: 999px;
   font-size: 10px;
-  color: #00B894;
+  color: var(--eco-500);
   font-weight: 600;
 }
 
 /* ── Zone 3: Upload ──────────────────────────── */
 .scan-zone-upload {
-  border: 1.5px dashed rgba(0,229,255,0.25);
+  border: 1.5px dashed rgba(45,106,79,0.25);
   border-radius: 14px;
   padding: 16px 20px;
   display: flex;
@@ -217,29 +217,29 @@
   transition: border-color 0.2s, background 0.2s, transform 80ms;
 }
 .scan-zone-upload:active { transform: scale(0.97); }
-.scan-zone-upload:hover { border-color: rgba(0,229,255,0.5); background: rgba(0,229,255,0.03); }
+.scan-zone-upload:hover { border-color: rgba(45,106,79,0.5); background: rgba(45,106,79,0.03); }
 
 .scan-zone-upload-icon {
   width: 44px;
   height: 44px;
-  background: rgba(0,229,255,0.08);
+  background: rgba(45,106,79,0.08);
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
-  color: #00E5FF;
+  color: var(--eco-600);
 }
 
 .scan-zone-upload-label {
   font-family: 'Clash Display', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #EDF2F7;
+  color: var(--grey-800);
 }
 .scan-zone-upload-sub {
   font-size: 11px;
-  color: #7A9AB5;
+  color: var(--grey-600);
   margin-top: 2px;
 }
 
@@ -276,8 +276,8 @@
 /* ── Result Card ─────────────────────────────── */
 .scan-result-card {
   margin: 14px 16px 0;
-  background: #0A1628;
-  border: 1px solid rgba(0,229,255,0.1);
+  background: #FFFFFF;
+  border: 1px solid rgba(45,106,79,0.1);
   border-radius: 20px;
   padding: 18px;
   overflow: visible;
@@ -294,7 +294,7 @@
   font-family: 'Clash Display', sans-serif;
   font-size: 12px;
   font-weight: 600;
-  color: #7A9AB5;
+  color: var(--grey-600);
   letter-spacing: 1px;
   text-transform: uppercase;
 }
@@ -302,14 +302,14 @@
 .scan-result-case {
   font-family: 'Space Mono', monospace;
   font-size: 10px;
-  color: #3D5674;
+  color: var(--grey-500);
 }
 
 .scan-result-title {
   font-family: 'Clash Display', sans-serif;
   font-size: 18px;
   font-weight: 700;
-  color: #EDF2F7;
+  color: var(--grey-800);
   margin-bottom: 14px;
 }
 
@@ -321,8 +321,8 @@
 }
 
 .scan-result-stat {
-  background: #0F1F38;
-  border: 1px solid rgba(0,229,255,0.08);
+  background: var(--surface-light);
+  border: 1px solid rgba(45,106,79,0.08);
   border-radius: 12px;
   padding: 12px;
   display: flex;
@@ -333,7 +333,7 @@
 .scan-result-stat__lbl {
   font-size: 10px;
   font-weight: 600;
-  color: #7A9AB5;
+  color: var(--grey-600);
   text-transform: uppercase;
   letter-spacing: .5px;
 }
@@ -342,10 +342,10 @@
   font-family: 'Clash Display', sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #EDF2F7;
+  color: var(--grey-800);
 }
 
-.scan-result-stat--value .scan-result-stat__val { color: #00B894; }
+.scan-result-stat--value .scan-result-stat__val { color: var(--eco-500); }
 .scan-result-stat--co2 .scan-result-stat__val   { color: #FFB347; }
 
 /* AI suggestion row */
@@ -353,8 +353,8 @@
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(0,184,148,0.06));
-  border: 1px solid rgba(0,229,255,0.12);
+  background: linear-gradient(135deg, rgba(45,106,79,0.06), rgba(82,183,136,0.06));
+  border: 1px solid rgba(45,106,79,0.12);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 14px;
@@ -362,29 +362,29 @@
 
 .scan-ai-icon {
   font-size: 16px;
-  color: #00E5FF;
+  color: var(--eco-600);
   margin-top: 1px;
   flex-shrink: 0;
 }
 
 .scan-ai-text {
   font-size: 13px;
-  color: #7A9AB5;
+  color: var(--grey-600);
   line-height: 1.5;
 }
-.scan-ai-text strong { color: #00E5FF; }
+.scan-ai-text strong { color: var(--eco-600); }
 
 /* ── CTA Button ──────────────────────────────── */
 .scan-result-btn {
   width: 100%;
   height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #00B894, #00E5FF);
+  background: linear-gradient(135deg, var(--eco-500), var(--eco-600));
   border: none;
   font-family: 'Clash Display', sans-serif;
   font-size: 15px;
   font-weight: 600;
-  color: #040D18;
+  color: var(--bg-light);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -397,7 +397,7 @@
 .scan-result-btn:active { transform: scale(0.97); }
 .scan-result-btn:disabled {
   background: linear-gradient(135deg, #224444, #1A3A4A);
-  color: #3D5674;
+  color: var(--grey-500);
   cursor: default;
 }
 .scan-result-btn::after {
@@ -427,12 +427,12 @@
   justify-content: center;
   height: 200px;
   gap: 12px;
-  color: #3D5674;
+  color: var(--grey-500);
 }
 
 .scan-placeholder-icon {
   font-size: 48px;
-  color: #3D5674;
+  color: var(--grey-500);
 }
 
 /* legacy compat */

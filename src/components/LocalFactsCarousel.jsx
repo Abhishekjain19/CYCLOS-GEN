@@ -1,19 +1,12 @@
 import { useRef, useEffect, useState } from 'react';
 import './LocalFactsCarousel.css';
 
-// Import local high-fidelity assets
-import coastalCleanupImg from '../assets/facts/coastal_cleanup.png';
-import microplasticsImg from '../assets/facts/microplastics.png';
-import coralRestorationImg from '../assets/facts/coral_restoration.png';
-import ghostNetImg from '../assets/facts/ghost_net_recovery.png';
-import wildlifeImg from '../assets/facts/dolphin_sighting.png';
-
 const GET_FACTS = (loc) => [
-  { img: coastalCleanupImg, title: `${loc} Coastal Cleanup`, body: `Recent data shows ${loc} has recovered over 2,500 lbs of ocean-bound plastic this year alone.`, color: '#0ea5e9' },
-  { img: microplasticsImg, title: `Microplastics Alert`, body: `Samples in the ${loc} district reveal 30% less microplastics than the national average! Great work.`, color: '#0369a1' },
-  { img: coralRestorationImg, title: `Coral Restoration`, body: `New ${loc} marine initiatives are replanting 500+ coral fragments to restore the local reef ecosystem.`, color: '#0284c7' },
-  { img: ghostNetImg, title: `Ghost Net Recovery`, body: `Local divers in ${loc} successfully removed 4 major commercial fishing nets, saving countless sea turtles.`, color: '#0284c7' },
-  { img: wildlifeImg, title: 'Wildlife Sightings', body: `Proper waste sorting directly impacts the marine cleanliness of ${loc}, leading to increased dolphin sightings!`, color: '#38bdf8' }
+  { img: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?w=500&q=80', title: `BBMP Dry Waste Centres`, body: `${loc}'s local Dry Waste Collection Centre has diverted 2,500 tonnes of plastic this year.`, color: 'var(--eco-500)' },
+  { img: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=500&q=80', title: `E-Waste Tracking`, body: `KSPCB initiates digitized tracking for toxic electronic waste in the ${loc} industrial sector.`, color: 'var(--eco-600)' },
+  { img: 'https://images.unsplash.com/photo-1611284446314-60a58a7dd514?w=500&q=80', title: `Community Composting`, body: `Citizen initiatives in ${loc} are converting 50% of wet waste into organic fertilizer.`, color: 'var(--eco-500)' },
+  { img: 'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500&q=80', title: `Circular Economy Hubs`, body: `New material recovery facilities in ${loc} are processing multi-layer plastics for construction.`, color: 'var(--eco-600)' },
+  { img: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=500&q=80', title: `Civic Cleanups`, body: `Weekend plogging drives in ${loc} have significantly reduced roadside littering!`, color: 'var(--eco-400)' }
 ];
 
 export default function LocalFactsCarousel({ location }) {

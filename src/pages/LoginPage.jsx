@@ -72,8 +72,8 @@ export default function LoginPage() {
           <span>Cyclos</span>
         </div>
 
-        <h1 className="auth-card__title">Login to your<br />account.</h1>
-        <p className="auth-card__sub">Please sign in to your account</p>
+        <h1 className="auth-card__title">Welcome back to<br />Cyclos.</h1>
+        <p className="auth-card__sub">Sign in to your SWM 2026 portal</p>
 
         {error && (
           <motion.div className="auth-error" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>

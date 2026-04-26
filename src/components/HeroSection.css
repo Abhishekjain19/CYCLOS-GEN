@@ -7,27 +7,28 @@
   flex-direction: column;
 }
 
-/* Ocean background image */
+/* Eco background */
 .hero__bg {
   position: absolute;
   inset: 0;
-  background: url('/ocean_hero.png') center center / cover no-repeat;
+  background-image: url('/cleaning_street_hero.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   z-index: 0;
 }
 
-/* Gradient overlay — tuned for ocean background */
+/* Gradient overlay */
 .hero__bg-overlay {
   position: absolute;
   inset: 0;
   background:
     linear-gradient(to bottom,
-      rgba(8, 28, 42, 0.4) 0%,
-      rgba(10, 32, 48, 0.3) 40%,
-      rgba(14, 36, 37, 0.75) 75%,
-      rgba(14, 36, 37, 1) 100%),
+      rgba(0, 0, 0, 0.2) 0%,
+      rgba(0, 0, 0, 0.4) 100%),
     linear-gradient(to right,
-      rgba(8, 28, 42, 0.65) 0%,
-      transparent 55%);
+      rgba(0, 0, 0, 0.5) 0%,
+      transparent 60%);
   z-index: 1;
 }
 
@@ -78,8 +79,7 @@
 }
 
 .hero__title-accent {
-  color: var(--teal-300);
-  /* Light teal (#7ECAC0) for contrast on dark overlay */
+  color: var(--eco-300);
 }
 
 .hero__subtitle {
@@ -102,8 +102,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(135deg, var(--teal-400), var(--teal-300));
-  color: var(--teal-950);
+  background: linear-gradient(135deg, var(--eco-400), var(--eco-300));
+  color: var(--eco-900);
   border: none;
   padding: 15px 32px;
   border-radius: 50px;
@@ -118,8 +118,8 @@
 
 .hero__cta-btn:hover {
   transform: translateY(-3px);
-  box-shadow: 0 10px 36px rgba(57, 147, 139, 0.55);
-  background: linear-gradient(135deg, var(--teal-300), var(--teal-200));
+  box-shadow: 0 10px 36px rgba(45, 106, 79, 0.55);
+  background: linear-gradient(135deg, var(--eco-300), var(--eco-200));
 }
 
 .hero__ghost-btn {
@@ -166,7 +166,7 @@
 .hero__carousel-dot {
   width: 8px;
   height: 8px;
-  background: var(--teal-400);
+  background: var(--eco-400);
   border-radius: 50%;
   animation: pulse 2s ease-in-out infinite;
 }
@@ -175,11 +175,11 @@
 
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(83, 174, 165, 0.5);
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5);
   }
 
   50% {
-    box-shadow: 0 0 0 6px rgba(83, 174, 165, 0);
+    box-shadow: 0 0 0 6px rgba(74, 222, 128, 0);
   }
 }
 
@@ -220,9 +220,9 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(to top,
-      rgba(14, 36, 37, 0.95) 0%,
-      rgba(14, 36, 37, 0.55) 45%,
-      rgba(14, 36, 37, 0.15) 100%);
+      rgba(20, 83, 45, 0.95) 0%,
+      rgba(20, 83, 45, 0.55) 45%,
+      rgba(20, 83, 45, 0.15) 100%);
 }
 
 .news-card__content {
@@ -303,7 +303,7 @@
   z-index: 10;
   width: 36px;
   height: 36px;
-  background: rgba(14, 36, 37, 0.7);
+  background: rgba(20, 83, 45, 0.7);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
@@ -316,8 +316,8 @@
 }
 
 .news-carousel__arrow:hover {
-  background: var(--teal-600);
-  border-color: var(--teal-400);
+  background: var(--eco-600);
+  border-color: var(--eco-400);
   transform: translateY(-50%) scale(1.1);
 }
 
@@ -349,7 +349,7 @@
 }
 
 .news-carousel__dot--active {
-  background: var(--teal-400);
+  background: var(--eco-400);
   width: 22px;
   border-radius: 99px;
 }
@@ -370,8 +370,8 @@
 .news-modal {
   width: 100%;
   max-width: 400px;
-  background: var(--teal-900);
-  border: 1px solid rgba(83, 174, 165, 0.2);
+  background: var(--eco-900);
+  border: 1px solid rgba(74, 222, 128, 0.2);
   border-radius: 24px;
   overflow: hidden;
   position: relative;
@@ -385,7 +385,7 @@
   z-index: 10;
   width: 32px;
   height: 32px;
-  background: rgba(14, 36, 37, 0.8);
+  background: rgba(20, 83, 45, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   color: white;
@@ -429,7 +429,7 @@
 
 .news-modal__date {
   font-size: 11px;
-  color: var(--teal-400);
+  color: var(--eco-400);
   font-weight: 600;
 }
 

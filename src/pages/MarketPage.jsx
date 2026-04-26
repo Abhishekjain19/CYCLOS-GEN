@@ -14,17 +14,13 @@ import './MarketPage.css';
 
 /* ── Category tabs ─────────── */
 const CATEGORIES = [
-  { id: 'all',      emoji: '🌊', label: 'All' },
-  { id: 'plastic',  emoji: '♻️', label: 'Plastic' },
+  { id: 'all',      emoji: '♻️', label: 'All' },
+  { id: 'plastic',  emoji: '🥤', label: 'Plastic' },
   { id: 'metal',    emoji: '🔩', label: 'Metal' },
   { id: 'paper',    emoji: '📄', label: 'Paper' },
   { id: 'glass',    emoji: '🏺', label: 'Glass' },
   { id: 'ewaste',   emoji: '💻', label: 'E-waste' },
   { id: 'organic',  emoji: '🌿', label: 'Organic' },
-  { id: 'ornament', emoji: '🐚', label: 'Ornaments' },
-  { id: 'obp',      emoji: '🌀', label: 'OBP Plastic' },
-  { id: 'fishing',  emoji: '🕸️', label: 'Nets' },
-  { id: 'metals',   emoji: '⚓', label: 'Sea Metals' },
 ];
 
 const SORT_OPTIONS = [
@@ -66,6 +62,9 @@ export default function MarketPage() {
   const [buySuccess, setBuySuccess] = useState(false);
   const [buyError, setBuyError] = useState('');
   const [pickupDate, setPickupDate] = useState('');
+  const [bidAmount, setBidAmount] = useState('');
+  const [escrowState, setEscrowState] = useState(null); // 'handshake', 'verification', 'complete'
+  const [physicalWeight, setPhysicalWeight] = useState('');
 
   // ── Read category from URL query on mount ─────────────
   useEffect(() => {
@@ -220,6 +219,10 @@ export default function MarketPage() {
     setSelected(p);
     setBuySuccess(false);
     setBuyError('');
+    setEscrowState(null);
+    setBidAmount(p.price?.replace(/[^0-9.]/g, '') || '');
+    setPhysicalWeight(p.quantity?.replace(/[^0-9.]/g, '') || '');
+    setPickupDate('');
   };
 
   // ── Image picker ─────────────────────────────────────────
@@ -327,7 +330,7 @@ export default function MarketPage() {
     }
   };
 
-  // ── Buy request ──────────────────────────────────────────
+  // ── Buy request / Bidding ──────────────────────────────────────────
   const handleBuyRequest = async () => {
     if (!selected) return;
     setBuyLoading(true);
@@ -344,20 +347,29 @@ export default function MarketPage() {
             seller_id: selected.seller_id,
             buyer_name: userProfile?.full_name || user.email,
             product_name: getDisplayName(selected),
-            status: 'accepted',
+            status: 'pending_handshake',
             pickup_date: pickupDate || 'Not specified',
+            bid_amount: bidAmount
           });
           if (error) throw error;
         }
       }
       setBuySuccess(true);
-      setPickupDate('');
+      setEscrowState('handshake');
     } catch (err) {
-      console.error('Buy request error:', err);
-      setBuyError('Could not send buy request. Please try again.');
+      console.error('Bid error:', err);
+      setBuyError('Could not send bid. Please try again.');
     } finally {
       setBuyLoading(false);
     }
+  };
+
+  const proceedToVerification = () => {
+    setEscrowState('verification');
+  };
+
+  const finalizePayout = () => {
+    setEscrowState('complete');
   };
 
   // ── Active categories to show in filter bar ──────────────
@@ -378,7 +390,7 @@ export default function MarketPage() {
         </button>
         <div className="mkt-header__center">
           <TbShoppingCart size={18} className="mkt-header__store-icon" />
-          <h2 className="mkt-header__title">Ocean Market</h2>
+          <h2 className="mkt-header__title">Eco-Market</h2>
         </div>
         <div className="mkt-header__actions">
           <button
@@ -612,7 +624,7 @@ export default function MarketPage() {
               <div className="mkt-upload__success">
                 <div className="mkt-upload__success-icon"><TbCheck size={40} /></div>
                 <h3>Listed Successfully!</h3>
-                <p>Your item is now live on the Ocean Market.</p>
+                <p>Your item is now live on the Eco-Market.</p>
               </div>
             ) : (
               <form className="mkt-upload__form" onSubmit={handleUploadSubmit} id="mkt-upload-form">
@@ -884,21 +896,79 @@ export default function MarketPage() {
                 </div>
               )}
 
-              {/* Pickup Date Selection */}
-              {!buySuccess && (user?.id !== selected.seller_id) && (
-                <div className="mkt-buy-date-picker" style={{ marginTop: 24 }}>
-                  <p className="mkt-detail__desc-title" style={{ marginBottom: 8 }}>Select Pickup Date</p>
-                  <input 
-                    type="date" 
-                    className="mkt-search"
-                    style={{ width: '100%', padding: '10px 14px' }}
-                    min={new Date().toISOString().split('T')[0]}
-                    value={pickupDate}
-                    onChange={(e) => setPickupDate(e.target.value)}
-                  />
-                  <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
-                    Seller must confirm the available date.
+              {/* Escrow States & Bidding */}
+              {escrowState === 'complete' ? (
+                <div style={{ marginTop: 24, padding: '16px', background: 'var(--eco-500)', borderRadius: '12px', color: '#fff' }}>
+                  <h3 style={{ margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '8px' }}><TbCheck size={20} /> Transaction Complete</h3>
+                  <p style={{ margin: '0 0 4px', fontSize: '14px' }}>Payout Sent via QR: <strong>₹{(parseFloat(bidAmount || 0) * 0.95).toFixed(2)}</strong> (5% Service Fee)</p>
+                  <p style={{ margin: 0, fontSize: '13px', opacity: 0.9 }}>CO2 Saving Logged: <strong>{parseFloat(physicalWeight || 0) * 1.5} kg</strong></p>
+                </div>
+              ) : escrowState === 'verification' ? (
+                <div style={{ marginTop: 24, padding: '16px', background: 'var(--eco-50)', border: '1px solid var(--eco-200)', borderRadius: '12px', color: 'var(--eco-900)' }}>
+                  <h3 style={{ margin: '0 0 12px' }}>Physical Verification</h3>
+                  <label style={{ display: 'block', marginBottom: 6, fontSize: 13, fontWeight: 600 }}>Verified Weight (kg)</label>
+                  <input type="number" value={physicalWeight} onChange={(e) => setPhysicalWeight(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid var(--eco-200)', marginBottom: 12 }} />
+                  <p style={{ margin: '0 0 12px', fontSize: '13px' }}>Adjusted Payout: ₹{((parseFloat(bidAmount || 0) / (parseFloat(selected.quantity?.replace(/[^0-9.]/g, '') || 1))) * parseFloat(physicalWeight || 0)).toFixed(2)}</p>
+                  <button onClick={finalizePayout} style={{ width: '100%', padding: '12px', background: 'var(--eco-600)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Generate Payout QR</button>
+                </div>
+              ) : escrowState === 'handshake' ? (
+                <div style={{ marginTop: 24, padding: '16px', background: 'var(--blue-50)', border: '1px solid var(--blue-200)', borderRadius: '12px', color: 'var(--blue-900)' }}>
+                  <h3 style={{ margin: '0 0 12px', display: 'flex', alignItems: 'center', gap: '8px' }}><TbBell size={20} /> Escrow Handshake Active</h3>
+                  <p style={{ margin: '0 0 8px', fontSize: '14px' }}>Bid accepted! Escrow secured.</p>
+                  <p style={{ margin: '0 0 16px', fontSize: '13px', background: '#fff', padding: '10px', borderRadius: '6px', border: '1px solid var(--blue-100)' }}>
+                    <strong>Exact GPS:</strong> 12.9716° N, 77.5946° E<br/>
+                    <strong>Contact:</strong> +91 98765 43210
                   </p>
+                  <button onClick={proceedToVerification} style={{ width: '100%', padding: '12px', background: 'var(--blue-600)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Arrived for Verification</button>
+                </div>
+              ) : (!buySuccess && user?.id !== selected.seller_id) && (
+                <div className="mkt-buy-date-picker" style={{ marginTop: 24 }}>
+                  <p className="mkt-detail__desc-title" style={{ marginBottom: 8 }}>Place Bid via Escrow</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+                    <div>
+                      <label style={{ fontSize: 12, color: 'var(--grey-600)', marginBottom: 4, display: 'block' }}>Bid Amount (₹)</label>
+                      <input 
+                        type="number" 
+                        className="mkt-search"
+                        style={{ width: '100%', padding: '10px 14px' }}
+                        value={bidAmount}
+                        onChange={(e) => setBidAmount(e.target.value)}
+                        placeholder="Offer price"
+                      />
+                    </div>
+                    <div>
+                      <label style={{ fontSize: 12, color: 'var(--grey-600)', marginBottom: 4, display: 'block' }}>Pickup Date</label>
+                      <input 
+                        type="date" 
+                        className="mkt-search"
+                        style={{ width: '100%', padding: '10px 14px' }}
+                        min={new Date().toISOString().split('T')[0]}
+                        value={pickupDate}
+                        onChange={(e) => setPickupDate(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <p style={{ fontSize: '12px', color: 'var(--grey-500)', marginTop: 4 }}>
+                    Funds will be held in Escrow until physical verification.
+                  </p>
+                </div>
+              )}
+
+              {/* Actions */}
+              {!escrowState && (
+                <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
+                  <button
+                    id="mkt-send-buy-request-btn"
+                    className={`mkt-detail__cta ${buySuccess ? 'mkt-detail__cta--success' : ''}`}
+                    style={{ margin: 0, flex: 1, background: 'var(--grey-900)' }}
+                    onClick={handleBuyRequest}
+                    disabled={buyLoading || buySuccess || !bidAmount || !pickupDate}
+                  >
+                    {buyLoading
+                      ? <TbLoader2 size={18} className="mkt-loading-spin" />
+                      : <><TbSend size={18} /> Place Escrow Bid</>
+                    }
+                  </button>
                 </div>
               )}
 
@@ -909,9 +979,9 @@ export default function MarketPage() {
                   <div className="mkt-also-list">
                     {products
                       .filter(p => p.id !== selected.id && p.category === selected.category)
-                      .slice(0, 3)
+                      .slice(0, 5)
                       .map(p => (
-                        <div key={p.id} className="mkt-also-item" onClick={() => openProduct(p)} id={`mkt-similar-${p.id}`}>
+                        <div key={p.id} className="mkt-also-item" onClick={() => { setSelected(p); window.scrollTo(0, 0); }} id={`mkt-similar-${p.id}`}>
                           <img
                             src={p.image_url || p.img}
                             alt={getDisplayName(p)}
@@ -924,30 +994,6 @@ export default function MarketPage() {
                   </div>
                 </>
               )}
-            </div>
-
-            {/* Footer actions */}
-            <div className="mkt-detail__footer">
-              <button
-                id="mkt-view-details-btn"
-                className="mkt-detail__view-btn"
-                onClick={() => openProduct(selected)}
-              >
-                <TbEye size={16} /> View Details
-              </button>
-              <button
-                id="mkt-send-buy-request-btn"
-                className="mkt-detail__add"
-                onClick={handleBuyRequest}
-                disabled={buyLoading || buySuccess}
-              >
-                {buyLoading
-                  ? <TbLoader2 size={18} className="mkt-loading-spin" />
-                  : buySuccess
-                  ? <><TbCheck size={18} /> Request Sent</>
-                  : <><TbSend size={18} /> Send Buy Request</>
-                }
-              </button>
             </div>
           </motion.div>
         )}

@@ -28,54 +28,34 @@ L.Icon.Default.mergeOptions({
 /* ── CONSTANTS & DATA ─────────────────────────────────────────────── */
 
 const INCIDENT_TYPES = [
-  { id: 'oil_spill', label: 'Oil Spill / Slick', icon: <TbDroplet />, desc: 'Major liquid hydrocarbon release detected.' },
-  { id: 'plastic_mass', label: 'Plastic Mass / Debris Field', icon: <TbRecycle />, desc: 'Large surface accumulation of marine debris.' },
-  { id: 'ghost_net', label: 'Ghost Net / ALDFG', icon: <TbArrowLoopRight />, desc: 'Abandoned, lost or discarded fishing gear.' },
-  { id: 'illegal_dumping', label: 'Illegal Dumping', icon: <TbBarrel />, desc: 'Unauthorized discharge of industrial or hazardous waste.' },
-  { id: 'chemical_discharge', label: 'Chemical Discharge', icon: <TbBiohazard />, desc: 'Release of hazardous non-oil liquid pollutants.' },
-  { id: 'dead_marine_life', label: 'Dead Marine Life', icon: <TbFish />, desc: 'Suspicious mass mortality event of marine species.' },
-  { id: 'coral_bleaching', label: 'Coral Bleaching Zone', icon: <TbRipple />, desc: 'Significant loss of photosynthetic pigments in reef.' },
-  { id: 'vessel_distress', label: 'Vessel in Distress', icon: <TbShip />, desc: 'Active maritime emergency involving life or safety.' },
-  { id: 'unauthorized_vessel', label: 'Unauthorized Vessel', icon: <TbRadar />, desc: 'Suspected IUU fishing or illegal intrusion.' },
-  { id: 'other', label: 'Other / Custom', icon: <TbPencil />, desc: 'Unclassified environmental incident or event.' }
+  { id: 'illegal_dumping', label: 'Illegal Dumping', icon: <TbBarrel />, desc: 'Unauthorized disposal of mixed waste in open plots.' },
+  { id: 'garbage_burning', label: 'Garbage Burning', icon: <TbRipple />, desc: 'Open burning of dry waste or plastics.' },
+  { id: 'overflowing_bins', label: 'Overflowing Bins', icon: <TbTrash />, desc: 'Public SWM bins that have not been cleared.' },
+  { id: 'ewaste_dumping', label: 'E-Waste Dumping', icon: <TbBiohazard />, desc: 'Improper disposal of electronics or batteries.' },
+  { id: 'drain_clogging', label: 'Drain Clogging', icon: <TbDroplet />, desc: 'Stormwater drain blocked by solid waste.' },
+  { id: 'other', label: 'Other / Custom', icon: <TbPencil />, desc: 'Unclassified civic waste incident.' }
 ];
 
 const PREWRITTEN_CONTENT = {
-  oil_spill: {
-    desc: "A significant hydrocarbon slick has been identified at the specified coordinates. The material appears to be spreading with surface currents, posing an immediate threat to local marine ecosystems and coastal stability.",
-    actions: ["Deploy containment booms and absorbent pads.", "Notify regional Coast Guard Pollution Response sector.", "Initiate wildlife impact assessment and pre-emptive cleaning."]
-  },
-  plastic_mass: {
-    desc: "A dense accumulation of macro and micro-plastics has formed a substantial debris field. Floating debris includes industrial waste, ghost gear, and consumer plastics, creating a hazard for marine life and navigation.",
-    actions: ["Monitor drift trajectory using satellite telemetry.", "Alert regional waste collection vessels for interception.", "Assess navigation risk for small craft in the sector."]
-  },
-  ghost_net: {
-    desc: "Submerged or floating abandoned fishing gear (ALDFG) has been detected. This gear is actively 'ghost fishing', potentially entangling marine megafauna and damaging benthic habitats.",
-    actions: ["Dispatch authorized dive teams for controlled retrieval.", "Conduct multi-beam sonar scan for caught wildlife.", "Mark location on nautical charts for debris avoidance."]
-  },
   illegal_dumping: {
-    desc: "Evidence of unauthorized industrial or hazardous waste discharge from a vessel has been documented. The nature of the material suggests a breach of MARPOL Annex I/II regulations.",
-    actions: ["Collect surface water samples for toxicology analysis.", "Identify and track source vessel using AIS and satellite logs.", "Assess potential chemical toxicity and plume dissipation."]
+    desc: "Unauthorized dumping of mixed solid waste has been identified at the specified coordinates. The waste volume suggests regular illegal disposal, posing health risks and violating SWM rules.",
+    actions: ["Dispatch local ward marshals to inspect site.", "Clear the dump via BBMP compactors.", "Identify potential violators and penalize."]
   },
-  chemical_discharge: {
-    desc: "A discharge of hazardous non-oil liquid pollutants has created a visible chemical plume. The plume characteristics suggest significant toxicity to microbial and macro-marine life.",
-    actions: ["Enforce maritime exclusion zone for non-essential traffic.", "Notify regional Chemical Spill Response teams immediately.", "Initiate large-scale water quality and pH monitoring."]
+  garbage_burning: {
+    desc: "Open burning of garbage, likely including plastics, has been observed. This releases toxic fumes, degrading local air quality and violating KSPCB guidelines.",
+    actions: ["Immediately extinguish the fire.", "Inspect waste composition to identify source.", "Issue warnings to nearby commercial/residential setups."]
   },
-  dead_marine_life: {
-    desc: "A suspicious mass mortality event involving multiple individuals or species has been observed. Preliminary assessment rules out natural predation, suggesting environmental or acoustic triggers.",
-    actions: ["Retrieve biological specimens for necropsy and toxicology.", "Investigate local acoustic signatures and temperature spikes.", "Coordinate with marine biologists for population impact data."]
+  overflowing_bins: {
+    desc: "Designated public SWM bins are overflowing, leading to littering on the adjacent streets. The collection cycle appears to have been missed.",
+    actions: ["Schedule immediate pickup by BBMP auto-tippers.", "Assess need for additional bins or frequency in this ward.", "Sanitize the surrounding area."]
   },
-  coral_bleaching: {
-    desc: "Large-scale coral bleaching has been detected within a critical reef structure. The loss of zooxanthellae indicates localized thermal stress or significant water quality degradation.",
-    actions: ["Deploy high-resolution temperature and light sensors.", "Implement temporary limit on local recreational and industrial activity.", "Initiate feasibility study for coral nursery and shading."]
+  ewaste_dumping: {
+    desc: "Improper disposal of hazardous e-waste or batteries has been detected in a generic waste pile. This poses a severe risk of heavy metal leaching into the soil and groundwater.",
+    actions: ["Deploy specialized e-waste handlers to collect hazardous materials.", "Transport to KSPCB-authorized e-waste recycling facility.", "Inspect soil for immediate contamination."]
   },
-  vessel_distress: {
-    desc: "A vessel has been identified in a state of distress, indicating a direct threat to the safety of the crew and the integrity of the ship. Situation requires immediate search and rescue coordination.",
-    actions: ["Acknowledge vessel distress signal/Mayday on VHF 16.", "Relay coordinates to the nearest Maritime Rescue center (MRCC).", "Maintain visual contact or standby for rescue support."]
-  },
-  unauthorized_vessel: {
-    desc: "Suspected illegal, unreported, and unregulated (IUU) fishing or unauthorized entry into a protected marine zone has been identified. Vessel is not broadcasting AIS or appears to be falsifying identity.",
-    actions: ["Document hull ID, flag, and crew activity from distance.", "Report sighting to Naval/Coast Guard enforcement division.", "Maintain safe distance to avoid escalation while tracking."]
+  drain_clogging: {
+    desc: "A critical stormwater drain is heavily clogged with solid waste, primarily plastics and debris. This poses an immediate flooding risk during the next rain cycle.",
+    actions: ["Deploy desilting machinery to clear the blockage.", "Transport extracted silt and solid waste to designated landfills.", "Install mesh to prevent further ingress of macro-plastics."]
   }
 };
 
@@ -86,14 +66,11 @@ const SEVERITIES = [
   { id: 'critical', label: 'Critical', color: '#991B1B' }
 ];
 
-const MARITIME_AUTHORITIES = [
-  { name: 'Indian Coast Guard - MRCC Mumbai', lat: 18.9, lng: 72.8, email: 'abhi1912005@gmail.com' },
-  { name: 'US Coast Guard - District 11', lat: 33.7, lng: -118.2, email: 'abhi1912005@gmail.com' },
-  { name: 'Australian Maritime Safety Authority', lat: -35.3, lng: 149.1, email: 'abhi1912005@gmail.com' },
-  { name: 'UK Maritime & Coastguard Agency', lat: 50.9, lng: -1.4, email: 'abhi1912005@gmail.com' },
-  { name: 'Hellenic Coast Guard (Greece)', lat: 37.9, lng: 23.6, email: 'abhi1912005@gmail.com' },
-  { name: 'Singapore MPA MRCC', lat: 1.3, lng: 103.8, email: 'abhi1912005@gmail.com' },
-  { name: 'Maritime Rescue South Africa', lat: -33.9, lng: 18.4, email: 'abhi1912005@gmail.com' }
+const CIVIC_AUTHORITIES = [
+  { name: 'BBMP SWM Cell (Central)', lat: 12.9716, lng: 77.5946, email: 'abhi1912005@gmail.com' },
+  { name: 'KSPCB Regional Office', lat: 12.9724, lng: 77.5806, email: 'abhi1912005@gmail.com' },
+  { name: 'BBMP South Zone', lat: 12.9250, lng: 77.5938, email: 'abhi1912005@gmail.com' },
+  { name: 'BBMP East Zone', lat: 12.9716, lng: 77.6411, email: 'abhi1912005@gmail.com' }
 ];
 
 /* ── HELPER COMPONENTS ─────────────────────────────────────────────── */
@@ -237,10 +214,10 @@ export default function ComplaintPage() {
   };
 
   const findNearestAuthority = () => {
-    if (!mapCoords) return MARITIME_AUTHORITIES[0];
-    let nearest = MARITIME_AUTHORITIES[0];
+    if (!mapCoords) return CIVIC_AUTHORITIES[0];
+    let nearest = CIVIC_AUTHORITIES[0];
     let minDist = Infinity;
-    MARITIME_AUTHORITIES.forEach(auth => {
+    CIVIC_AUTHORITIES.forEach(auth => {
       const d = Math.sqrt(Math.pow(auth.lat - mapCoords[0], 2) + Math.pow(auth.lng - mapCoords[1], 2));
       if (d < minDist) {
         minDist = d;
@@ -258,7 +235,7 @@ export default function ComplaintPage() {
     setAiDrafting(true);
     setAiDraftedText("");
     try {
-      const prompt = `You are a marine environmental incident reporting officer. Given the following user description of a mid-ocean incident: "${customDescription}", write a formal, professional incident report email body section in 4-5 sentences. Use official language suitable for government maritime authorities. Do not include greetings or sign-offs.`;
+      const prompt = `You are a civic solid waste management reporting officer. Given the following user description of a urban civic waste incident: "${customDescription}", write a formal, professional incident report email body section in 4-5 sentences. Use official language suitable for BBMP and KSPCB authorities. Do not include greetings or sign-offs.`;
       const response = await getChatResponse([{ role: 'user', content: prompt }]);
       
       // Simulate streaming
@@ -392,7 +369,7 @@ export default function ComplaintPage() {
               <div className="portal-header">
                 <div className="title-group">
                   <h2>MISSION LOG</h2>
-                  <p>Archived and active mid-ocean environmental distress reports.</p>
+                  <p>Archived and active civic solid waste management incident reports.</p>
                 </div>
                 <button className="initialize-btn" onClick={() => {
                   setView('create');
@@ -483,7 +460,7 @@ export default function ComplaintPage() {
                     <div className="email-render-card static">
                       <div className="email-body-scroll">
                         <div className="report-header">
-                          <div className="brand">CYCLOS OCEAN WATCH</div>
+                          <div className="brand">CYCLOS SWM PLATFORM</div>
                           <div className="title">ARCHIVED INCIDENT REPORT</div>
                         </div>
                         <div className="report-section">
@@ -534,6 +511,15 @@ export default function ComplaintPage() {
                         <span className="t-time">{selectedReport.date}</span>
                       </div>
                     </div>
+                    {selectedReport.status !== 'RESOLVED' && (
+                      <div className="timeline-event">
+                        <div className="t-dot" style={{ background: 'transparent', border: '2px solid #EF4444' }}></div>
+                        <div className="t-info">
+                          <span className="t-label" style={{ color: '#EF4444' }}>KSPCB ESCALATION</span>
+                          <span className="t-time">Pending (T-minus 7 Days)</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -563,7 +549,7 @@ export default function ComplaintPage() {
               {step === 1 && (
                 <div className="step-content">
                   <h2 className="step-title">Satellite / Drone / Photographic Evidence</h2>
-                  <p className="step-subtitle">Provide visual verification of the mid-ocean environmental incident.</p>
+                  <p className="step-subtitle">Provide visual verification of the urban environmental incident.</p>
                   
                   <label className="sos-dropzone">
                     <input type="file" multiple accept="image/*,video/*" onChange={handleFileUpload} hidden />
@@ -658,7 +644,7 @@ export default function ComplaintPage() {
                   
                   <div className="location-row">
                     <div className="input-with-button">
-                      <label>Maritime Coordinates (WGS84)</label>
+                      <label>Urban Coordinates (WGS84)</label>
                       <div className="coord-input-group">
                         <input 
                           type="text" 
@@ -697,7 +683,7 @@ export default function ComplaintPage() {
                   <div className="auth-lookup-card">
                     <div className="auth-icon"><TbShield /></div>
                     <div className="auth-info">
-                      <span className="auth-label">NEAREST MARITIME AUTHORITY</span>
+                      <span className="auth-label">NEAREST CIVIC AUTHORITY</span>
                       <span className="auth-name">{nearestAuthority.name}</span>
                       <span className="auth-email">{nearestAuthority.email}</span>
                     </div>
@@ -722,12 +708,12 @@ export default function ComplaintPage() {
                     <div className="email-render-card">
                       <div className="email-header">
                         <div className="subject-line">
-                          [URGENT] Ocean Incident Report - {incidentType?.label.toUpperCase()} - {coordinates} - Case #{caseId}
+                          [URGENT] Civic Waste Incident - {incidentType?.label.toUpperCase()} - {coordinates} - Case #{caseId}
                         </div>
                       </div>
                       <div className="email-body-scroll">
                         <div className="report-header">
-                          <div className="brand">CYCLOS OCEAN WATCH</div>
+                          <div className="brand">CYCLOS SWM PLATFORM</div>
                           <div className="title">OFFICIAL INCIDENT REPORT</div>
                           <div className="meta">CID: {caseId} | {timestamp}</div>
                         </div>
@@ -770,8 +756,12 @@ export default function ComplaintPage() {
                         </div>
 
                         <div className="report-footer">
-                          This report was generated via Cyclos Ocean Intelligence System.
-                          Internal Routing: Maritime Environmental Enforcement Taskforce.
+                          <p>This report was generated via Cyclos SWM 2026 Intelligence System.</p>
+                          <p><strong>Primary Routing:</strong> BBMP SWM Enforcement Taskforce</p>
+                          <p><strong>Secondary Routing:</strong> KSPCB Compliance Board</p>
+                          <div style={{ marginTop: '12px', padding: '8px', background: '#FEE2E2', color: '#991B1B', borderRadius: '6px', fontSize: '11px', fontWeight: 'bold' }}>
+                            ⚠ MANDATE: If unaddressed within 7 days, this ticket auto-escalates to KSPCB Nodal Officer.
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -837,7 +827,7 @@ export default function ComplaintPage() {
               {/* HIDDEN PRINT TEMPLATE FOR PDF GENERATION */}
               <div className="sos-print-template">
                 <div className="print-header">
-                  <div className="print-brand">CYCLOS OCEAN WATCH</div>
+                  <div className="print-brand">CYCLOS SWM PLATFORM</div>
                   <div className="print-report-id">OFFICIAL MISSION DISPATCH: #{caseId}</div>
                   <div className="print-meta">{timestamp}</div>
                 </div>
