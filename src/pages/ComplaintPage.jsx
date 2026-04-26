@@ -6,12 +6,15 @@ import {
   TbDroplet, TbRecycle, TbArrowLoopRight, TbBarrel, TbBiohazard, 
   TbFish, TbRipple, TbShip, TbRadar, TbPencil, TbCurrentLocation,
   TbShield, TbDownload, TbLoader2, TbCrosshair, TbAlertTriangle,
-  TbX, TbExternalLink, TbCheckupList, TbMail, TbClock, TbMapPin, TbPlus
+  TbX, TbExternalLink, TbCheckupList, TbMail, TbClock, TbMapPin, TbPlus,
+  TbCamera, TbAlertCircle, TbSwitchHorizontal, TbVideo, TbFocusCentered
 } from 'react-icons/tb';
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import emailjs from 'emailjs-com';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { getChatResponse } from '../services/nvidiaNim';
 import { supabase } from '../supabase/supabaseClient';
 import { useAuth } from '../context/AuthContext';
@@ -103,6 +106,22 @@ export default function ComplaintPage() {
   const [caseId, setCaseId] = useState(() => Date.now().toString(36).toUpperCase().slice(-6));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isPdfGenerating, setIsPdfGenerating] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // holds the entry to delete
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Refs
+  const printTemplateRef = useRef(null);
+  const cameraInputRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+
+  // Camera state
+  const [showCamera, setShowCamera] = useState(false);
+  const [cameraStream, setCameraStream] = useState(null);
+  const [cameraFacing, setCameraFacing] = useState('environment'); // 'environment' | 'user'
+  const [captureLocation, setCaptureLocation] = useState('');
 
   // History State
   const [reportHistory, setReportHistory] = useState([]);
@@ -172,14 +191,12 @@ export default function ComplaintPage() {
     return () => supabase.removeChannel(channel);
   }, [user]);
 
-  // ── Step 1: Upload ──────
-  const handleFileUpload = (e) => {
-    const newFiles = Array.from(e.target.files);
+  // ── Step 1: Upload / Camera ──────
+  const processNewFiles = (newFiles) => {
     if (files.length + newFiles.length > 4) {
       alert("Maximum 4 files allowed.");
       return;
     }
-    
     newFiles.forEach(file => {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -189,8 +206,124 @@ export default function ComplaintPage() {
     });
   };
 
+  const handleFileUpload = (e) => {
+    processNewFiles(Array.from(e.target.files));
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
   const removeFile = (index) => {
     setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  // ── Camera ──────
+  const openCamera = async (facing = cameraFacing) => {
+    if (files.length >= 4) { alert('Maximum 4 files allowed.'); return; }
+    // Grab location for watermark
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const { latitude, longitude } = pos.coords;
+        setCaptureLocation(`${Math.abs(latitude).toFixed(4)}°${latitude >= 0 ? 'N' : 'S'} ${Math.abs(longitude).toFixed(4)}°${longitude >= 0 ? 'E' : 'W'}`);
+      }, () => setCaptureLocation('Location unavailable'));
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      setCameraStream(stream);
+      setShowCamera(true);
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        }
+      }, 100);
+    } catch (err) {
+      console.error('Camera error:', err);
+      alert('Could not access camera. Please allow camera permissions and try again.');
+    }
+  };
+
+  const closeCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      setCameraStream(null);
+    }
+    setShowCamera(false);
+  };
+
+  const switchCamera = async () => {
+    const newFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+    setCameraFacing(newFacing);
+    closeCamera();
+    setTimeout(() => openCamera(newFacing), 300);
+  };
+
+  const capturePhoto = () => {
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Draw the video frame
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // ── Watermark ──
+    const now = new Date();
+    const timeStr = now.toLocaleString('en-IN', {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: true,
+    });
+    const locStr = captureLocation || 'Location unavailable';
+    const lines = [locStr, timeStr];
+
+    const pad = 14;
+    const fontSize = Math.max(16, Math.round(canvas.width / 55));
+    ctx.font = `bold ${fontSize}px 'Courier New', monospace`;
+
+    // Measure max width
+    const maxW = Math.max(...lines.map(l => ctx.measureText(l).width));
+    const boxH = lines.length * (fontSize + 6) + pad;
+    const boxW = maxW + pad * 2;
+
+    // Semi-transparent background pill
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.62)';
+    roundRect(ctx, 10, 10, boxW, boxH, 8);
+    ctx.fill();
+
+    // Text
+    ctx.fillStyle = '#00FF99';
+    lines.forEach((line, i) => {
+      ctx.fillText(line, 10 + pad, 10 + pad + fontSize + i * (fontSize + 6));
+    });
+
+    // Convert to blob and add to files
+    canvas.toBlob((blob) => {
+      const fileName = `camera_${Date.now()}.jpg`;
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      setFiles(prev => [...prev, { blob, preview: dataUrl, name: fileName, isCamera: true }]);
+      closeCamera();
+    }, 'image/jpeg', 0.92);
+  };
+
+  // Helper: rounded rect (Canvas API doesn't have this built-in in all browsers)
+  const roundRect = (ctx, x, y, w, h, r) => {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.lineTo(x + r, y + h);
+    ctx.arcTo(x, y + h, x, y + h - r, r);
+    ctx.lineTo(x, y + r);
+    ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
   };
 
   // ── Step 3: Location ──────
@@ -333,6 +466,100 @@ export default function ComplaintPage() {
   const emailData = generateReportBody();
   const timestamp = new Date().toISOString().replace('T', ' ').split('.')[0] + ' UTC';
 
+  // ── PDF Generation ──────
+  const handleDownloadPDF = async () => {
+    const el = printTemplateRef.current;
+    if (!el) return;
+    setIsPdfGenerating(true);
+    try {
+      // Make element temporarily visible for capture
+      el.style.position = 'fixed';
+      el.style.top = '0';
+      el.style.left = '0';
+      el.style.zIndex = '-9999';
+      el.style.width = '794px'; // A4 px at 96dpi
+      el.style.display = 'block';
+      el.style.background = '#ffffff';
+      el.style.color = '#1a1a1a';
+      el.style.padding = '40px';
+      el.style.fontFamily = 'Arial, sans-serif';
+
+      await new Promise(r => setTimeout(r, 200)); // allow render
+
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      // Restore element
+      el.style.display = 'none';
+      el.style.position = '';
+      el.style.top = '';
+      el.style.left = '';
+      el.style.zIndex = '';
+      el.style.width = '';
+      el.style.background = '';
+      el.style.color = '';
+      el.style.padding = '';
+      el.style.fontFamily = '';
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      let heightLeft = pdfHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+      heightLeft -= pdf.internal.pageSize.getHeight();
+
+      while (heightLeft > 0) {
+        position -= pdf.internal.pageSize.getHeight();
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
+        heightLeft -= pdf.internal.pageSize.getHeight();
+      }
+
+      pdf.save(`CYCLOS_REPORT_${caseId}.pdf`);
+    } catch (err) {
+      console.error('PDF generation error:', err);
+      alert('PDF generation failed. Please try again.');
+    } finally {
+      setIsPdfGenerating(false);
+    }
+  };
+
+  // ── Delete Report ──────
+  const handleDeleteReport = async (entry) => {
+    setIsDeleting(true);
+    try {
+      if (user) {
+        const { error } = await supabase
+          .from('incident_reports')
+          .delete()
+          .eq('case_id', entry.id)
+          .eq('user_id', user.id);
+        if (error) throw error;
+      }
+      // Remove from local state
+      setReportHistory(prev => prev.filter(r => r.id !== entry.id));
+      setDeleteConfirm(null);
+      if (view === 'detail') setView('history');
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Failed to delete report. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="sos-report-page">
       <div className="sos-diagonal-texture"></div>
@@ -357,6 +584,104 @@ export default function ComplaintPage() {
       </div>
 
       <div className="sos-main-content">
+        {/* ── Camera Modal ── */}
+        <AnimatePresence>
+          {showCamera && (
+            <motion.div
+              className="camera-modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div
+                className="camera-modal"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+              >
+                <div className="camera-modal-header">
+                  <span className="cam-title"><TbVideo /> Live Camera Feed</span>
+                  <button className="cam-close-btn" onClick={closeCamera}><TbX /></button>
+                </div>
+
+                <div className="camera-viewfinder">
+                  <video
+                    ref={videoRef}
+                    className="camera-video"
+                    autoPlay
+                    playsInline
+                    muted
+                  />
+                  <div className="cam-corner cam-corner-tl" />
+                  <div className="cam-corner cam-corner-tr" />
+                  <div className="cam-corner cam-corner-bl" />
+                  <div className="cam-corner cam-corner-br" />
+                  {captureLocation && (
+                    <div className="cam-location-badge">
+                      <TbMapPin /> {captureLocation}
+                    </div>
+                  )}
+                </div>
+
+                <div className="camera-modal-footer">
+                  <button className="cam-switch-btn" onClick={switchCamera} title="Switch camera">
+                    <TbSwitchHorizontal /> Switch
+                  </button>
+                  <button className="cam-capture-btn" onClick={capturePhoto}>
+                    <TbFocusCentered /> Capture
+                  </button>
+                  <button className="cam-cancel-btn" onClick={closeCamera}>
+                    Cancel
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Delete Confirmation Modal ── */}
+        <AnimatePresence>
+          {deleteConfirm && (
+            <motion.div
+              className="delete-modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !isDeleting && setDeleteConfirm(null)}
+            >
+              <motion.div
+                className="delete-modal"
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.85, opacity: 0 }}
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="delete-modal-icon"><TbAlertCircle /></div>
+                <h3 className="delete-modal-title">Delete Mission Report?</h3>
+                <p className="delete-modal-body">
+                  Case <strong>#{deleteConfirm.id}</strong> — <em>{deleteConfirm.type}</em> will be permanently removed from the registry. This action cannot be undone.
+                </p>
+                <div className="delete-modal-actions">
+                  <button
+                    className="dm-cancel-btn"
+                    onClick={() => setDeleteConfirm(null)}
+                    disabled={isDeleting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="dm-confirm-btn"
+                    onClick={() => handleDeleteReport(deleteConfirm)}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? <><TbLoader2 className="spinning" /> Deleting...</> : <><TbTrash /> Yes, Delete</>}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         <AnimatePresence mode="wait">
           {view === 'history' ? (
             <motion.div 
@@ -391,7 +716,19 @@ export default function ComplaintPage() {
                     <div className="card-main">
                       <div className="card-top">
                         <span className="card-case">CASE #{entry.id}</span>
-                        <span className={`card-status ${entry.status.toLowerCase()}`}>{entry.status}</span>
+                        <div className="card-top-right">
+                          <span className={`card-status ${entry.status.toLowerCase()}`}>{entry.status}</span>
+                          <button
+                            className="card-delete-btn"
+                            title="Delete report"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteConfirm(entry);
+                            }}
+                          >
+                            <TbTrash />
+                          </button>
+                        </div>
                       </div>
                       <h3 className="card-type">{entry.type}</h3>
                       <div className="card-loc">
@@ -495,6 +832,13 @@ export default function ComplaintPage() {
                     <TbDownload/> ARCHIVE TO PDF
                   </button>
 
+                  <button
+                    className="detail-delete-btn"
+                    onClick={() => setDeleteConfirm(selectedReport)}
+                  >
+                    <TbTrash /> DELETE REPORT
+                  </button>
+
                   <div className="mission-status-track">
                     <h4 className="sub-label">MISSION TIMELINE</h4>
                     <div className="timeline-event">
@@ -550,25 +894,45 @@ export default function ComplaintPage() {
                 <div className="step-content">
                   <h2 className="step-title">Satellite / Drone / Photographic Evidence</h2>
                   <p className="step-subtitle">Provide visual verification of the urban environmental incident.</p>
-                  
-                  <label className="sos-dropzone">
-                    <input type="file" multiple accept="image/*,video/*" onChange={handleFileUpload} hidden />
-                    <TbCloudUpload className="upload-icon" />
-                    <div className="upload-text">
-                      <strong>Click or Drag to Upload</strong>
-                      <span>Accepted: JPG, PNG, MP4, MOV (Max 20MB per file)</span>
-                    </div>
-                  </label>
+
+                  {/* Hidden file input only */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+                  {/* Hidden canvas for photo capture watermarking */}
+                  <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+                  {/* Upload options row */}
+                  <div className="evidence-upload-row">
+                    <button className="evidence-option-btn upload-btn" onClick={() => fileInputRef.current?.click()}>
+                      <TbCloudUpload className="ev-icon" />
+                      <span className="ev-label">Upload Files</span>
+                      <span className="ev-sub">JPG, PNG, MP4, MOV</span>
+                    </button>
+                    <button className="evidence-option-btn camera-btn" onClick={() => openCamera()}>
+                      <TbCamera className="ev-icon" />
+                      <span className="ev-label">Capture Photo</span>
+                      <span className="ev-sub">Live camera + geo-stamp</span>
+                    </button>
+                  </div>
 
                   {files.length > 0 && (
                     <div className="thumbnail-grid">
                       {files.map((f, i) => (
                         <div key={i} className="thumb-item">
-                          {f.file.type.startsWith('image') ? (
+                          {(f.isCamera || (f.file && f.file.type.startsWith('image'))) ? (
                             <img src={f.preview} alt="Evidence" />
-                          ) : (
+                          ) : f.file && f.file.type.startsWith('video') ? (
                             <div className="video-thumb"><TbShip /></div>
+                          ) : (
+                            <img src={f.preview} alt="Evidence" />
                           )}
+                          {f.isCamera && <div className="cam-badge"><TbCamera /></div>}
                           <button className="remove-thumb" onClick={() => removeFile(i)}><TbX /></button>
                           <div className="thumb-label">{f.name.substring(0, 10)}...</div>
                         </div>
@@ -580,7 +944,7 @@ export default function ComplaintPage() {
                     <div className="warning-banner">
                       <TbAlertTriangle /> Proceeding without visual evidence will mark this report as "UNVERIFIED".
                     </div>
-                  ) }
+                  )}
                 </div>
               )}
 
@@ -825,61 +1189,68 @@ export default function ComplaintPage() {
               <p>Your report has been successfully dispatched to {nearestAuthority.name} and archived in the global registry.</p>
               
               {/* HIDDEN PRINT TEMPLATE FOR PDF GENERATION */}
-              <div className="sos-print-template">
-                <div className="print-header">
-                  <div className="print-brand">CYCLOS SWM PLATFORM</div>
-                  <div className="print-report-id">OFFICIAL MISSION DISPATCH: #{caseId}</div>
-                  <div className="print-meta">{timestamp}</div>
-                </div>
+              <div ref={printTemplateRef} style={{ display: 'none' }}>
+                <div style={{ fontFamily: 'Arial, sans-serif', color: '#1a1a1a', background: '#fff', padding: '40px', maxWidth: '794px' }}>
+                  {/* Header */}
+                  <div style={{ borderBottom: '3px solid #0a1628', paddingBottom: '16px', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '3px', color: '#0a1628' }}>CYCLOS SWM PLATFORM</div>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: '#1d4ed8', marginTop: '4px', letterSpacing: '2px' }}>OFFICIAL MISSION DISPATCH: #{caseId}</div>
+                    <div style={{ fontSize: '11px', color: '#6b7280', marginTop: '4px' }}>{timestamp}</div>
+                  </div>
 
-                <div className="print-body">
-                   <div className="print-section">
-                      <h3 className="print-section-title">I. INCIDENT SUMMARY</h3>
-                      <div className="print-data"><span className="label">TYPE:</span> {incidentType?.label}</div>
-                      <div className="print-data"><span className="label">SEVERITY:</span> {severity.toUpperCase()}</div>
-                      <div className="print-data"><span className="label">REPORTER:</span> {reporterName}</div>
-                   </div>
+                  {/* Section I */}
+                  <div style={{ marginBottom: '20px', padding: '16px', background: '#f8fafc', borderLeft: '4px solid #1d4ed8', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: '#1d4ed8', marginBottom: '10px' }}>I. INCIDENT SUMMARY</div>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}><span style={{ fontWeight: '700', minWidth: '100px', color: '#374151' }}>TYPE:</span> <span>{incidentType?.label}</span></div>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}><span style={{ fontWeight: '700', minWidth: '100px', color: '#374151' }}>SEVERITY:</span> <span style={{ fontWeight: '700', color: SEVERITIES.find(s => s.id === severity)?.color }}>{severity.toUpperCase()}</span></div>
+                    <div style={{ display: 'flex', gap: '8px' }}><span style={{ fontWeight: '700', minWidth: '100px', color: '#374151' }}>REPORTER:</span> <span>{reporterName}</span></div>
+                  </div>
 
-                   <div className="print-section">
-                      <h3 className="print-section-title">II. COORDINATE TELEMETRY</h3>
-                      <div className="print-data"><span className="label">LOC:</span> {coordinates}</div>
-                      <div className="print-data"><span className="label">AUTHORITY:</span> {nearestAuthority.name}</div>
-                   </div>
+                  {/* Section II */}
+                  <div style={{ marginBottom: '20px', padding: '16px', background: '#f8fafc', borderLeft: '4px solid #1d4ed8', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: '#1d4ed8', marginBottom: '10px' }}>II. COORDINATE TELEMETRY</div>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '6px' }}><span style={{ fontWeight: '700', minWidth: '100px', color: '#374151' }}>LOCATION:</span> <span style={{ fontFamily: 'monospace' }}>{coordinates || 'N/A'}</span></div>
+                    <div style={{ display: 'flex', gap: '8px' }}><span style={{ fontWeight: '700', minWidth: '100px', color: '#374151' }}>AUTHORITY:</span> <span>{nearestAuthority.name}</span></div>
+                  </div>
 
-                   <div className="print-section">
-                      <h3 className="print-section-title">III. OFFICIAL DISPATCH CONTENT</h3>
-                      <p className="print-desc">{aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc}</p>
-                   </div>
+                  {/* Section III */}
+                  <div style={{ marginBottom: '20px', padding: '16px', background: '#f8fafc', borderLeft: '4px solid #1d4ed8', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: '#1d4ed8', marginBottom: '10px' }}>III. OFFICIAL DISPATCH CONTENT</div>
+                    <p style={{ lineHeight: '1.7', color: '#374151', margin: 0 }}>{aiDraftedText || PREWRITTEN_CONTENT[incidentType?.id]?.desc || 'No description provided.'}</p>
+                  </div>
 
-                   <div className="print-section">
-                      <h3 className="print-section-title">IV. RECOMMENDED ACTION PLAN</h3>
-                      <ul className="print-actions">
-                        {(PREWRITTEN_CONTENT[incidentType?.id]?.actions || ["Immediate containment required"]).map((a,i)=>(
-                          <li key={i}>{a}</li>
-                        ))}
-                      </ul>
-                   </div>
+                  {/* Section IV */}
+                  <div style={{ marginBottom: '20px', padding: '16px', background: '#f8fafc', borderLeft: '4px solid #1d4ed8', borderRadius: '4px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: '#1d4ed8', marginBottom: '10px' }}>IV. RECOMMENDED ACTION PLAN</div>
+                    <ul style={{ paddingLeft: '20px', margin: 0 }}>
+                      {(PREWRITTEN_CONTENT[incidentType?.id]?.actions || ['Immediate containment required']).map((a, i) => (
+                        <li key={i} style={{ marginBottom: '6px', lineHeight: '1.5', color: '#374151' }}>{a}</li>
+                      ))}
+                    </ul>
+                  </div>
 
-                   <div className="print-section">
-                      <h3 className="print-section-title">V. ATTACHED MEDIA EVIDENCE</h3>
-                      <div className="print-media-grid">
+                  {/* Section V - Media */}
+                  {files.length > 0 && (
+                    <div style={{ marginBottom: '20px', padding: '16px', background: '#f8fafc', borderLeft: '4px solid #1d4ed8', borderRadius: '4px' }}>
+                      <div style={{ fontSize: '11px', fontWeight: '800', letterSpacing: '2px', color: '#1d4ed8', marginBottom: '10px' }}>V. ATTACHED MEDIA EVIDENCE</div>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                         {files.map((file, i) => (
-                          <div key={i} className="print-media-item">
-                            <img src={file.preview} alt="Evidence" />
-                          </div>
+                          <img key={i} src={file.preview} alt={`Evidence ${i + 1}`} style={{ width: '160px', height: '120px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #e5e7eb' }} />
                         ))}
                       </div>
-                   </div>
-                </div>
+                    </div>
+                  )}
 
-                <div className="print-footer">
-                   Generated via Cyclos Intelligence System. This document is a certified copy of the original dispatch.
+                  {/* Footer */}
+                  <div style={{ borderTop: '1px solid #d1d5db', paddingTop: '12px', fontSize: '11px', color: '#9ca3af' }}>
+                    Generated via Cyclos Intelligence System 2026. This document is a certified copy of the original dispatch.
+                  </div>
                 </div>
               </div>
 
               <div className="success-actions">
-                <button className="download-pdf-btn" onClick={() => window.print()}>
-                  <TbDownload /> DOWNLOAD REPORT PDF
+                <button className="download-pdf-btn" onClick={handleDownloadPDF} disabled={isPdfGenerating}>
+                  {isPdfGenerating ? <><TbLoader2 className="spinning" /> GENERATING PDF...</> : <><TbDownload /> DOWNLOAD REPORT PDF</>}
                 </button>
                 <button className="start-new-btn" onClick={() => { setView('history'); setIsSuccess(false); setFiles([]); setIncidentType(null); setCoordinates(''); }}>
                   RETURN TO MISSION LOG
