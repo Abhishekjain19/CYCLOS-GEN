@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -153,9 +153,11 @@ function JoinView({ events, onJoin, onDelete, onComplete, onBack }) {
         transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="comm-subview__header">
-          <button className="comm-back-btn" onClick={onBack}><TbArrowLeft size= {20} /></button>
-          <h2 className="comm-subview__title">Join an Event</h2>
-          <span className="comm-subview__count text-white">{events.length}</span>
+          <div className="comm-subview__header-inner">
+            <button className="comm-back-btn" onClick={onBack}><TbArrowLeft size={20} /></button>
+            <h2 className="comm-subview__title">Join an Event</h2>
+            <span className="comm-subview__count">{events.length}</span>
+          </div>
         </div>
 
         <div className="comm-events-list">
@@ -206,7 +208,7 @@ function JoinView({ events, onJoin, onDelete, onComplete, onBack }) {
                   </div>
 
                   <h3 className="comm-event-name">{ev.title || ev.name}</h3>
-                  <p className="comm-event-desc text-white">{ev.description}</p>
+                  <p className="comm-event-desc">{ev.description}</p>
 
                   <div className="comm-event-meta">
                     <span className="comm-event-meta__item">
@@ -221,7 +223,7 @@ function JoinView({ events, onJoin, onDelete, onComplete, onBack }) {
                   </div>
 
                   <div className="comm-event-footer">
-                    <span className="comm-event-spots text-white">{ev.capacity || ev.spots} spots left</span>
+                    <span className="comm-event-spots">{ev.capacity || ev.spots} spots left</span>
                     {!isOwner && (
                       <button
                         className={`comm-join-btn ${isJoined ? 'comm-join-btn--joined' : ''}`}
@@ -354,9 +356,11 @@ function CreateView({ onBack, onCreated }) {
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="comm-subview__header">
-        <button className="comm-back-btn" onClick={onBack}><TbArrowLeft size={20} /></button>
-        <h2 className="comm-subview__title">Create Event</h2>
-        <span />
+        <div className="comm-subview__header-inner">
+          <button className="comm-back-btn" onClick={onBack}><TbArrowLeft size={20} /></button>
+          <h2 className="comm-subview__title">Create Event</h2>
+          <span />
+        </div>
       </div>
 
       <div className="comm-form">
