@@ -324,15 +324,20 @@ export default function ScanPage() {
           <TbArrowLeft size={20} />
         </button>
         <div className="scan-header__title">SCAN</div>
-        <button className="scan-header__btn" onClick={() => {
-          setScanned(false);
-          setInputMode('choose');
-          setUseCamera(false);
-          setImage(null);
-          setResult(null);
-        }}>
-          <TbReload size={20} />
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="scan-header__btn" onClick={() => navigate('/bins')} title="Nearby Bin Stations">
+            <TbMapPin size={20} />
+          </button>
+          <button className="scan-header__btn" onClick={() => {
+            setScanned(false);
+            setInputMode('choose');
+            setUseCamera(false);
+            setImage(null);
+            setResult(null);
+          }}>
+            <TbReload size={20} />
+          </button>
+        </div>
       </div>
 
       <div className="scan-camera-wrapper">

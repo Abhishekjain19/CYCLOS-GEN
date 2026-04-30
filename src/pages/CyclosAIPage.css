@@ -5,21 +5,25 @@
   flex-direction: column;
   height: 100vh;
   height: 100dvh;
-  background: var(--bg-light);
+  background: #FFFFFF;
   font-family: 'Satoshi', sans-serif;
-  padding-bottom: 70px; /* Space for bottom nav */
+  overflow: hidden;
+  position: relative;
 }
 
 /* ── Header ──────────────────────────────────────────────── */
 .cyclos-ai-header {
-  background: #FFFFFF;
-  padding: 16px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 12px 20px;
   display: flex;
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(82,183,136,0.1);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .cyclos-ai-header__back {
@@ -115,11 +119,14 @@
 .cyclos-ai-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  padding: 20px 20px 180px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  background: #f8fcf9;
+  gap: 24px;
+  background: #FFFFFF;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .cyclos-ai-messages::-webkit-scrollbar { width: 4px; }
@@ -128,9 +135,10 @@
 /* ── Message Wrappers ────────────────────────────────────── */
 .cyclos-ai-msg {
   display: flex;
-  align-items: flex-end;
-  gap: 8px;
-  max-width: 90%;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .cyclos-ai-msg.ai   { align-self: flex-start; }
@@ -138,34 +146,49 @@
 
 /* ── Avatar ──────────────────────────────────────────────── */
 .cyclos-ai-msg__avatar {
-  width: 30px; height: 30px; min-width: 30px;
+  width: 36px; height: 36px; min-width: 36px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #006E5A, var(--eco-600));
+  background: var(--bg-light);
   display: flex; align-items: center; justify-content: center;
+  color: var(--grey-600);
+}
+
+.cyclos-ai-msg__avatar.gemini-style {
+  background: linear-gradient(135deg, #4285f4, #9b72cb, #d96570, #f4af42);
+  background-size: 200% 200%;
+  animation: geminiGradient 4s ease infinite;
   color: #FFFFFF;
-  box-shadow: 0 0 8px rgba(0,184,148,0.3);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+@keyframes geminiGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* ── Bubble ───────────────────────────────────────────── */
 .cyclos-ai-msg.ai .cyclos-ai-msg__bubble {
-  background: #FFFFFF;
-  border: 1px solid rgba(82,183,136,0.1);
-  border-left: 3px solid var(--eco-600);
-  border-radius: 4px 16px 16px 16px;
-  padding: 12px 14px;
-  font-size: 14px;
-  color: var(--grey-900);
-  line-height: 1.55;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  background: transparent;
+  padding: 4px 0;
+  font-size: 16px;
+  color: var(--grey-800);
+  line-height: 1.6;
+  width: 100%;
+}
+
+.cyclos-ai-msg.user {
+  flex-direction: row-reverse;
 }
 
 .cyclos-ai-msg.user .cyclos-ai-msg__bubble {
-  background: linear-gradient(135deg, #004D5A, #006E6E);
-  border-radius: 16px 4px 16px 16px;
-  padding: 12px 14px;
-  font-size: 14px;
-  color: #FFFFFF;
-  line-height: 1.55;
+  background: #f0f4f9;
+  border-radius: 18px;
+  padding: 12px 20px;
+  font-size: 15px;
+  color: var(--grey-900);
+  line-height: 1.5;
+  max-width: 85%;
 }
 
 /* ── Markdown ─────────────────────────────────────────────── */
@@ -233,105 +256,125 @@
 
 /* ── Quick Suggestions ────────────────────────────────── */
 .cyclos-ai-suggestions {
-  padding: 8px 16px 12px;
+  padding: 20px;
   display: flex;
-  gap: 8px;
+  gap: 12px;
   overflow-x: auto;
   scrollbar-width: none;
-  background: #f8fcf9;
+  background: transparent;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  justify-content: center;
+  flex-wrap: wrap;
 }
+
 .cyclos-ai-suggestions::-webkit-scrollbar { display: none; }
 
 .cyclos-ai-suggestions__chip {
-  padding: 8px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(82,183,136,0.2);
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
   background: #FFFFFF;
-  color: var(--eco-600);
-  font-size: 13px;
-  font-weight: 600;
+  color: var(--grey-700);
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
-  flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
-  transition: all 0.2s;
-}
-.cyclos-ai-suggestions__chip:hover {
-  background: var(--eco-50);
-  border-color: var(--eco-500);
-}
-
-/* ── Input Area ──────────────────────────────────────────────── */
-.cyclos-ai-input-area {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px 16px;
-  background: #FFFFFF;
-  border-top: 1px solid rgba(82,183,136,0.1);
-  z-index: 5;
-}
-
-.cyclos-ai-action-btn {
-  width: 38px; height: 38px; min-width: 38px;
-  border-radius: 50%;
-  background: var(--bg-light);
-  border: none;
-  color: var(--grey-600);
-  display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
   cursor: pointer;
 }
-.cyclos-ai-action-btn:hover { color: var(--eco-600); background: var(--eco-50); }
-.cyclos-ai-action-btn:active { transform: scale(0.9); }
-.cyclos-ai-action-btn.listening { 
-  color: #EF4444; 
-  background: rgba(239, 68, 68, 0.1); 
-  animation: pulseMic 1.5s infinite; 
+
+.cyclos-ai-suggestions__chip:hover {
+  background: #f8f9fa;
+  border-color: #ced4da;
 }
 
-@keyframes pulseMic {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+/* ── Input Area ──────────────────────────────────────────────── */
+.cyclos-ai-input-area-container {
+  position: absolute;
+  bottom: 80px;
+  left: 0;
+  right: 0;
+  padding: 10px 20px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.cyclos-ai-input-area {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px 8px 16px;
+  background: #f0f4f9;
+  border-radius: 32px;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  pointer-events: auto;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.cyclos-ai-input-area:focus-within {
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .cyclos-ai-input {
   flex: 1;
-  background: var(--bg-light);
-  border: 1px solid rgba(82,183,136,0.15);
-  border-radius: 20px;
-  padding: 12px 16px;
-  font-size: 14px;
+  background: transparent;
+  border: none;
+  padding: 12px 8px;
+  font-size: 16px;
   outline: none;
-  transition: border-color 0.2s;
+  color: var(--grey-900);
 }
-.cyclos-ai-input:focus { border-color: var(--eco-500); }
+
+.cyclos-ai-action-btn {
+  width: 40px; height: 40px; min-width: 40px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: var(--grey-700);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.cyclos-ai-action-btn:hover { background: rgba(0,0,0,0.05); color: var(--eco-600); }
 
 .cyclos-ai-send-btn {
-  width: 44px; height: 44px; min-width: 44px;
+  width: 40px; height: 40px; min-width: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--eco-600), var(--eco-500));
-  color: #FFFFFF;
+  background: transparent;
+  color: var(--eco-600);
   border: none;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 12px rgba(82,183,136,0.3);
-  transition: transform 0.2s;
+  transition: transform 0.2s, color 0.2s;
+  opacity: 0.5;
+  pointer-events: none;
 }
+
+.cyclos-ai-send-btn.active {
+  opacity: 1;
+  pointer-events: auto;
+  color: var(--eco-600);
+}
+
 .cyclos-ai-send-btn:active { transform: scale(0.9); }
 
 /* ── Scanner Overlay ────────────────────────────────────────── */
 .cyclos-ai-scanner-overlay {
   position: absolute;
-  top: 72px; /* Below header */
-  bottom: 74px; /* Above input area */
+  top: 0;
+  bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px);
-  z-index: 10;
+  background: #FFFFFF;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 24px;
 }
 
 .cyclos-ai-scanner-header {

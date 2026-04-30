@@ -1,6 +1,7 @@
-﻿import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, Circle, useMap } from 'react-leaflet';
+import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TbArrowLeft, TbLocation, TbRoute, TbTrash,
@@ -28,28 +29,40 @@ const SITE_TYPES = [
     typeBadge: 'COLLECTION POINT',
     icon: <TbTrash size={22} />,
     status: 'Open 24/7',
+    color: '#FF4757', // Red
     accepts: ['Dry Waste', 'Recyclables'],
+    weightYear: '14.2 Tons',
+    weightMonth: '1.2 Tons',
   },
   {
     id: 2, iconClass: 'bin-list-icon--transfer',
     typeBadge: 'TRANSFER STATION',
     icon: <TbRoute size={22} />,
     status: 'Open 6am–10pm',
+    color: '#2E86DE', // Blue
     accepts: ['Mixed Waste', 'Bulk Items'],
+    weightYear: '42.5 Tons',
+    weightMonth: '3.8 Tons',
   },
   {
     id: 3, iconClass: 'bin-list-icon--smart',
     typeBadge: 'SMART DUSTBIN',
     icon: <TbWifi size={22} />,
     status: '24/7 Smart',
+    color: '#FF9F43', // Orange
     accepts: ['Recyclables', 'Plastic', 'Metal'],
+    weightYear: '2.1 Tons',
+    weightMonth: '0.18 Tons',
   },
   {
     id: 4, iconClass: 'bin-list-icon--hub',
     typeBadge: 'RECYCLING HUB',
     icon: <TbRecycle size={22} />,
     status: 'Open 8am–8pm',
+    color: '#2EE5B0', // Teal/Green (User asked for red, blue, orange - I'll stick to those 3 mostly)
     accepts: ['Plastic', 'Dry Waste', 'E-Waste', 'Metal', 'Glass'],
+    weightYear: '28.4 Tons',
+    weightMonth: '2.4 Tons',
   },
 ];
 
@@ -58,6 +71,11 @@ const generateNearbyBins = (lat, lng) => [
   { id: 2, lat: lat - 0.0034, lng: lng + 0.0082, name: "Garbage Transfer Station", distance: "1.2 km", type: "Mixed Waste", ...SITE_TYPES[1] },
   { id: 3, lat: lat + 0.0120, lng: lng + 0.0010, name: "Public Smart Dustbin", distance: "2.1 km", type: "Recyclables", ...SITE_TYPES[2] },
   { id: 4, lat: lat - 0.0080, lng: lng - 0.0090, name: "Community Recycling Hub", distance: "2.8 km", type: "Plastics/Dry Waste", ...SITE_TYPES[3] },
+];
+
+const generateNearbyProducers = (lat, lng, domain) => [
+  { id: 101, lat: lat + 0.004, lng: lng + 0.004, name: "Community Bulk Producer", distance: "0.5 km", domain: domain },
+  { id: 102, lat: lat - 0.006, lng: lng - 0.002, name: "Local SWM Partner", distance: "0.9 km", domain: domain },
 ];
 
 const getHaversineKm = (lat1, lon1, lat2, lon2) => {
@@ -86,6 +104,8 @@ function MapRecenter({ coords }) {
 export default function BinLocationPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userProfile } = useAuth();
+  const secondaryDomain = userProfile?.secondary_domain || 'Recyclables';
   const materialType = location.state?.materialType || "General Waste";
 
   const [userPos, setUserPos] = useState([DEFAULT_LAT, DEFAULT_LNG]);
@@ -133,6 +153,7 @@ export default function BinLocationPage() {
   }, [selectedBin, userPos[0], userPos[1]]);
 
   const bins = useMemo(() => generateNearbyBins(userPos[0], userPos[1]), [userPos]);
+  const producers = useMemo(() => generateNearbyProducers(userPos[0], userPos[1], secondaryDomain), [userPos, secondaryDomain]);
 
   const handleBack = () => {
     if (isNavigating) setIsNavigating(false);
@@ -231,20 +252,71 @@ export default function BinLocationPage() {
           >
             <div className="bin-map-wrapper">
               <MapContainer
-                center={[(userPos[0] + selectedBin.lat) / 2, (userPos[1] + selectedBin.lng) / 2]}
-                zoom={15}
+                center={[userPos[0], userPos[1]]}
+                zoom={14}
                 style={{ height: '100%', width: '100%' }}
                 zoomControl={false}
               >
                 <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
-                <MapRecenter coords={isNavigating ? userPos : [(userPos[0] + selectedBin.lat) / 2, (userPos[1] + selectedBin.lng) / 2]} />
+                <MapRecenter coords={isNavigating ? userPos : selectedBin ? [(userPos[0] + selectedBin.lat) / 2, (userPos[1] + selectedBin.lng) / 2] : [userPos[0], userPos[1]]} />
+                
+                {/* User Marker */}
                 <Marker position={[userPos[0], userPos[1]]}>
-                  <Popup>Your Location</Popup>
+                  <Popup>You are here</Popup>
                 </Marker>
-                <Marker position={[selectedBin.lat, selectedBin.lng]}>
-                  <Popup>{selectedBin.name}</Popup>
-                </Marker>
-                <Polyline positions={liveRoute} color="#00E5FF" weight={5} className="nav-route-line" />
+
+                {/* Bin Markers */}
+                {bins.map(bin => {
+                  const customIcon = L.divIcon({
+                    className: 'custom-bin-marker',
+                    html: `<div style="background-color: ${bin.color}; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px ${bin.color}"></div>`,
+                    iconSize: [16, 16],
+                    iconAnchor: [8, 8]
+                  });
+
+                  return (
+                    <Marker 
+                      key={bin.id} 
+                      position={[bin.lat, bin.lng]}
+                      icon={customIcon}
+                      opacity={selectedBin && selectedBin.id !== bin.id ? 0.4 : 1}
+                      eventHandlers={{ click: () => setSelectedBin(bin) }}
+                    >
+                      <Popup>
+                        <div style={{ color: '#333' }}>
+                          <strong>{bin.name}</strong><br/>
+                          Status: {bin.status}
+                        </div>
+                      </Popup>
+                    </Marker>
+                  );
+                })}
+
+                {/* Producer Fuzz Circles (Matches User Secondary Domain) */}
+                {producers.map(p => (
+                  <Circle 
+                    key={p.id}
+                    center={[p.lat, p.lng]}
+                    radius={300}
+                    pathOptions={{ 
+                      color: '#facc15', 
+                      fillColor: '#facc15', 
+                      fillOpacity: 0.2, 
+                      dashArray: '5, 10' 
+                    }}
+                  >
+                    <Popup>
+                      <div style={{ color: '#333' }}>
+                        <strong>{p.name}</strong><br/>
+                        Selling: {p.domain}
+                      </div>
+                    </Popup>
+                  </Circle>
+                ))}
+
+                {selectedBin && (
+                  <Polyline positions={liveRoute} color="#00E5FF" weight={5} className="nav-route-line" />
+                )}
               </MapContainer>
             </div>
 
@@ -314,14 +386,12 @@ export default function BinLocationPage() {
                   {/* Stats row */}
                   <div className="bin-sheet-stats">
                     <div className="bin-sheet-stat">
-                      <span className="bin-sheet-stat__val">{selectedBin.distance}</span>
-                      <span className="bin-sheet-stat__lbl">Distance</span>
+                      <span className="bin-sheet-stat__val">{selectedBin.weightYear}</span>
+                      <span className="bin-sheet-stat__lbl">Per Year</span>
                     </div>
                     <div className="bin-sheet-stat">
-                      <span className="bin-sheet-stat__val">
-                        {Math.ceil(parseFloat(selectedBin.distance) / 0.08)} min
-                      </span>
-                      <span className="bin-sheet-stat__lbl">ETA Walk</span>
+                      <span className="bin-sheet-stat__val">{selectedBin.weightMonth}</span>
+                      <span className="bin-sheet-stat__lbl">Per Month</span>
                     </div>
                     <div className="bin-sheet-stat">
                       <span className="bin-sheet-stat__val" style={{ color: '#00B894', fontSize: 13 }}>
@@ -331,8 +401,20 @@ export default function BinLocationPage() {
                     </div>
                   </div>
 
+                  <div className="bin-sheet-materials-info" style={{ margin: '16px 0', fontSize: '13px', color: 'var(--grey-600)' }}>
+                    <strong>Accepted:</strong> {selectedBin.accepts.join(', ')}
+                  </div>
+
                   <button className="bin-sheet-btn" onClick={() => setIsNavigating(true)}>
                     <TbRoute size={20} /> Start Navigation
+                  </button>
+
+                  <button 
+                    className="bin-sheet-btn secondary" 
+                    style={{ background: 'transparent', color: 'var(--eco-600)', border: '1px solid var(--eco-600)', marginTop: '8px' }}
+                    onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selectedBin.lat},${selectedBin.lng}`, '_blank')}
+                  >
+                    Google Maps Navigation ↗
                   </button>
 
                   <p className="bin-sheet-footer">

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TbSend, TbPhoto, TbRobot, TbMicrophone, TbMicrophoneOff, TbCamera, TbX, TbArrowLeft } from 'react-icons/tb';
+import { TbSend, TbPhoto, TbRobot, TbMicrophone, TbMicrophoneOff, TbCamera, TbX, TbArrowLeft, TbSparkles } from 'react-icons/tb';
 import ReactMarkdown from 'react-markdown';
 import { motion, AnimatePresence } from 'framer-motion';
 import { analyzeWasteImage, getChatResponse } from '../services/nvidiaNim';
@@ -18,7 +18,7 @@ const QUICK_SUGGESTIONS = [
 const WELCOME_MESSAGE = {
   id: 'welcome',
   role: 'ai',
-  text: "Hi! 👋 I'm the Cyclos AI Assistant. You can ask me about recycling, sustainability, or scan a waste item for instant AI segregation guidance.",
+  text: "Hello! I'm your Cyclos AI Assistant. How can I help you with recycling or sustainability today?",
   ts: Date.now(),
 };
 
@@ -102,73 +102,43 @@ export default function CyclosAIPage() {
   const speakText = useCallback(async (text) => {
     if (!isVoiceModeRef.current) return;
     
-    // Stop any ongoing browser speech
+    // Stop any ongoing speech
     if (synthRef.current) synthRef.current.cancel();
     
-    // Stop any ongoing AI audio playback
+    // Stop any ongoing audio playback
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current = null;
     }
     
+    // Clean text for better speech synthesis
     const cleanText = text.replace(/[\u1F60-\u1F64]|[\u2702-\u27B0]|[\u1F68-\u1F6C]|[\u1F30-\u1F70]|[\u2600-\u26ff]/g, '')
                           .replace(/[*_#`]/g, '');
 
-    const elevenLabsKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
-    
-    if (elevenLabsKey) {
-      try {
-        // Use ElevenLabs AI Voice (Rachel Voice ID)
-        const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
-          method: 'POST',
-          headers: {
-            'Accept': 'audio/mpeg',
-            'xi-api-key': elevenLabsKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            text: cleanText,
-            model_id: 'eleven_monolingual_v1',
-            voice_settings: {
-              stability: 0.5,
-              similarity_boost: 0.5
-            }
-          })
-        });
-
-        if (!response.ok) throw new Error('ElevenLabs API Error');
-
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        audioRef.current = audio;
-        audio.play();
-        return;
-      } catch (err) {
-        console.error("AI Voice failed, falling back to browser TTS", err);
-      }
-    } else {
-      console.warn("No VITE_ELEVENLABS_API_KEY found. Falling back to browser TTS.");
-    }
-    
-    // Fallback to browser TTS
+    /**
+     * Using Open Source / Web Speech API for Voice Synthesis
+     * This avoids reliance on proprietary closed-source APIs like ElevenLabs
+     */
     const utterance = new SpeechSynthesisUtterance(cleanText);
     const voices = synthRef.current.getVoices();
-    const premiumVoice = voices.find(v => 
-      v.name.includes('Natural') || 
-      v.name.includes('Premium') || 
-      v.name.includes('Google US English')
-    ) || voices.find(v => v.lang.startsWith('en'));
+    
+    // Prioritize high-quality "Natural" or "Google" voices if available
+    const bestVoice = voices.find(v => v.name.includes('Natural')) || 
+                      voices.find(v => v.name.includes('Google US English')) ||
+                      voices.find(v => v.name.includes('Premium')) ||
+                      voices.find(v => v.lang.startsWith('en-US')) ||
+                      voices.find(v => v.lang.startsWith('en'));
 
-    if (premiumVoice) {
-      utterance.voice = premiumVoice;
-      utterance.lang = premiumVoice.lang;
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      utterance.lang = bestVoice.lang;
     } else {
       utterance.lang = 'en-US';
     }
     
-    utterance.pitch = 1.05;
-    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.rate = 1.05; // Slightly faster for an "agent" feel
+    utterance.volume = 1.0;
     
     synthRef.current.speak(utterance);
   }, []);
@@ -195,13 +165,22 @@ export default function CyclosAIPage() {
     setIsTyping(true);
 
     try {
-      const replyText = await getChatResponse(apiMessages);
+      let replyText = await getChatResponse(apiMessages);
       setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now() + 1, role: 'ai', text: replyText },
-      ]);
-      if (isVoiceModeRef.current) speakText(replyText);
+      
+      const aiMsg = { 
+        id: Date.now() + 1, 
+        role: 'ai', 
+        text: replyText,
+        hidden: isVoiceModeRef.current // Don't show in chat if in voice mode
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
+      
+      if (isVoiceModeRef.current) {
+        toast.success("EcoGuide is speaking...", { icon: '🎙️' });
+        speakText(replyText);
+      }
     } catch (err) {
       console.error(err);
       setIsTyping(false);
@@ -394,7 +373,7 @@ export default function CyclosAIPage() {
 
       {/* ── Messages ── */}
       <div className="cyclos-ai-messages">
-        {messages.map((msg) => (
+        {messages.filter(m => !m.hidden).map((msg) => (
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -402,8 +381,8 @@ export default function CyclosAIPage() {
             className={`cyclos-ai-msg ${msg.role}`}
           >
             {msg.role === 'ai' && (
-              <div className="cyclos-ai-msg__avatar">
-                <TbRobot size={16} />
+              <div className="cyclos-ai-msg__avatar gemini-style">
+                <TbSparkles size={20} />
               </div>
             )}
 
@@ -424,8 +403,8 @@ export default function CyclosAIPage() {
 
         {isTyping && (
           <div className="cyclos-ai-msg ai">
-            <div className="cyclos-ai-msg__avatar">
-              <TbRobot size={16} />
+            <div className="cyclos-ai-msg__avatar gemini-style">
+              <TbSparkles size={20} />
             </div>
             <div className="cyclos-ai-typing">
               <span /><span /><span />
@@ -433,18 +412,18 @@ export default function CyclosAIPage() {
           </div>
         )}
         <div ref={messagesEndRef} />
-      </div>
 
-      {/* ── Quick suggestions ── */}
-      {messages.length === 1 && (
-        <div className="cyclos-ai-suggestions">
-          {QUICK_SUGGESTIONS.map((s) => (
-            <button key={s} className="cyclos-ai-suggestions__chip" onClick={() => sendMessage(s)}>
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
+        {/* ── Quick suggestions ── */}
+        {messages.length === 1 && (
+          <div className="cyclos-ai-suggestions">
+            {QUICK_SUGGESTIONS.map((s) => (
+              <button key={s} className="cyclos-ai-suggestions__chip" onClick={() => sendMessage(s)}>
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* ── Scanner Overlay ── */}
       <AnimatePresence>
@@ -477,59 +456,63 @@ export default function CyclosAIPage() {
       </AnimatePresence>
 
       {/* ── Input area ── */}
-      <div className="cyclos-ai-input-area">
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          style={{ display: 'none' }}
-          onChange={handleImageUpload}
-        />
+      <div className="cyclos-ai-input-area-container">
+        <div className="cyclos-ai-input-area">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleImageUpload}
+          />
 
-        <button
-          className="cyclos-ai-action-btn"
-          onClick={() => setShowScanner(true)}
-          aria-label="Scan object"
-          title="Scan object using camera"
-        >
-          <TbCamera size={22} />
-        </button>
+          <button
+            className="cyclos-ai-action-btn"
+            onClick={() => setShowScanner(true)}
+            aria-label="Scan object"
+            title="Scan object using camera"
+          >
+            <TbCamera size={24} />
+          </button>
 
-        <button
-          className="cyclos-ai-action-btn"
-          onClick={() => fileInputRef.current?.click()}
-          aria-label="Upload waste image"
-          title="Upload a waste image"
-        >
-          <TbPhoto size={22} />
-        </button>
+          <button
+            className="cyclos-ai-action-btn"
+            onClick={() => fileInputRef.current?.click()}
+            aria-label="Upload waste image"
+            title="Upload a waste image"
+          >
+            <TbPhoto size={24} />
+          </button>
 
-        <button
-          className={`cyclos-ai-action-btn ${isListening ? 'listening' : ''}`}
-          onClick={() => setIsListening(!isListening)}
-          aria-label="Toggle microphone"
-          title="Speak to Cyclos AI"
-        >
-          {isListening ? <TbMicrophoneOff size={22} /> : <TbMicrophone size={22} />}
-        </button>
+          <TbSparkles className="cyclos-ai-input-sparkle" size={20} style={{ color: 'var(--eco-600)', opacity: 0.7, marginLeft: '8px' }} />
 
-        <input
-          ref={inputRef}
-          className="cyclos-ai-input"
-          placeholder={isListening ? "Listening..." : "Message Cyclos AI..."}
-          value={inputVal}
-          onChange={(e) => setInputVal(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={isListening}
-        />
+          <input
+            ref={inputRef}
+            className="cyclos-ai-input"
+            placeholder={isListening ? "Listening..." : "Enter a prompt here..."}
+            value={inputVal}
+            onChange={(e) => setInputVal(e.target.value)}
+            onKeyDown={handleKeyDown}
+            disabled={isListening}
+          />
 
-        <button
-          className="cyclos-ai-send-btn"
-          onClick={() => sendMessage(inputVal)}
-          aria-label="Send message"
-        >
-          <TbSend size={18} />
-        </button>
+          <button
+            className={`cyclos-ai-action-btn ${isListening ? 'listening' : ''}`}
+            onClick={() => setIsListening(!isListening)}
+            aria-label="Toggle microphone"
+            title="Speak to Cyclos AI"
+          >
+            {isListening ? <TbMicrophoneOff size={24} /> : <TbMicrophone size={24} />}
+          </button>
+
+          <button
+            className={`cyclos-ai-send-btn ${inputVal.trim() ? 'active' : ''}`}
+            onClick={() => sendMessage(inputVal)}
+            aria-label="Send message"
+          >
+            <TbSend size={22} />
+          </button>
+        </div>
       </div>
     </div>
   );

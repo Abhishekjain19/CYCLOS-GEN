@@ -1,16 +1,12 @@
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, Tooltip, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Tooltip, Circle, Popup, useMap } from 'react-leaflet';
+import { useAuth } from '../context/AuthContext';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  TbRecycle, TbFish, TbAlertTriangle, TbThermometer, TbWind, 
-  TbDroplet, TbTrash, TbCircleCheck, TbBuildingSkyscraper, 
-  TbActivity, TbLeaf, TbMicroscope, TbGlobe, TbHistory, 
-  TbSparkles, TbSearch, TbFilter, TbX, TbChevronRight,
-  TbLoader2, TbRipple
+  TbRecycle, TbTrash, TbGlobe, TbSearch, TbRipple
 } from 'react-icons/tb';
-import { getChatResponse } from '../services/nvidiaNim';
 import './MapSection.css';
 
 // Fix for default marker icons
@@ -62,170 +58,21 @@ const getMarkerIcon = (status, index) => {
 
 function MapController({ selectedCoords, userLocation }) {
   const map = useMap();
+  const [hasInitiallyCentered, setHasInitiallyCentered] = useState(false);
+
   useEffect(() => {
     if (selectedCoords) {
-      map.flyTo(selectedCoords, 14, { duration: 1.2 });
-    } else if (userLocation) {
-      map.flyTo(userLocation, 12, { duration: 1.5 });
+      map.flyTo(selectedCoords, 15, { duration: 1.2 });
+    } else if (userLocation && !hasInitiallyCentered) {
+      // Use setView for the initial load to prevent "flying" animation
+      map.setView(userLocation, 14);
+      setHasInitiallyCentered(true);
     }
-  }, [selectedCoords, userLocation, map]);
+  }, [selectedCoords, userLocation, map, hasInitiallyCentered]);
   return null;
 }
 
-/* ─── Zone Detail Panel ─────────────────────────────────────────── */
-function ZoneDetailPanel({ zone, onClose }) {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [aiInsight, setAiInsight] = useState("");
-  const [showThreatenedList, setShowThreatenedList] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const resp = await getChatResponse([{
-          role: 'user',
-          content: `Provide accurate solid waste management data for "${zone.name}" as JSON. Include:
-          sw_tonnes_year (number), sw_tonnes_month (number), waste_accepted (array of strings, e.g., ["Plastic", "E-Waste", "Organic"]), pollution_level ("High", "Moderate", "Low"), facility_status ("Open", "Closed"), ai_long_insight (string 3 sentences).
-          Return ONLY JSON.`
-        }]);
-        const jsonText = resp.match(/\{[\s\S]*\}/)[0];
-        const json = JSON.parse(jsonText);
-        setData(json);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [zone.id]);
-
-
-  const triggerAIInsight = () => {
-    if (!data) return;
-    setIsStreaming(true);
-    setAiInsight("");
-    const text = data.ai_long_insight;
-    let i = 0;
-    const interval = setInterval(() => {
-      setAiInsight(prev => prev + text.charAt(i));
-      i++;
-      if (i >= text.length) {
-        clearInterval(interval);
-        setIsStreaming(false);
-      }
-    }, 20);
-  };
-
-  return (
-    <motion.div 
-      className="map-detail-sidebar"
-      initial={{ x: '100%' }}
-      animate={{ x: 0 }}
-      exit={{ x: '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-    >
-      <div className="sidebar-header">
-        <div className="header-text">
-          <h2>{zone.name}</h2>
-          <span className={`status-badge ${zone.status}`}>{zone.status} zone</span>
-        </div>
-        <button onClick={onClose} className="sidebar-close"><TbX /></button>
-      </div>
-
-      <div className="sidebar-scrollable">
-        {loading ? (
-          <div className="sidebar-loading">
-            <TbLoader2 className="spinner" />
-            <p>Scanning SWM Data Streams...</p>
-          </div>
-        ) : data ? (
-          <div className="metrics-grid">
-            {/* 1. Navigation Option */}
-            <div 
-              className="metric-card full" 
-              style={{ cursor: 'pointer', background: 'rgba(82,183,136,0.15)', border: '1px solid rgba(82,183,136,0.3)', marginBottom: '8px' }} 
-              onClick={() => window.open(`https://maps.google.com/?q=${zone.lat},${zone.lng}`, '_blank')}
-            >
-              <TbGlobe className="m-icon" style={{ color: 'var(--eco-600)' }} />
-              <div className="m-info">
-                <span className="m-label" style={{ color: 'var(--eco-600)' }}>Navigation</span>
-                <span className="m-value" style={{ fontSize: '15px', color: 'var(--grey-900)' }}>Open in Google Maps ↗</span>
-              </div>
-            </div>
-
-            {/* 2. What kind of waste are accepted */}
-            <div className="metric-card full">
-              <TbTrash className="m-icon" />
-              <div className="m-info">
-                <span className="m-label">Waste Accepted</span>
-                <span className="m-value" style={{ fontSize: '14px' }}>
-                  {data.waste_accepted ? data.waste_accepted.join(', ') : "Mixed SWM, Organic, Plastic"}
-                </span>
-              </div>
-            </div>
-
-            {/* 3. Is this ward polluted */}
-            <div className="metric-card">
-              <TbAlertTriangle className="m-icon" />
-              <div className="m-info">
-                <span className="m-label">Pollution Level</span>
-                <span className={`m-badge ${data.pollution_level?.toLowerCase() === 'high' ? 'danger' : data.pollution_level?.toLowerCase() === 'low' ? 'success' : 'warning'}`}>
-                  {data.pollution_level || "Moderate"}
-                </span>
-              </div>
-            </div>
-
-            {/* 5. Open or close */}
-            <div className="metric-card">
-              <TbCircleCheck className="m-icon" />
-              <div className="m-info">
-                <span className="m-label">Facility Status</span>
-                <span className={`m-badge ${data.facility_status?.toLowerCase() === 'closed' ? 'danger' : 'success'}`}>
-                  {data.facility_status || "Open"}
-                </span>
-              </div>
-            </div>
-
-            {/* 4. Approx waste per year/month */}
-            <div className="metric-card full">
-              <TbRecycle className="m-icon" />
-              <div className="m-info">
-                <span className="m-label">Approx Waste (Year / Month)</span>
-                <span className="m-value">
-                  {Number(data.sw_tonnes_year || 12000).toLocaleString()} t/yr &nbsp;|&nbsp; {Number(data.sw_tonnes_month || 1000).toLocaleString()} t/mo
-                </span>
-              </div>
-            </div>
-
-            <div className="metric-card full primary">
-              <div className="m-info">
-                <span className="m-label">AI Conservation Insight</span>
-                <button 
-                  className="ai-gen-btn" 
-                  onClick={triggerAIInsight} 
-                  disabled={isStreaming}
-                >
-                  <TbSparkles /> {isStreaming ? "Synthesizing..." : "Analyze Zone"}
-                </button>
-                {(aiInsight || isStreaming) && (
-                  <div className="ai-insight-box">
-                    <p>{aiInsight}</p>
-                    {isStreaming && <span className="streaming-dot"></span>}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        ) : (
-          <p className="error-text">Failed to connect to SWM civic uplink.</p>
-        )}
-      </div>
-    </motion.div>
-  );
-}
 
 /* ─── Main Map Component ─────────────────────────────────────────── */
 export default function MapSection() {
@@ -244,6 +91,28 @@ export default function MapSection() {
       );
     }
   }, []);
+
+  const { userProfile } = useAuth();
+  const secondaryDomain = userProfile?.secondary_domain || 'Plastic';
+
+  const nearbyBins = useMemo(() => {
+    if (!userLocation) return [];
+    const [lat, lng] = userLocation;
+    return [
+      { id: 'bin1', name: 'BBMP Collection Center', lat: lat + 0.005, lng: lng - 0.003, color: '#FF4757', status: 'Open', accepts: 'Dry Waste', yr: '12t', mo: '1t' },
+      { id: 'bin2', name: 'Smart Bin Malleswaram', lat: lat - 0.002, lng: lng + 0.006, color: '#2E86DE', status: 'Open', accepts: 'Recyclables', yr: '5t', mo: '0.4t' },
+      { id: 'bin3', name: 'Transfer Station North', lat: lat + 0.002, lng: lng + 0.008, color: '#FF9F43', status: 'Open', accepts: 'Mixed Waste', yr: '45t', mo: '3.5t' },
+    ];
+  }, [userLocation]);
+
+  const nearbyProducers = useMemo(() => {
+    if (!userLocation) return [];
+    const [lat, lng] = userLocation;
+    return [
+      { id: 'prod1', name: 'Community Producer', lat: lat + 0.008, lng: lng + 0.002, domain: secondaryDomain },
+      { id: 'prod2', name: 'Local Bulk Seller', lat: lat - 0.004, lng: lng - 0.005, domain: secondaryDomain },
+    ];
+  }, [userLocation, secondaryDomain]);
 
   const filteredData = useMemo(() => {
     return URBAN_ECO_ZONES.filter(o => {
@@ -274,11 +143,8 @@ export default function MapSection() {
 
       <div className="map-frame">
         <MapContainer
-          center={[20.5937, 78.9629]}
-          zoom={5}
-          minZoom={4}
-          maxBounds={[[6.5546, 68.1114], [35.6745, 97.3956]]}
-          maxBoundsViscosity={1.0}
+          center={userLocation || [12.9716, 77.5946]}
+          zoom={14}
           scrollWheelZoom={true}
           className="leaflet-integrated-container"
           zoomControl={false}
@@ -293,28 +159,141 @@ export default function MapSection() {
             userLocation={userLocation}
           />
           
-          {filteredData.map((zone, idx) => (
-            <Marker 
-              key={zone.id}
-              position={[zone.lat, zone.lng]}
-              icon={getMarkerIcon(zone.status, idx)}
-              eventHandlers={{ click: () => setSelectedZone(zone) }}
-            >
-              <Tooltip direction="top" className="map-integrated-tooltip" opacity={1}>
-                <strong>{zone.name}</strong>
-              </Tooltip>
+          {filteredData.map((zone, idx) => {
+            const wardColor = zone.status === 'critical_waste' ? '#FF4757' : zone.status === 'moderate' ? '#FF9F43' : '#2EE5B0';
+            
+            return (
+              <Marker 
+                key={zone.id}
+                position={[zone.lat, zone.lng]}
+                icon={getMarkerIcon(zone.status, idx)}
+                eventHandlers={{ click: () => setSelectedZone(zone) }}
+              >
+                <Popup>
+                  <div className="map-bin-popup" style={{ minWidth: '220px', padding: '4px' }}>
+                    <h4 style={{ margin: '0 0 8px', color: wardColor }}>{zone.name}</h4>
+                    <div style={{ fontSize: '13px', marginBottom: '8px' }}>
+                      <strong>Status:</strong> {zone.status === 'eco_hub' ? 'Eco-Positive' : zone.status === 'moderate' ? 'Moderate' : 'Critical'}<br/>
+                      <strong>Capacity:</strong> Active Collection
+                    </div>
+                    
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', fontSize: '12px' }}>
+                      <div style={{ flex: 1, background: '#f1f3f5', padding: '6px 8px', borderRadius: '4px' }}>
+                        <strong>{zone.status === 'eco_hub' ? '2.5k' : zone.status === 'moderate' ? '5k' : '12k'}</strong>t/yr
+                      </div>
+                      <div style={{ flex: 1, background: '#f1f3f5', padding: '6px 8px', borderRadius: '4px' }}>
+                        <strong>{zone.status === 'eco_hub' ? '208' : zone.status === 'moderate' ? '415' : '1k'}</strong>t/mo
+                      </div>
+                    </div>
+
+                    <p style={{ fontSize: '11px', color: '#666', marginBottom: '12px', lineHeight: '1.4' }}>
+                      {zone.desc}
+                    </p>
+
+                    <button 
+                      style={{ 
+                        width: '100%', 
+                        padding: '8px', 
+                        background: wardColor, 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        boxShadow: `0 4px 12px ${wardColor}33`
+                      }}
+                      onClick={() => window.open(`https://www.google.com/maps/?q=${zone.lat},${zone.lng}`, '_blank')}
+                    >
+                      Navigate to Ward Office ↗
+                    </button>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* User Location Marker */}
+          {userLocation && (
+            <Marker position={userLocation}>
+              <Tooltip direction="top" permanent>You</Tooltip>
             </Marker>
+          )}
+
+          {/* Nearby Bins */}
+          {nearbyBins.map(bin => {
+            const binIcon = L.divIcon({
+              className: 'custom-bin-marker',
+              html: `<div style="background-color: ${bin.color}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 10px ${bin.color}"></div>`,
+              iconSize: [18, 18],
+              iconAnchor: [9, 9]
+            });
+
+            return (
+              <Marker 
+                key={bin.id} 
+                position={[bin.lat, bin.lng]}
+                icon={binIcon}
+              >
+                <Popup>
+                  <div className="map-bin-popup" style={{ minWidth: '200px', padding: '4px' }}>
+                    <h4 style={{ margin: '0 0 8px', color: bin.color }}>{bin.name}</h4>
+                    <div style={{ fontSize: '13px', marginBottom: '8px' }}>
+                      <strong>Status:</strong> {bin.status}<br/>
+                      <strong>Accepts:</strong> {bin.accepts}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', fontSize: '12px' }}>
+                      <div style={{ flex: 1, background: '#f1f3f5', padding: '4px 8px', borderRadius: '4px' }}>
+                        <strong>{bin.yr}</strong>/yr
+                      </div>
+                      <div style={{ flex: 1, background: '#f1f3f5', padding: '4px 8px', borderRadius: '4px' }}>
+                        <strong>{bin.mo}</strong>/mo
+                      </div>
+                    </div>
+                    <button 
+                      style={{ 
+                        width: '100%', 
+                        padding: '6px', 
+                        background: bin.color, 
+                        color: 'white', 
+                        border: 'none', 
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600'
+                      }}
+                      onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${bin.lat},${bin.lng}`, '_blank')}
+                    >
+                      Navigate in Google Maps ↗
+                    </button>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
+
+          {/* Producer Fuzz Circles */}
+          {nearbyProducers.map(p => (
+            <Circle 
+              key={p.id}
+              center={[p.lat, p.lng]}
+              radius={400}
+              pathOptions={{ 
+                color: '#facc15', 
+                fillColor: '#facc15', 
+                fillOpacity: 0.15, 
+                dashArray: '5, 10' 
+              }}
+            >
+              <Tooltip direction="top">
+                <strong>{p.name}</strong><br/>
+                Sells: {p.domain}
+              </Tooltip>
+            </Circle>
           ))}
         </MapContainer>
 
-        <AnimatePresence>
-          {selectedZone && (
-            <ZoneDetailPanel 
-              zone={selectedZone} 
-              onClose={() => setSelectedZone(null)} 
-            />
-          )}
-        </AnimatePresence>
+
       </div>
 
       <div className="map-footer-note">
