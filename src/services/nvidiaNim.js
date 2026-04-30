@@ -53,7 +53,7 @@ export const analyzeWasteImage = async (base64Image) => {
           content: [
             {
               type: 'text',
-              text: 'STRICT INSTRUCTION: Analyze this waste item and RETURN ONLY A VALID JSON OBJECT. DO NOT include any conversational text, explanations, or labels like "Based on the image".\n\nREQUIRED FIELDS:\n- type: (string, e.g., "Copper Wire", "Mixed Organic")\n- stream: (string, "Dry Waste", "Wet Waste", "E-Waste", "Hazardous")\n- grade: (string, "A", "B", "C")\n- recyclability_score: (string, e.g., "94%")\n- weight_estimation: (string, just the number, e.g., "8")\n- price_per_kg: (string, just the number, e.g., "800")\n- co2_per_kg: (string, just the number, e.g., "13.5")\n- selling_potential: (string, "YES", "NO", "Only if bulk")\n- confidence: (string, just the number e.g., "91")\n- segregation_method: (string, precise instructions on how to segregate this item into standard bins)'
+              text: 'You are a JSON-only data extraction API. Analyze this waste item and output ONLY a raw JSON object. Do not include any markdown formatting, backticks, or conversational text. Use exactly this JSON structure:\n{\n  "type": "Item name (e.g., Plastic Bottles)",\n  "stream": "Dry Waste / Wet Waste / E-Waste / Hazardous",\n  "grade": "A / B / C",\n  "recyclability_score": "94%",\n  "weight_estimation": "8",\n  "price_per_kg": "800",\n  "co2_per_kg": "13.5",\n  "selling_potential": "YES / NO / Only if bulk",\n  "confidence": "91",\n  "segregation_method": "Detailed segregation instructions here"\n}'
             },
             {
               type: 'image_url',

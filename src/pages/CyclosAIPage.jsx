@@ -96,35 +96,73 @@ export default function CyclosAIPage() {
     }
   }, [isListening]);
 
-  const speakText = useCallback((text) => {
-    if (!synthRef.current || !isVoiceModeRef.current) return;
-    synthRef.current.cancel();
+  // Holds the current Audio object so we can cancel it
+  const audioRef = useRef(null);
+
+  const speakText = useCallback(async (text) => {
+    if (!isVoiceModeRef.current) return;
     
-    const cleanText = text.replace(/[#*`_]/g, '').trim();
+    // Stop any ongoing browser speech
+    if (synthRef.current) synthRef.current.cancel();
+    
+    // Stop any ongoing AI audio playback
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current = null;
+    }
+    
+    const cleanText = text.replace(/[\u1F60-\u1F64]|[\u2702-\u27B0]|[\u1F68-\u1F6C]|[\u1F30-\u1F70]|[\u2600-\u26ff]/g, '')
+                          .replace(/[*_#`]/g, '');
+
+    const elevenLabsKey = import.meta.env.VITE_ELEVENLABS_API_KEY;
+    
+    if (elevenLabsKey) {
+      try {
+        // Use ElevenLabs AI Voice (Rachel Voice ID)
+        const response = await fetch('https://api.elevenlabs.io/v1/text-to-speech/21m00Tcm4TlvDq8ikWAM', {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'xi-api-key': elevenLabsKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            text: cleanText,
+            model_id: 'eleven_monolingual_v1',
+            voice_settings: {
+              stability: 0.5,
+              similarity_boost: 0.5
+            }
+          })
+        });
+
+        if (!response.ok) throw new Error('ElevenLabs API Error');
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        audioRef.current = audio;
+        audio.play();
+        return;
+      } catch (err) {
+        console.error("AI Voice failed, falling back to browser TTS", err);
+      }
+    } else {
+      console.warn("No VITE_ELEVENLABS_API_KEY found. Falling back to browser TTS.");
+    }
+    
+    // Fallback to browser TTS
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    
     const voices = synthRef.current.getVoices();
-    const premiumVoices = [
-      'Google UK English Female',
-      'Microsoft Sonia Online (Natural) - English (United Kingdom)',
-      'Microsoft Aria Online (Natural) - English (United States)',
-      'Google US English',
-      'Samantha'
-    ];
+    const premiumVoice = voices.find(v => 
+      v.name.includes('Natural') || 
+      v.name.includes('Premium') || 
+      v.name.includes('Google US English')
+    ) || voices.find(v => v.lang.startsWith('en'));
 
-    let selectedVoice = null;
-    for (const vName of premiumVoices) {
-      selectedVoice = voices.find(v => v.name === vName);
-      if (selectedVoice) break;
-    }
-
-    if (!selectedVoice) {
-      selectedVoice = voices.find(v => v.lang.startsWith('en') && (v.name.includes('Female') || v.name.includes('Google'))) || voices.find(v => v.lang.startsWith('en'));
-    }
-
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-      utterance.lang = selectedVoice.lang;
+    if (premiumVoice) {
+      utterance.voice = premiumVoice;
+      utterance.lang = premiumVoice.lang;
     } else {
       utterance.lang = 'en-US';
     }
@@ -215,7 +253,7 @@ export default function CyclosAIPage() {
         {
           id: Date.now() + 1,
           role: 'ai',
-          text: "⚠️ **Analysis Failed**\n\nI couldn't process this image clearly. Please try uploading a clearer photo.",
+          text: `⚠️ **Analysis Failed**\n\nI couldn't process this image clearly. Please try uploading a clearer photo.\n\n*Error details: ${err.message}*`,
           isImageReply: true,
         },
       ]);
@@ -226,13 +264,37 @@ export default function CyclosAIPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64 = reader.result.split(',')[1];
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 800;
+      const MAX_HEIGHT = 800;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > MAX_WIDTH) {
+          height *= MAX_WIDTH / width;
+          width = MAX_WIDTH;
+        }
+      } else {
+        if (height > MAX_HEIGHT) {
+          width *= MAX_HEIGHT / height;
+          height = MAX_HEIGHT;
+        }
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      
+      const base64withPrefix = canvas.toDataURL('image/jpeg', 0.7);
+      const base64 = base64withPrefix.split(',')[1];
       const objectUrl = URL.createObjectURL(file);
       processCapturedImage(base64, objectUrl);
     };
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file);
     e.target.value = '';
   };
 
@@ -268,12 +330,30 @@ export default function CyclosAIPage() {
 
     const canvas = canvasChatRef.current;
     if (!canvas) return;
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0);
     
-    const base64withPrefix = canvas.toDataURL('image/jpeg', 0.8);
+    const MAX_WIDTH = 800;
+    const MAX_HEIGHT = 800;
+    let width = video.videoWidth;
+    let height = video.videoHeight;
+
+    if (width > height) {
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+    } else {
+      if (height > MAX_HEIGHT) {
+        width *= MAX_HEIGHT / height;
+        height = MAX_HEIGHT;
+      }
+    }
+
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, width, height);
+    
+    const base64withPrefix = canvas.toDataURL('image/jpeg', 0.7);
     const base64 = base64withPrefix.split(',')[1];
     
     setShowScanner(false);
