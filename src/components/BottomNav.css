@@ -2,65 +2,6 @@
    BOTTOM NAV  ·  Frosted Glass Pill
    ══════════════════════════════════ */
 
-/* ── Floating AI FAB Button ────────────────────────────── */
-.chatbot-fab {
-  position: fixed;
-  bottom: 90px;
-  right: 16px;
-  z-index: 9997;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--eco-500), var(--eco-700));
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 0 0 4px rgba(45, 106, 79, 0.15),
-    0 0 20px rgba(45, 106, 79, 0.25),
-    0 0 40px rgba(45, 106, 79, 0.10),
-    0 6px 20px rgba(0,0,0,0.2);
-  transition: transform 150ms var(--ease-spring, cubic-bezier(0.34,1.56,0.64,1)),
-              box-shadow 0.25s ease;
-  color: rgba(255,255,255,0.9);
-  -webkit-tap-highlight-color: transparent;
-}
-
-.chatbot-fab:hover {
-  transform: scale(1.05);
-  box-shadow:
-    0 0 0 4px rgba(45, 106, 79, 0.25),
-    0 0 28px rgba(45, 106, 79, 0.45),
-    0 0 50px rgba(45, 106, 79, 0.15),
-    0 6px 24px rgba(0,0,0,0.3);
-}
-
-.chatbot-fab:active {
-  transform: scale(0.96);
-}
-
-.chatbot-fab--active {
-  background: linear-gradient(135deg, var(--eco-600), var(--eco-800));
-  box-shadow:
-    0 0 0 5px rgba(45, 106, 79, 0.3),
-    0 0 30px rgba(45, 106, 79, 0.5),
-    0 0 60px rgba(45, 106, 79, 0.2),
-    0 6px 20px rgba(0,0,0,0.3);
-}
-
-/* Wave icon oscillation animation */
-.chatbot-fab__wave {
-  width: 28px;
-  height: 16px;
-  animation: waveOscillate 2.2s ease-in-out infinite;
-}
-
-@keyframes waveOscillate {
-  0%,100% { transform: scaleY(1); }
-  50%      { transform: scaleY(0.7); }
-}
 
 .bottom-nav-app {
   position: fixed;

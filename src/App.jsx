@@ -11,6 +11,7 @@ import PrimaryDomainPage from './pages/PrimaryDomainPage';
 import SecondaryDomainPage from './pages/SecondaryDomainPage';
 import MainPage from './pages/MainPage';
 import ScanPage from './pages/ScanPage';
+import CyclosAIPage from './pages/CyclosAIPage';
 import MarketPage from './pages/MarketPage';
 import BinLocationPage from './pages/BinLocationPage';
 import ComplaintPage from './pages/ComplaintPage';
@@ -77,6 +78,7 @@ function AppRoutes() {
         <Route path="/onboard/secondary" element={<OnboardRoute><SecondaryDomainPage /></OnboardRoute>} />
         <Route path="/app" element={<ProtectedRoute><MainPage /></ProtectedRoute>} />
         <Route path="/scanner" element={<ProtectedRoute><ScanPage /></ProtectedRoute>} />
+        <Route path="/cyclos-ai" element={<ProtectedRoute><CyclosAIPage /></ProtectedRoute>} />
         <Route path="/bins" element={<ProtectedRoute><BinLocationPage /></ProtectedRoute>} />
         <Route path="/complaint" element={<ProtectedRoute><ComplaintPage /></ProtectedRoute>} />
         <Route path="/marketplace" element={<ProtectedRoute><MarketPage /></ProtectedRoute>} />

@@ -1,4 +1,4 @@
-const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY || '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';
+const NVIDIA_API_KEY = import.meta.env.VITE_NVIDIA_API_KEY || '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';
 const BASE_URL = '/api/nvidia';
 
 /**
@@ -53,7 +53,7 @@ export const analyzeWasteImage = async (base64Image) => {
           content: [
             {
               type: 'text',
-              text: 'STRICT INSTRUCTION: Analyze this waste item and RETURN ONLY A VALID JSON OBJECT. DO NOT include any conversational text, explanations, or labels like "Based on the image".\n\nREQUIRED FIELDS:\n- type: (string, e.g., "Copper Wire", "Mixed Organic")\n- stream: (string, "Dry Waste", "Wet Waste", "E-Waste", "Hazardous")\n- grade: (string, "A", "B", "C")\n- recyclability_score: (string, e.g., "94%")\n- weight_estimation: (string, just the number, e.g., "8")\n- price_per_kg: (string, just the number, e.g., "800")\n- co2_per_kg: (string, just the number, e.g., "13.5")\n- selling_potential: (string, "YES", "NO", "Only if bulk")\n- confidence: (string, just the number e.g., "91")'
+              text: 'STRICT INSTRUCTION: Analyze this waste item and RETURN ONLY A VALID JSON OBJECT. DO NOT include any conversational text, explanations, or labels like "Based on the image".\n\nREQUIRED FIELDS:\n- type: (string, e.g., "Copper Wire", "Mixed Organic")\n- stream: (string, "Dry Waste", "Wet Waste", "E-Waste", "Hazardous")\n- grade: (string, "A", "B", "C")\n- recyclability_score: (string, e.g., "94%")\n- weight_estimation: (string, just the number, e.g., "8")\n- price_per_kg: (string, just the number, e.g., "800")\n- co2_per_kg: (string, just the number, e.g., "13.5")\n- selling_potential: (string, "YES", "NO", "Only if bulk")\n- confidence: (string, just the number e.g., "91")\n- segregation_method: (string, precise instructions on how to segregate this item into standard bins)'
             },
             {
               type: 'image_url',

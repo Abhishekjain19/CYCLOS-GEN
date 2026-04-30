@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { TbSend, TbPhoto, TbRobot, TbMicrophone, TbMicrophoneOff } from 'react-icons/tb';
+import { TbSend, TbPhoto, TbRobot, TbMicrophone, TbMicrophoneOff, TbCamera, TbX } from 'react-icons/tb';
 import ReactMarkdown from 'react-markdown';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import './ChatbotPopup.css';
 
 /* ── Canned text responses keyed by keywords ── */
@@ -36,37 +36,43 @@ const IMAGE_CLASSIFICATIONS = [
     category: 'Plastic Waste',
     emoji: '🧴',
     advice:
-      'This appears to be plastic waste. Check the recycling number on the bottom. PET (#1) and HDPE (#2) are accepted at most curbside bins. Rinse clean before recycling.',
+      'This appears to be plastic waste. Check the recycling number on the bottom. PET (#1) and HDPE (#2) are accepted at most curbside bins.',
+    segregation: 'Rinse clean to remove residue. Crush to save space. Segregate into the **Blue Bin** (Dry/Plastic Waste).'
   },
   {
     category: 'Metal / Aluminium',
     emoji: '🥫',
     advice:
-      'Looks like metal packaging. Aluminium cans and steel tins are infinitely recyclable — just rinse them and place in your recycling bin. Great choice to recycle!',
+      'Looks like metal packaging. Aluminium cans and steel tins are infinitely recyclable.',
+    segregation: 'Rinse the can. Crush it if possible. Segregate into the **Blue Bin** (Dry Waste) or sell to a local scrap dealer.'
   },
   {
     category: 'Glass',
     emoji: '🫙',
     advice:
-      'This looks like glass. Glass is 100 % recyclable and can be recycled indefinitely. Rinse it out and take it to your nearest glass bank or curbside collection.',
+      'This looks like glass. Glass is 100% recyclable and can be recycled indefinitely.',
+    segregation: 'Rinse out food/liquid. Do not mix broken glass with intact glass. Wrap broken pieces in newspaper and place in the **Blue Bin**.'
   },
   {
     category: 'Paper / Cardboard',
     emoji: '📦',
     advice:
-      'This appears to be paper or cardboard. Flatten any boxes and keep the material dry. Remove plastic inserts or tape before recycling.',
+      'This appears to be paper or cardboard.',
+    segregation: 'Flatten all boxes. Keep the material dry and free of food stains (no greasy pizza boxes). Place in the **Blue Bin**.'
   },
   {
     category: 'Organic Waste',
     emoji: '🍃',
     advice:
-      'This looks like organic or food waste. Consider home composting! Organic matter breaks down naturally and enriches soil. Many local councils also offer food-waste collection.',
+      'This looks like organic or food waste. Organic matter breaks down naturally and enriches soil.',
+    segregation: 'Do not put in plastic bags. Place directly into the **Green Bin** (Wet Waste) or use a home composter.'
   },
   {
     category: 'E-Waste',
     emoji: '📱',
     advice:
-      'This appears to be electronic waste. Never place e-waste in your regular bin — it contains hazardous materials. Use the Cyclos map to find a certified e-waste drop-off point near you.',
+      'This appears to be electronic waste. Never place e-waste in your regular bin.',
+    segregation: 'Keep separate from all other waste. Store in a cool, dry place and drop off at a certified Cyclos E-Waste hub or **Red Bin** (Hazardous).'
   },
 ];
 
@@ -125,6 +131,81 @@ export default function ChatbotPopup({ onClose }) {
   const recognitionRef = useRef(null);
   const synthRef = useRef(window.speechSynthesis);
   const typingTimeoutRef = useRef(null);
+
+  const [showScanner, setShowScanner] = useState(false);
+  const videoChatRef = useRef(null);
+  const canvasChatRef = useRef(null);
+
+  // Camera logic for Chatbot
+  const startChatCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      if (videoChatRef.current) {
+        videoChatRef.current.srcObject = stream;
+      }
+    } catch (err) {
+      console.error(err);
+      setShowScanner(false);
+    }
+  };
+
+  const stopChatCamera = () => {
+    if (videoChatRef.current?.srcObject) {
+      videoChatRef.current.srcObject.getTracks().forEach(track => track.stop());
+    }
+  };
+
+  useEffect(() => {
+    if (showScanner) {
+      startChatCamera();
+    } else {
+      stopChatCamera();
+    }
+    return () => stopChatCamera();
+  }, [showScanner]);
+
+  const handleChatCameraCapture = () => {
+    if (!videoChatRef.current) return;
+    const video = videoChatRef.current;
+    if (video.readyState !== 4 || video.videoWidth === 0) return;
+
+    const canvas = canvasChatRef.current;
+    if (!canvas) return;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0);
+    const objectUrl = canvas.toDataURL('image/jpeg', 0.8);
+    
+    setShowScanner(false);
+
+    const userMsg = {
+      id: Date.now(),
+      role: 'user',
+      image: objectUrl,
+      text: null,
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setIsTyping(true);
+
+    setTimeout(() => {
+      const cls = getRandomClassification();
+      const replyText = `${cls.emoji} **Detected: ${cls.category}**\n\n${cls.advice}\n\n**Segregation Method:**\n${cls.segregation}`;
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: 'ai',
+          text: replyText,
+          isImageReply: true,
+        },
+      ]);
+      if (isVoiceMode) {
+        speakText(`Detected ${cls.category}. ${cls.segregation}`);
+      }
+    }, 1400 + Math.random() * 800);
+  };
 
   // Initialize Speech Recognition
   useEffect(() => {
@@ -276,7 +357,7 @@ export default function ChatbotPopup({ onClose }) {
     /* simulate AI analysing image */
     setTimeout(() => {
       const cls = getRandomClassification();
-      const replyText = `${cls.emoji} **Detected: ${cls.category}**\n\n${cls.advice}`;
+      const replyText = `${cls.emoji} **Detected: ${cls.category}**\n\n${cls.advice}\n\n**Segregation Method:**\n${cls.segregation}`;
       setIsTyping(false);
       setMessages((prev) => [
         ...prev,
@@ -288,7 +369,7 @@ export default function ChatbotPopup({ onClose }) {
         },
       ]);
       if (isVoiceMode) {
-        speakText(`Detected ${cls.category}. ${cls.advice}`);
+        speakText(`Detected ${cls.category}. ${cls.segregation}`);
       }
     }, 1400 + Math.random() * 800);
 
@@ -402,6 +483,36 @@ export default function ChatbotPopup({ onClose }) {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* ── Scanner Overlay ── */}
+        <AnimatePresence>
+          {showScanner && (
+            <motion.div 
+              className="chatbot-scanner-overlay"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+            >
+              <div className="chatbot-scanner-header">
+                <span>Object Scanner</span>
+                <button onClick={() => setShowScanner(false)} aria-label="Close Scanner"><TbX size={20} /></button>
+              </div>
+              <div className="chatbot-scanner-video-wrap">
+                 <video ref={videoChatRef} autoPlay playsInline className="chatbot-scanner-video" />
+                 <canvas ref={canvasChatRef} style={{ display: 'none' }} />
+                 <div className="chatbot-scanner-hud">
+                   <div className="corner tl"></div>
+                   <div className="corner tr"></div>
+                   <div className="corner bl"></div>
+                   <div className="corner br"></div>
+                 </div>
+              </div>
+              <button className="chatbot-scanner-capture" onClick={handleChatCameraCapture} aria-label="Capture Image">
+                 <TbCamera size={24} />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ── Quick suggestion chips (only before first user message) ── */}
         {messages.length === 1 && (
           <div className="chatbot-suggestions">
@@ -438,6 +549,16 @@ export default function ChatbotPopup({ onClose }) {
             title="Upload a waste image for AI classification"
           >
             <TbPhoto size={19} />
+          </button>
+
+          {/* scanner button */}
+          <button
+            className="chatbot-upload-btn"
+            onClick={() => setShowScanner(true)}
+            aria-label="Scan object"
+            title="Scan object using camera"
+          >
+            <TbCamera size={19} />
           </button>
 
           {/* voice mode toggle */}

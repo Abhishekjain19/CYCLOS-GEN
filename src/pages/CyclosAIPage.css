@@ -1,0 +1,387 @@
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,600,700&display=swap');
+
+.cyclos-ai-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--bg-light);
+  font-family: 'Satoshi', sans-serif;
+  padding-bottom: 70px; /* Space for bottom nav */
+}
+
+/* ── Header ──────────────────────────────────────────────── */
+.cyclos-ai-header {
+  background: #FFFFFF;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(82,183,136,0.1);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+}
+
+.cyclos-ai-header__back {
+  background: none;
+  border: none;
+  color: var(--grey-700);
+  padding: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.cyclos-ai-header__icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #006E5A, var(--eco-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 18px;
+  box-shadow: 0 0 12px rgba(0,184,148,0.35);
+}
+
+.cyclos-ai-header__text {
+  flex: 1;
+}
+
+.cyclos-ai-header__title {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--eco-500);
+  margin: 0;
+  line-height: 1;
+}
+
+.cyclos-ai-header__subtitle {
+  font-size: 11px;
+  color: var(--grey-600);
+  margin: 4px 0 0;
+  line-height: 1;
+}
+
+.cyclos-ai-header-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cyclos-ai-header-toggle-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--grey-600);
+  display: none;
+}
+@media (min-width: 400px) {
+  .cyclos-ai-header-toggle-label {
+    display: block;
+  }
+}
+
+.cyclos-ai-header-switch {
+  width: 44px;
+  height: 24px;
+  border-radius: 12px;
+  background: var(--grey-300);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  padding: 0;
+}
+.cyclos-ai-header-switch.active {
+  background: var(--eco-500);
+}
+.cyclos-ai-header-switch-handle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #FFF;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.cyclos-ai-header-switch.active .cyclos-ai-header-switch-handle {
+  transform: translateX(20px);
+}
+
+/* ── Messages Area ───────────────────────────────────────── */
+.cyclos-ai-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8fcf9;
+}
+
+.cyclos-ai-messages::-webkit-scrollbar { width: 4px; }
+.cyclos-ai-messages::-webkit-scrollbar-thumb { background: rgba(82,183,136,0.2); border-radius: 99px; }
+
+/* ── Message Wrappers ────────────────────────────────────── */
+.cyclos-ai-msg {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 90%;
+}
+
+.cyclos-ai-msg.ai   { align-self: flex-start; }
+.cyclos-ai-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+/* ── Avatar ──────────────────────────────────────────────── */
+.cyclos-ai-msg__avatar {
+  width: 30px; height: 30px; min-width: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #006E5A, var(--eco-600));
+  display: flex; align-items: center; justify-content: center;
+  color: #FFFFFF;
+  box-shadow: 0 0 8px rgba(0,184,148,0.3);
+}
+
+/* ── Bubble ───────────────────────────────────────────── */
+.cyclos-ai-msg.ai .cyclos-ai-msg__bubble {
+  background: #FFFFFF;
+  border: 1px solid rgba(82,183,136,0.1);
+  border-left: 3px solid var(--eco-600);
+  border-radius: 4px 16px 16px 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--grey-900);
+  line-height: 1.55;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.cyclos-ai-msg.user .cyclos-ai-msg__bubble {
+  background: linear-gradient(135deg, #004D5A, #006E6E);
+  border-radius: 16px 4px 16px 16px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #FFFFFF;
+  line-height: 1.55;
+}
+
+/* ── Markdown ─────────────────────────────────────────────── */
+.cyclos-ai-markdown p { margin: 0 0 8px 0; }
+.cyclos-ai-markdown p:last-child { margin-bottom: 0; }
+.cyclos-ai-markdown h1, .cyclos-ai-markdown h2, .cyclos-ai-markdown h3 {
+  font-family: 'Clash Display', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--eco-600);
+  margin: 12px 0 8px;
+}
+.cyclos-ai-msg.user .cyclos-ai-markdown h3 { color: #fff; }
+.cyclos-ai-markdown ul { margin: 8px 0 8px 18px; padding: 0; }
+.cyclos-ai-markdown li { margin-bottom: 5px; }
+
+/* ── Image bubble ─────────────────────────────────────────── */
+.cyclos-ai-msg__image-bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: 220px;
+}
+
+.cyclos-ai-msg__preview-img {
+  width: 200px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid rgba(82,183,136,0.2);
+}
+
+.cyclos-ai-msg__image-label {
+  font-size: 11px;
+  color: var(--grey-600);
+  font-style: italic;
+}
+
+/* ── Typing Indicator ──────────────────────────────────────── */
+.cyclos-ai-typing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 16px;
+  background: #FFFFFF;
+  border: 1px solid rgba(82,183,136,0.1);
+  border-left: 3px solid var(--eco-600);
+  border-radius: 4px 16px 16px 16px;
+}
+
+.cyclos-ai-typing span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--eco-600);
+  animation: cyclosTyping 1.2s infinite;
+}
+.cyclos-ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+.cyclos-ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes cyclosTyping {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* ── Quick Suggestions ────────────────────────────────── */
+.cyclos-ai-suggestions {
+  padding: 8px 16px 12px;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: #f8fcf9;
+}
+.cyclos-ai-suggestions::-webkit-scrollbar { display: none; }
+
+.cyclos-ai-suggestions__chip {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(82,183,136,0.2);
+  background: #FFFFFF;
+  color: var(--eco-600);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+  transition: all 0.2s;
+}
+.cyclos-ai-suggestions__chip:hover {
+  background: var(--eco-50);
+  border-color: var(--eco-500);
+}
+
+/* ── Input Area ──────────────────────────────────────────────── */
+.cyclos-ai-input-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px 16px;
+  background: #FFFFFF;
+  border-top: 1px solid rgba(82,183,136,0.1);
+  z-index: 5;
+}
+
+.cyclos-ai-action-btn {
+  width: 38px; height: 38px; min-width: 38px;
+  border-radius: 50%;
+  background: var(--bg-light);
+  border: none;
+  color: var(--grey-600);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.cyclos-ai-action-btn:hover { color: var(--eco-600); background: var(--eco-50); }
+.cyclos-ai-action-btn:active { transform: scale(0.9); }
+.cyclos-ai-action-btn.listening { 
+  color: #EF4444; 
+  background: rgba(239, 68, 68, 0.1); 
+  animation: pulseMic 1.5s infinite; 
+}
+
+@keyframes pulseMic {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.cyclos-ai-input {
+  flex: 1;
+  background: var(--bg-light);
+  border: 1px solid rgba(82,183,136,0.15);
+  border-radius: 20px;
+  padding: 12px 16px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.cyclos-ai-input:focus { border-color: var(--eco-500); }
+
+.cyclos-ai-send-btn {
+  width: 44px; height: 44px; min-width: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--eco-600), var(--eco-500));
+  color: #FFFFFF;
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 12px rgba(82,183,136,0.3);
+  transition: transform 0.2s;
+}
+.cyclos-ai-send-btn:active { transform: scale(0.9); }
+
+/* ── Scanner Overlay ────────────────────────────────────────── */
+.cyclos-ai-scanner-overlay {
+  position: absolute;
+  top: 72px; /* Below header */
+  bottom: 74px; /* Above input area */
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.cyclos-ai-scanner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Clash Display', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--eco-600);
+  margin-bottom: 16px;
+}
+
+.cyclos-ai-scanner-header button {
+  background: none; border: none; color: var(--grey-600); padding: 4px; display: flex;
+}
+
+.cyclos-ai-scanner-video-wrap {
+  flex: 1;
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.cyclos-ai-scanner-video {
+  width: 100%; height: 100%; object-fit: cover;
+}
+
+.cyclos-ai-scanner-hud {
+  position: absolute; inset: 24px; pointer-events: none;
+}
+.cyclos-ai-scanner-hud .corner {
+  position: absolute; width: 40px; height: 40px; border: 4px solid var(--eco-500); opacity: 0.8;
+}
+.cyclos-ai-scanner-hud .tl { top: 0; left: 0; border-right: none; border-bottom: none; border-radius: 16px 0 0 0; }
+.cyclos-ai-scanner-hud .tr { top: 0; right: 0; border-left: none; border-bottom: none; border-radius: 0 16px 0 0; }
+.cyclos-ai-scanner-hud .bl { bottom: 0; left: 0; border-right: none; border-top: none; border-radius: 0 0 0 16px; }
+.cyclos-ai-scanner-hud .br { bottom: 0; right: 0; border-left: none; border-top: none; border-radius: 0 0 16px 0; }
+
+.cyclos-ai-scanner-capture {
+  margin: 24px auto 0;
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--eco-600), var(--eco-500));
+  color: #fff;
+  border: 4px solid #fff;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(82, 183, 136, 0.4);
+  transition: transform 0.2s;
+}
+.cyclos-ai-scanner-capture:active { transform: scale(0.9); }

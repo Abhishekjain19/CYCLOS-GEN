@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TbArrowLeft, TbReload, TbCamera, TbPhoto, TbQrcode } from 'react-icons/tb';
+import { TbArrowLeft, TbReload, TbCamera, TbPhoto, TbQrcode, TbMapPin } from 'react-icons/tb';
 import { analyzeWasteImage } from '../services/nvidiaNim';
 import { supabase } from '../supabase/supabaseClient';
 import { useAuth } from '../context/AuthContext';
